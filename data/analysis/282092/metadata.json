@@ -1,0 +1,14 @@
+{
+  "pr_number": 282092,
+  "issue_number": 281924,
+  "repo": "microsoft/vscode",
+  "clone_path": "/Users/penlv/Code/Work/vscode2",
+  "parent_commit": "2759242b92514d676a6f489945693820fbe4b23e",
+  "merge_commit": "5fbb91b1657478e7429c3e67554c23fee865e121",
+  "pr_title": "Fix for cloud multi diff stats",
+  "pr_created_at": "2025-12-08T23:49:29Z",
+  "pr_merged_at": "2025-12-09T01:02:16Z",
+  "issue_title": "Chat agent: cloud session does not show changes",
+  "issue_created_at": "2025-12-08T11:07:52Z",
+  "issue_closed_at": "2025-12-18T06:15:43Z"
+}

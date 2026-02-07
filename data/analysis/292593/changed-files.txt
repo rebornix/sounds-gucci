@@ -1,0 +1,1 @@
+test/smoke/src/areas/chat/chatAnonymous.test.ts

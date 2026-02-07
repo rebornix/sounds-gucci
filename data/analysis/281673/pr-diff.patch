@@ -1,0 +1,138 @@
+diff --git a/src/vs/workbench/api/browser/mainThreadChatSessions.ts b/src/vs/workbench/api/browser/mainThreadChatSessions.ts
+index c6b0d3938b10f..25e12f1a0cf3f 100644
+--- a/src/vs/workbench/api/browser/mainThreadChatSessions.ts
++++ b/src/vs/workbench/api/browser/mainThreadChatSessions.ts
+@@ -21,6 +21,7 @@ import { IChatEditorOptions } from '../../contrib/chat/browser/chatEditor.js';
+ import { ChatEditorInput } from '../../contrib/chat/browser/chatEditorInput.js';
+ import { awaitStatsForSession } from '../../contrib/chat/common/chat.js';
+ import { IChatAgentRequest } from '../../contrib/chat/common/chatAgents.js';
++import { IChatModel } from '../../contrib/chat/common/chatModel.js';
+ import { IChatContentInlineReference, IChatProgress, IChatService } from '../../contrib/chat/common/chatService.js';
+ import { IChatSession, IChatSessionContentProvider, IChatSessionHistoryItem, IChatSessionItem, IChatSessionItemProvider, IChatSessionProviderOptionItem, IChatSessionsService } from '../../contrib/chat/common/chatSessionsService.js';
+ import { IChatRequestVariableEntry } from '../../contrib/chat/common/chatVariableEntries.js';
+@@ -458,34 +459,28 @@ export class MainThreadChatSessions extends Disposable implements MainThreadChat
+ 			return Promise.all(sessions.map(async session => {
+ 				const uri = URI.revive(session.resource);
+ 				const model = this._chatService.getSession(uri);
+-				let description: string | undefined;
+-				let changes: IChatSessionItem['changes'];
+ 				if (model) {
+-					description = this._chatSessionsService.getSessionDescription(model);
++					session = await this.handleSessionModelOverrides(model, session);
+ 				}
+ 
+-				if (session.changes instanceof Array) {
+-					changes = revive(session.changes);
+-				} else {
+-					const modelStats = model ?
+-						await awaitStatsForSession(model) :
+-						(await this._chatService.getMetadataForSession(uri))?.stats;
+-					if (modelStats) {
+-						changes = {
+-							files: modelStats.fileCount,
+-							insertions: modelStats.added,
+-							deletions: modelStats.removed
++				// We can still get stats if there is no model or if fetching from model failed
++				if (!session.changes || !model) {
++					const stats = (await this._chatService.getMetadataForSession(uri))?.stats;
++					if (stats) {
++						session.changes = {
++							files: stats.fileCount,
++							insertions: stats.added,
++							deletions: stats.removed
+ 						};
+ 					}
+ 				}
+ 
+ 				return {
+ 					...session,
+-					changes,
++					changes: revive(session.changes),
+ 					resource: uri,
+ 					iconPath: session.iconPath,
+ 					tooltip: session.tooltip ? this._reviveTooltip(session.tooltip) : undefined,
+-					description: description || session.description
+ 				} satisfies IChatSessionItem;
+ 			}));
+ 		} catch (error) {
+@@ -494,6 +489,28 @@ export class MainThreadChatSessions extends Disposable implements MainThreadChat
+ 		return [];
+ 	}
+ 
++	private async handleSessionModelOverrides(model: IChatModel, session: Dto<IChatSessionItem>): Promise<Dto<IChatSessionItem>> {
++		// Override desciription if there's an in-progress count
++		const inProgress = this._chatSessionsService.getInProgress();
++		if (inProgress.length) {
++			session.description = this._chatSessionsService.getInProgressSessionDescription(model);
++		}
++
++		// Override changes
++		// TODO: @osortega we don't really use statistics anymore, we need to clarify that in the API
++		if (!(session.changes instanceof Array)) {
++			const modelStats = await awaitStatsForSession(model);
++			if (modelStats) {
++				session.changes = {
++					files: modelStats.fileCount,
++					insertions: modelStats.added,
++					deletions: modelStats.removed
++				};
++			}
++		}
++		return session;
++	}
++
+ 	private async _provideNewChatSessionItem(handle: number, options: { request: IChatAgentRequest; metadata?: any }, token: CancellationToken): Promise<IChatSessionItem> {
+ 		try {
+ 			const chatSessionItem = await this._proxy.$provideNewChatSessionItem(handle, options, token);
+diff --git a/src/vs/workbench/contrib/chat/browser/agentSessions/localAgentSessionsProvider.ts b/src/vs/workbench/contrib/chat/browser/agentSessions/localAgentSessionsProvider.ts
+index 719b4e0f3c023..df4ccb285edaf 100644
+--- a/src/vs/workbench/contrib/chat/browser/agentSessions/localAgentSessionsProvider.ts
++++ b/src/vs/workbench/contrib/chat/browser/agentSessions/localAgentSessionsProvider.ts
+@@ -130,7 +130,7 @@ export class LocalAgentsSessionsProvider extends Disposable implements IChatSess
+ 			}
+ 
+ 			const lastResponse = model.getRequests().at(-1)?.response;
+-			description = this.chatSessionsService.getSessionDescription(model);
++			description = this.chatSessionsService.getInProgressSessionDescription(model);
+ 
+ 			startTime = model.timestamp;
+ 			if (lastResponse) {
+diff --git a/src/vs/workbench/contrib/chat/browser/chatSessions.contribution.ts b/src/vs/workbench/contrib/chat/browser/chatSessions.contribution.ts
+index ac026b37809cb..ba34a466f4d90 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatSessions.contribution.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatSessions.contribution.ts
+@@ -929,7 +929,7 @@ export class ChatSessionsService extends Disposable implements IChatSessionsServ
+ 	}
+ 
+ 
+-	public getSessionDescription(chatModel: IChatModel): string | undefined {
++	public getInProgressSessionDescription(chatModel: IChatModel): string | undefined {
+ 		const requests = chatModel.getRequests();
+ 		if (requests.length === 0) {
+ 			return undefined;
+diff --git a/src/vs/workbench/contrib/chat/common/chatSessionsService.ts b/src/vs/workbench/contrib/chat/common/chatSessionsService.ts
+index 15080b6f37124..37bc05759ab4a 100644
+--- a/src/vs/workbench/contrib/chat/common/chatSessionsService.ts
++++ b/src/vs/workbench/contrib/chat/common/chatSessionsService.ts
+@@ -228,7 +228,7 @@ export interface IChatSessionsService {
+ 	isEditable(sessionResource: URI): boolean;
+ 	// #endregion
+ 	registerChatModelChangeListeners(chatService: IChatService, chatSessionType: string, onChange: () => void): IDisposable;
+-	getSessionDescription(chatModel: IChatModel): string | undefined;
++	getInProgressSessionDescription(chatModel: IChatModel): string | undefined;
+ }
+ 
+ export const IChatSessionsService = createDecorator<IChatSessionsService>('chatSessionsService');
+diff --git a/src/vs/workbench/contrib/chat/test/common/mockChatSessionsService.ts b/src/vs/workbench/contrib/chat/test/common/mockChatSessionsService.ts
+index 1c1238d50809d..8b4f0b08e28d8 100644
+--- a/src/vs/workbench/contrib/chat/test/common/mockChatSessionsService.ts
++++ b/src/vs/workbench/contrib/chat/test/common/mockChatSessionsService.ts
+@@ -217,7 +217,7 @@ export class MockChatSessionsService implements IChatSessionsService {
+ 		return Array.from(this.contentProviders.keys());
+ 	}
+ 
+-	getSessionDescription(chatModel: IChatModel): string | undefined {
++	getInProgressSessionDescription(chatModel: IChatModel): string | undefined {
+ 		return undefined;
+ 	}
+ 

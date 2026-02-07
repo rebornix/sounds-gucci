@@ -1,0 +1,5 @@
+src/vs/base/common/date.ts
+src/vs/workbench/contrib/chat/browser/agentSessions/agentSessions.ts
+src/vs/workbench/contrib/chat/browser/agentSessions/agentSessionsPicker.ts
+src/vs/workbench/contrib/chat/browser/agentSessions/agentSessionsViewer.ts
+src/vs/workbench/contrib/chat/test/browser/agentSessions/agentSessionsDataSource.test.ts

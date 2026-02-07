@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 291227,
+    "title": "Unread state seems flaky and random (fix #290346)",
+    "mergeCommit": "761f19c25f6be7cf9cdf90c8d1bd632f8ba21459",
+    "parentCommit": "4a54efe6fcf72adb92b94891a7c7d35a8753a40e",
+    "fileCount": 2
+  },
+  "issue": {
+    "number": 290346,
+    "title": "Unread state seems flaky and random",
+    "author": "jrieken",
+    "commentCount": 4
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/291227",
+  "generatedAt": "2026-02-07T18:26:14Z"
+}

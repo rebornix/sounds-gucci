@@ -1,0 +1,2 @@
+resources/workbenchModes/agent-sessions.code-workbench-mode
+src/vs/workbench/browser/layout.ts

@@ -1,0 +1,15 @@
+diff --git a/src/vs/workbench/contrib/chat/common/chatModel.ts b/src/vs/workbench/contrib/chat/common/chatModel.ts
+index eb1b93279b404..7a4dbed7cc6e8 100644
+--- a/src/vs/workbench/contrib/chat/common/chatModel.ts
++++ b/src/vs/workbench/contrib/chat/common/chatModel.ts
+@@ -1069,6 +1069,10 @@ export class ChatResponseModel extends Disposable implements IChatResponseModel
+ 	}
+ 
+ 	complete(): void {
++		// No-op if it's already complete
++		if (this.isComplete) {
++			return;
++		}
+ 		if (this._result?.errorDetails?.responseIsRedacted) {
+ 			this._response.clear();
+ 		}

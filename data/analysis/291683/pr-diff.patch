@@ -1,0 +1,25 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/agentSessions/agentSessionsControl.ts b/src/vs/workbench/contrib/chat/browser/agentSessions/agentSessionsControl.ts
+index 6c4eb042e8a48..bc13d51d74ffe 100644
+--- a/src/vs/workbench/contrib/chat/browser/agentSessions/agentSessionsControl.ts
++++ b/src/vs/workbench/contrib/chat/browser/agentSessions/agentSessionsControl.ts
+@@ -325,13 +325,13 @@ export class AgentSessionsControl extends Disposable implements IAgentSessionsCo
+ 					break;
+ 				}
+ 				case AgentSessionSection.More: {
+-					const shouldCollapseMore =
+-						!this.sessionsListFindIsOpen &&				// always expand when find is open
+-						!this.options.filter.getExcludes().read;	// always expand when only showing unread
+-
+-					if (shouldCollapseMore && !child.collapsed) {
+-						this.sessionsList.collapse(child.element);
+-					} else if (!shouldCollapseMore && child.collapsed) {
++					if (
++						child.collapsed &&
++						(
++							this.sessionsListFindIsOpen ||			// always expand when find is open
++							this.options.filter.getExcludes().read	// always expand when only showing unread
++						)
++					) {
+ 						this.sessionsList.expand(child.element);
+ 					}
+ 					break;

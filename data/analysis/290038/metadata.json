@@ -1,0 +1,10 @@
+{
+  "pr_number": 290038,
+  "issue_number": 289963,
+  "repo": "microsoft/vscode",
+  "clone_path": "/Users/penlv/Code/Work/vscode2",
+  "merge_commit": "e55c97262cbe55dcad1b8f01381056f164d7968c",
+  "parent_commit": "37b8e6d5e05653f776a4168c5261992a3cf580f8",
+  "pr_title": "Fixes for agent sessions welcome page logic for Insiders and prefill data",
+  "changed_files": 1
+}

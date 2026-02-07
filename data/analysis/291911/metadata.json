@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 291911,
+    "title": "targetted fix for agent status widget with multiple windows open",
+    "mergeCommit": "2b17889bea76cae3a08203311262ad137632a22c",
+    "parentCommit": "da5a231c63aece4107062e27b1498128c9fde293",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 290863,
+    "title": "Clicking from unread to in progress toggles all filters off",
+    "author": "lramos15",
+    "commentCount": 8
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/291911",
+  "generatedAt": "2026-02-07T08:45:57Z"
+}

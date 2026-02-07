@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 292160,
+    "title": "Agents welcome view command fixes",
+    "mergeCommit": "d6ff40d9187f4f0a0d4139211742773111ad6816",
+    "parentCommit": "620c66a303b645014e921ea2b7d159fc68ff355a",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 291444,
+    "title": "Open recent is not actionable with no recent workspaces",
+    "author": "cwebster-99",
+    "commentCount": 2
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/292160",
+  "generatedAt": "2026-02-06T06:15:16Z"
+}

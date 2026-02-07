@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 291805,
+    "title": "Agent sessions - Session grouping doesn't seem to always account for \"yesterday\" sessions (fix #291589)",
+    "mergeCommit": "dc1437b20d1a2087321d030461981bbc48d2607f",
+    "parentCommit": "cfb2e3e39a3f6911ddd8ca70937b4f221a5264a8",
+    "fileCount": 5
+  },
+  "issue": {
+    "number": 291589,
+    "title": "Agent sessions - Session grouping doesn't seem to always account for \"yesterday\" sessions",
+    "author": "lostintangent",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/291805",
+  "generatedAt": "2026-02-07T09:14:06Z"
+}

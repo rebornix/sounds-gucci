@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 288922,
+    "title": "Explicitly archiving all sessions from Sessions view context menu should not show dialog (fix #288910)",
+    "mergeCommit": "7f460a4ad8472d53c28725e486954b0d1172efbf",
+    "parentCommit": "a320e1230dde778cc68962948d15df11cbf6bbbd",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 288910,
+    "title": "Explicitly archiving all sessions from Sessions view context menu should not show dialog",
+    "author": "ulugbekna",
+    "commentCount": 2
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/288922",
+  "generatedAt": "2026-02-07T21:27:57Z"
+}

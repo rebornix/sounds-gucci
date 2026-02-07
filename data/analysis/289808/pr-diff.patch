@@ -1,0 +1,27 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/actions/chatExecuteActions.ts b/src/vs/workbench/contrib/chat/browser/actions/chatExecuteActions.ts
+index abf92d9dab95e..2e974648c938a 100644
+--- a/src/vs/workbench/contrib/chat/browser/actions/chatExecuteActions.ts
++++ b/src/vs/workbench/contrib/chat/browser/actions/chatExecuteActions.ts
+@@ -559,7 +559,7 @@ export class OpenWorkspacePickerAction extends Action2 {
+ 			menu: [
+ 				{
+ 					id: MenuId.ChatInput,
+-					order: 0.1,
++					order: 0.6,
+ 					when: ContextKeyExpr.and(
+ 						ChatContextKeys.inAgentSessionsWelcome,
+ 						ChatContextKeys.chatSessionType.isEqualTo('local')
+diff --git a/src/vs/workbench/contrib/chat/browser/widget/input/chatInputPart.ts b/src/vs/workbench/contrib/chat/browser/widget/input/chatInputPart.ts
+index d1eee6a64b059..2344369e87110 100644
+--- a/src/vs/workbench/contrib/chat/browser/widget/input/chatInputPart.ts
++++ b/src/vs/workbench/contrib/chat/browser/widget/input/chatInputPart.ts
+@@ -1942,7 +1942,8 @@ export class ChatInputPart extends Disposable implements IHistoryNavigationWidge
+ 						},
+ 					};
+ 					const chatSessionPosition = isIChatResourceViewContext(widget.viewContext) ? 'editor' : 'sidebar';
+-					const Picker = action.id === OpenSessionTargetPickerAction.ID ? SessionTypePickerActionItem : DelegationSessionPickerActionItem;
++					const isWelcomeViewMode = !!this.options.sessionTypePickerDelegate?.setActiveSessionProvider;
++					const Picker = (action.id === OpenSessionTargetPickerAction.ID || isWelcomeViewMode) ? SessionTypePickerActionItem : DelegationSessionPickerActionItem;
+ 					return this.sessionTargetWidget = this.instantiationService.createInstance(Picker, action, chatSessionPosition, delegate, pickerOptions);
+ 				} else if (action.id === OpenWorkspacePickerAction.ID && action instanceof MenuItemAction) {
+ 					if (this.workspaceContextService.getWorkbenchState() === WorkbenchState.EMPTY && this.options.workspacePickerDelegate) {

@@ -1,13 +1,6 @@
-# Analysis data (generated)
-data/analysis/*/
-
 # Keep the directory structure
 !data/analysis/.gitkeep
 !data/.gitkeep
-
-# Generated reports can be committed
-# data/prs-with-issues.md
-# data/analysis-results.md
 
 # OS files
 .DS_Store

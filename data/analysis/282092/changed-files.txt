@@ -1,0 +1,4 @@
+src/vs/workbench/api/browser/mainThreadChatSessions.ts
+src/vs/workbench/contrib/chat/browser/agentSessions/agentSessionsActions.ts
+src/vs/workbench/contrib/chat/browser/agentSessions/agentSessionsModel.ts
+src/vs/workbench/contrib/chat/browser/agentSessions/agentSessionsViewer.ts

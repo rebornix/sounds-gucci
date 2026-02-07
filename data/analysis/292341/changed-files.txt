@@ -1,0 +1,4 @@
+test/automation/src/chat.ts
+test/smoke/src/areas/chat/chatAnonymous.test.ts
+test/smoke/src/areas/chat/chatDisabled.test.ts
+test/smoke/src/main.ts

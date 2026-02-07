@@ -1,0 +1,96 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/actions/chatActions.ts b/src/vs/workbench/contrib/chat/browser/actions/chatActions.ts
+index 05ab31c59a5ef..37b1c58b43406 100644
+--- a/src/vs/workbench/contrib/chat/browser/actions/chatActions.ts
++++ b/src/vs/workbench/contrib/chat/browser/actions/chatActions.ts
+@@ -508,25 +508,41 @@ export function registerChatActions() {
+ 			const configurationService = accessor.get(IConfigurationService);
+ 
+ 			const chatLocation = viewDescriptorService.getViewLocationById(ChatViewId);
+-
++			const chatVisible = viewsService.isViewVisible(ChatViewId);
+ 			const clickBehavior = configurationService.getValue<AgentsControlClickBehavior>(ChatConfiguration.AgentsControlClickBehavior);
+-			if (viewsService.isViewVisible(ChatViewId)) {
+-				if (clickBehavior === AgentsControlClickBehavior.Focus) {
+-					(await widgetService.revealWidget())?.focusInput();
+-				} else {
+-					if (
+-						chatLocation === ViewContainerLocation.AuxiliaryBar &&
+-						!layoutService.isAuxiliaryBarMaximized() &&
+-						clickBehavior === AgentsControlClickBehavior.TriStateToggle
+-					) {
++			switch (clickBehavior) {
++				case AgentsControlClickBehavior.Focus:
++					if (chatLocation === ViewContainerLocation.AuxiliaryBar) {
+ 						layoutService.setAuxiliaryBarMaximized(true);
+ 					} else {
++						this.updatePartVisibility(layoutService, chatLocation, true);
++					}
++					(await widgetService.revealWidget())?.focusInput();
++					break;
++				case AgentsControlClickBehavior.Cycle:
++					if (chatVisible) {
++						if (
++							chatLocation === ViewContainerLocation.AuxiliaryBar &&
++							!layoutService.isAuxiliaryBarMaximized()
++						) {
++							layoutService.setAuxiliaryBarMaximized(true);
++							(await widgetService.revealWidget())?.focusInput();
++						} else {
++							this.updatePartVisibility(layoutService, chatLocation, false);
++						}
++					} else {
++						this.updatePartVisibility(layoutService, chatLocation, true);
++						(await widgetService.revealWidget())?.focusInput();
++					}
++					break;
++				default:
++					if (chatVisible) {
+ 						this.updatePartVisibility(layoutService, chatLocation, false);
++					} else {
++						this.updatePartVisibility(layoutService, chatLocation, true);
++						(await widgetService.revealWidget())?.focusInput();
+ 					}
+-				}
+-			} else {
+-				this.updatePartVisibility(layoutService, chatLocation, true);
+-				(await widgetService.revealWidget())?.focusInput();
++					break;
+ 			}
+ 		}
+ 
+diff --git a/src/vs/workbench/contrib/chat/browser/chat.contribution.ts b/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+index ad5bdd7463493..353adcf49caca 100644
+--- a/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
++++ b/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+@@ -188,14 +188,14 @@ configurationRegistry.registerConfiguration({
+ 		},
+ 		[ChatConfiguration.AgentsControlClickBehavior]: {
+ 			type: 'string',
+-			enum: [AgentsControlClickBehavior.Default, AgentsControlClickBehavior.TriStateToggle, AgentsControlClickBehavior.Focus],
++			enum: [AgentsControlClickBehavior.Default, AgentsControlClickBehavior.Cycle, AgentsControlClickBehavior.Focus],
+ 			enumDescriptions: [
+ 				nls.localize('chat.agentsControl.clickBehavior.default', "Clicking chat icon toggles chat visibility."),
+-				nls.localize('chat.agentsControl.clickBehavior.triStateToggle', "Clicking chat icon cycles through: show chat, maximize chat, hide chat. This requires chat to be contained in the secondary sidebar."),
+-				nls.localize('chat.agentsControl.clickBehavior.focus', "Clicking chat icon focuses the chat view.")
++				nls.localize('chat.agentsControl.clickBehavior.cycle', "Clicking chat icon cycles through: show chat, maximize chat, hide chat. This requires chat to be contained in the secondary sidebar."),
++				nls.localize('chat.agentsControl.clickBehavior.focus', "Clicking chat icon focuses the chat view and maximizes it if located in the secondary sidebar.")
+ 			],
+ 			markdownDescription: nls.localize('chat.agentsControl.clickBehavior', "Controls the behavior when clicking on the chat icon in the command center."),
+-			default: product.quality !== 'stable' ? AgentsControlClickBehavior.TriStateToggle : AgentsControlClickBehavior.Default,
++			default: product.quality !== 'stable' ? AgentsControlClickBehavior.Cycle : AgentsControlClickBehavior.Default,
+ 			tags: ['experimental']
+ 		},
+ 		[ChatConfiguration.AgentStatusEnabled]: {
+diff --git a/src/vs/workbench/contrib/chat/common/constants.ts b/src/vs/workbench/contrib/chat/common/constants.ts
+index cddbb4e20b509..ff711652a775c 100644
+--- a/src/vs/workbench/contrib/chat/common/constants.ts
++++ b/src/vs/workbench/contrib/chat/common/constants.ts
+@@ -84,7 +84,7 @@ export enum CollapsedToolsDisplayMode {
+ 
+ export enum AgentsControlClickBehavior {
+ 	Default = 'default',
+-	TriStateToggle = 'triStateToggle',
++	Cycle = 'cycle',
+ 	Focus = 'focus',
+ }
+ 

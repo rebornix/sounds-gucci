@@ -1,0 +1,1 @@
+src/vs/workbench/api/browser/mainThreadChatSessions.ts

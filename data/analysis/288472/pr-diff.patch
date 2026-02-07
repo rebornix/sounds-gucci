@@ -1,0 +1,12 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/widgetHosts/viewPane/chatViewPane.ts b/src/vs/workbench/contrib/chat/browser/widgetHosts/viewPane/chatViewPane.ts
+index 82e01d19a974e..f7914efb84832 100644
+--- a/src/vs/workbench/contrib/chat/browser/widgetHosts/viewPane/chatViewPane.ts
++++ b/src/vs/workbench/contrib/chat/browser/widgetHosts/viewPane/chatViewPane.ts
+@@ -500,6 +500,7 @@ export class ChatViewPane extends ViewPane implements IViewWelcomeDelegate {
+ 			// Sessions control: stacked
+ 			if (this.sessionsViewerOrientation === AgentSessionsViewerOrientation.Stacked) {
+ 				newSessionsContainerVisible =
++					!!this.chatEntitlementService.sentiment.installed &&		// chat is installed (otherwise make room for terms and welcome)
+ 					(!this._widget || this._widget?.isEmpty()) &&				// chat widget empty
+ 					!this.welcomeController?.isShowingWelcome.get() &&			// welcome not showing
+ 					(this.sessionsCount > 0 || !this.sessionsViewerLimited);	// has sessions or is showing all sessions

@@ -42,18 +42,18 @@ Run the `setup.sh` script with the following parameters:
 2. **Fetches issue details**: Gets issue title, body, and all comments
 3. **Checks out parent commit**: Switches local clone to the state before the fix
 4. **Generates context files**:
-   - `issue.md` - Issue title, body, and comments
-   - `pr.md` - PR title, body, and commit messages
-   - `pr-diff.patch` - The actual PR diff (for validator comparison)
-   - `changed-files.txt` - List of files changed in the PR
-   - `metadata.json` - Structured data for scripts
+  - `issue.md` - Issue title, body, and comments
+  - `pr.md` - PR title, body, and commit messages (for fix-validator only)
+  - `pr-diff.patch` - The actual PR diff (for validator comparison)
+  - `changed-files.txt` - List of files changed in the PR (for validator comparison)
+  - `metadata.json` - Structured data for scripts
 
 ## Output Structure
 
 ```
 data/analysis/<pr>/
 ├── issue.md           # Issue context for bug-analyzer
-├── pr.md              # PR context for bug-analyzer
+├── pr.md              # PR context (fix-validator only)
 ├── pr-diff.patch      # Actual fix (for validator)
 ├── changed-files.txt  # Files touched by the PR
 └── metadata.json      # Structured metadata

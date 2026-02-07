@@ -1,6 +1,7 @@
 {
     "chat.tools.terminal.autoApprove": {
         "gh": true,
-        "./.github/skills/setup-pr-analysis/setup.sh": true
+        "./.github/skills/setup-pr-analysis/setup.sh": true,
+        "./.github/skills/fetch-bugfix-prs/fetch.sh": true
     }
 }

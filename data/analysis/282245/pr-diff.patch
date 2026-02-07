@@ -1,0 +1,13 @@
+diff --git a/src/vs/workbench/api/browser/mainThreadChatSessions.ts b/src/vs/workbench/api/browser/mainThreadChatSessions.ts
+index 50a510c6c0d0f..159106fe59486 100644
+--- a/src/vs/workbench/api/browser/mainThreadChatSessions.ts
++++ b/src/vs/workbench/api/browser/mainThreadChatSessions.ts
+@@ -502,7 +502,7 @@ export class MainThreadChatSessions extends Disposable implements MainThreadChat
+ 
+ 	private async handleSessionModelOverrides(model: IChatModel, session: Dto<IChatSessionItem>): Promise<Dto<IChatSessionItem>> {
+ 		// Override desciription if there's an in-progress count
+-		const inProgress = this._chatSessionsService.getInProgress();
++		const inProgress = model.getRequests().filter(r => r.response && !r.response.isComplete);
+ 		if (inProgress.length) {
+ 			session.description = this._chatSessionsService.getInProgressSessionDescription(model);
+ 		}

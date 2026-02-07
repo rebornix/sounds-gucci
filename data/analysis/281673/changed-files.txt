@@ -1,0 +1,5 @@
+src/vs/workbench/api/browser/mainThreadChatSessions.ts
+src/vs/workbench/contrib/chat/browser/agentSessions/localAgentSessionsProvider.ts
+src/vs/workbench/contrib/chat/browser/chatSessions.contribution.ts
+src/vs/workbench/contrib/chat/common/chatSessionsService.ts
+src/vs/workbench/contrib/chat/test/common/mockChatSessionsService.ts

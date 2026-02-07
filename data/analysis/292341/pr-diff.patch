@@ -1,0 +1,60 @@
+diff --git a/test/automation/src/chat.ts b/test/automation/src/chat.ts
+index 90ba336e4da91..e95eeb072d0f0 100644
+--- a/test/automation/src/chat.ts
++++ b/test/automation/src/chat.ts
+@@ -53,11 +53,11 @@ export class Chat {
+ 		await this.code.waitForElement(CHAT_RESPONSE_COMPLETE, undefined, retryCount);
+ 	}
+ 
+-	async waitForModelInFooter(modelName: string): Promise<void> {
++	async waitForModelInFooter(): Promise<void> {
+ 		await this.code.waitForElements(CHAT_FOOTER_DETAILS, false, el => {
+ 			return el.some(el => {
+ 				const text = el && typeof el.textContent === 'string' ? el.textContent : '';
+-				return !!text && text.includes(modelName);
++				return !!text && text.length > 0;
+ 			});
+ 		});
+ 	}
+diff --git a/test/smoke/src/areas/chat/chatAnonymous.test.ts b/test/smoke/src/areas/chat/chatAnonymous.test.ts
+index b2d178f18b23e..5993b99502d83 100644
+--- a/test/smoke/src/areas/chat/chatAnonymous.test.ts
++++ b/test/smoke/src/areas/chat/chatAnonymous.test.ts
+@@ -31,7 +31,7 @@ export function setup(logger: Logger) {
+ 			await app.workbench.chat.waitForResponse();
+ 
+ 			// Wait for model name to appear in footer
+-			await app.workbench.chat.waitForModelInFooter('GPT-5 mini');
++			await app.workbench.chat.waitForModelInFooter();
+ 		});
+ 	});
+ }
+diff --git a/test/smoke/src/areas/chat/chat.test.ts b/test/smoke/src/areas/chat/chatDisabled.test.ts
+similarity index 98%
+rename from test/smoke/src/areas/chat/chat.test.ts
+rename to test/smoke/src/areas/chat/chatDisabled.test.ts
+index 539f1f28f9ead..f2acd44115a5d 100644
+--- a/test/smoke/src/areas/chat/chat.test.ts
++++ b/test/smoke/src/areas/chat/chatDisabled.test.ts
+@@ -7,7 +7,7 @@ import { Application, Logger } from '../../../../automation';
+ import { installAllHandlers } from '../../utils';
+ 
+ export function setup(logger: Logger) {
+-	describe('Chat', () => {
++	describe('Chat Disabled', () => {
+ 
+ 		// Shared before/after handling
+ 		installAllHandlers(logger);
+diff --git a/test/smoke/src/main.ts b/test/smoke/src/main.ts
+index f82e297eaf53f..2360381fd525c 100644
+--- a/test/smoke/src/main.ts
++++ b/test/smoke/src/main.ts
+@@ -26,7 +26,7 @@ import { setup as setupLocalizationTests } from './areas/workbench/localization.
+ import { setup as setupLaunchTests } from './areas/workbench/launch.test';
+ import { setup as setupTerminalTests } from './areas/terminal/terminal.test';
+ import { setup as setupTaskTests } from './areas/task/task.test';
+-import { setup as setupChatTests } from './areas/chat/chat.test';
++import { setup as setupChatTests } from './areas/chat/chatDisabled.test';
+ import { setup as setupChatAnonymousTests } from './areas/chat/chatAnonymous.test';
+ import { setup as setupAccessibilityTests } from './areas/accessibility/accessibility.test';
+ 

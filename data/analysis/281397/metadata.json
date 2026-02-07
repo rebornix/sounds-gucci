@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 281397,
+    "title": "Fix for agent session progress",
+    "mergeCommit": "431aebe28b612f70c046d12bdb41fe3dd307ebd5",
+    "parentCommit": "a649ee8b96e90fc546968710b41aa5230529eeaa",
+    "fileCount": 2
+  },
+  "issue": {
+    "number": 281149,
+    "title": "Local Session shows no empty description/progress when the chat widget is streaming in text",
+    "author": "rebornix",
+    "commentCount": 3
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "/Users/penlv/Code/Work/sounds-gucci/data/analysis/281397",
+  "generatedAt": "2026-02-03T00:00:00Z"
+}

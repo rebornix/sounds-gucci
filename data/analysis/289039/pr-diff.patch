@@ -1,0 +1,16 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/widget/chatWidget.ts b/src/vs/workbench/contrib/chat/browser/widget/chatWidget.ts
+index 4e94376ed4486..642cc3bea386d 100644
+--- a/src/vs/workbench/contrib/chat/browser/widget/chatWidget.ts
++++ b/src/vs/workbench/contrib/chat/browser/widget/chatWidget.ts
+@@ -1873,6 +1873,11 @@ export class ChatWidget extends Disposable implements IChatWidget {
+ 				}
+ 				// Only show if response wasn't canceled
+ 				this.renderChatSuggestNextWidget();
++
++				// Mark the session as read when the request completes and the widget is visible
++				if (this.visible && this.viewModel?.sessionResource) {
++					this.agentSessionsService.getSession(this.viewModel.sessionResource)?.setRead(true);
++				}
+ 			}
+ 		}));
+ 

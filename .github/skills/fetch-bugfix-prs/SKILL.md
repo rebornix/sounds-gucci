@@ -12,14 +12,14 @@ This skill fetches pull requests that are bug fixes with linked issues from a Gi
 Run the `fetch.sh` script with the following parameters:
 
 ```bash
-./fetch.sh --author <username> --repo <owner/repo> --since <YYYY-MM-DD> --until <YYYY-MM-DD> --output <path>
+./fetch.sh --repo <owner/repo> --since <YYYY-MM-DD> --until <YYYY-MM-DD> [--author <username>] [--output <path>]
 ```
 
 ### Parameters
 
 | Parameter | Required | Description | Example |
 |-----------|----------|-------------|---------|
-| `--author` | Yes | GitHub username of the PR author | `osortega` |
+| `--author` | No | GitHub username of the PR author | `osortega` |
 | `--repo` | Yes | Repository in `owner/repo` format | `microsoft/vscode` |
 | `--since` | Yes | Start date (inclusive) | `2025-12-02` |
 | `--until` | Yes | End date (inclusive) | `2026-02-02` |
@@ -28,12 +28,18 @@ Run the `fetch.sh` script with the following parameters:
 ### Example
 
 ```bash
+# Fetch all bug-fix PRs from the last 2 months
+./.github/skills/fetch-bugfix-prs/fetch.sh \
+   --repo microsoft/vscode \
+   --since 2025-12-02 \
+   --until 2026-02-02
+
 # Fetch Osvaldo's bug-fix PRs from the last 2 months
 ./.github/skills/fetch-bugfix-prs/fetch.sh \
-  --author osortega \
-  --repo microsoft/vscode \
-  --since 2025-12-02 \
-  --until 2026-02-02
+   --author osortega \
+   --repo microsoft/vscode \
+   --since 2025-12-02 \
+   --until 2026-02-02
 ```
 
 ## Output Format

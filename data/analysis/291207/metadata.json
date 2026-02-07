@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 291207,
+    "title": "Don't sort sessions by read/unread state (fix #290858)",
+    "mergeCommit": "555c71bd02142065b21f32c07921b7f072b6bcba",
+    "parentCommit": "a066abff0fe2962791823f757767d88f079a036c",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 290858,
+    "title": "Don't sort sessions by read/unread state",
+    "author": "chrmarti",
+    "commentCount": 1
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/291207",
+  "generatedAt": "2026-02-07T18:30:34Z"
+}

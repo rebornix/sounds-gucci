@@ -1,0 +1,1 @@
+src/vs/workbench/contrib/chat/electron-browser/chat.contribution.ts

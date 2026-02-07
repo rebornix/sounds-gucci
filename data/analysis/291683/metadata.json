@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 291683,
+    "title": "Chat Sessions: Toggling filter collapses More section (fix #291544)",
+    "mergeCommit": "90d24f7d3424df566adb7cc6a3d758ca7f169964",
+    "parentCommit": "a72cd7b63e06ee2bad86679806a56bfff3da30b7",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 291544,
+    "title": "Chat Sessions: Toggling filter collapses More section",
+    "author": "joaomoreno",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/291683",
+  "generatedAt": "2026-02-07T09:17:18Z"
+}

@@ -1,0 +1,13 @@
+diff --git a/src/vs/workbench/contrib/chat/common/participants/chatAgents.ts b/src/vs/workbench/contrib/chat/common/participants/chatAgents.ts
+index b209685e82a8c..16d66aa198249 100644
+--- a/src/vs/workbench/contrib/chat/common/participants/chatAgents.ts
++++ b/src/vs/workbench/contrib/chat/common/participants/chatAgents.ts
+@@ -350,7 +350,7 @@ export class ChatAgentService extends Disposable implements IChatAgentService {
+ 			this._onDidChangeAgents.fire(undefined);
+ 
+ 			if (entry.data.isDefault) {
+-				this._hasDefaultAgent.set(Iterable.some(this._agents.values(), agent => agent.data.isDefault));
++				this._hasDefaultAgent.set(Iterable.some(this._agents.values(), agent => agent.data.isDefault && !!agent.impl));
+ 			}
+ 		});
+ 	}

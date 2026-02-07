@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 289883,
+    "title": "Agent sessions sash can hide the side-by-side when sized small (fix #289680)",
+    "mergeCommit": "4af12255f5b9dd3679c5adfe4739908d5412ddb2",
+    "parentCommit": "36e22499559c2fa23083b6fce20f66869c65c54a",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 289680,
+    "title": "Agent sessions sash can hide the side-by-side when sized small",
+    "author": "bpasero",
+    "commentCount": 1
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/289883",
+  "generatedAt": "2026-02-07T19:44:51Z"
+}

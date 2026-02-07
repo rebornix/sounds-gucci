@@ -23,6 +23,7 @@ You will receive a path to an analysis directory containing:
 **DO NOT READ** these files as they contain solution hints:
 - `pr.md` - Contains PR description which may reveal the fix approach
 - `pr-diff.patch` - Contains the actual solution
+- `changed-files.txt` - Reveals the files touched by the fix
 
 ## Analysis Process
 
@@ -37,14 +38,20 @@ Read ONLY `issue.md` to understand:
 **WARNING**: If the issue description references a PR or contains phrases like "Follow up from PR #..." or links to merged code, note this as the issue may be retrospective (created after the fix). Still attempt analysis but flag this in your output.
 
 ### Step 2: Analyze Git History (Incremental Window)
-Start with a 24-hour window before the parent commit and expand if needed:
+Start with a 24-hour window before the parent commit and expand if needed (24 hours -> 3 days -> 7 days max):
 
 ```bash
-# Get commits from last 24 hours before parent commit
+# Get the parent commit timestamp (ISO)
 cd <clone-path>
-git log --oneline --since="24 hours ago" HEAD~100..HEAD
+parent=<parent-commit-sha>
+parent_time=$(git show -s --format=%cI "$parent")
 
-# If not enough context, expand to 48 hours, then 72 hours, up to 7 days max
+# 24 hours before parent commit
+git log --oneline --since="${parent_time} - 24 hours" --until="${parent_time}" "$parent"
+
+# If not enough context, expand to 3 days, then 7 days max
+git log --oneline --since="${parent_time} - 3 days" --until="${parent_time}" "$parent"
+git log --oneline --since="${parent_time} - 7 days" --until="${parent_time}" "$parent"
 ```
 
 For each relevant commit, examine:
@@ -83,7 +90,7 @@ Based on your analysis, propose a fix that includes:
 ## Time Window Expansion Rules
 
 - Start with 24 hours of git history
-- If the bug seems related to a recent change but you can't find it, expand by 24 hours
+- If the bug seems related to a recent change but you can't find it, expand to 3 days
 - Maximum window: 7 days (168 hours)
 - Stop expanding when you find:
   - A commit that likely introduced the regression
@@ -133,7 +140,7 @@ Structure your response as follows:
 ## Important Notes
 
 - You are analyzing the codebase BEFORE the fix was applied
-- Do NOT look at `pr-diff.patch` - that contains the actual solution
+- Do NOT look at `pr.md`, `pr-diff.patch`, or `changed-files.txt` - those contain solution hints
 - Focus on understanding the bug and proposing your own fix
 - Be thorough but efficient - expand the time window only when necessary
 - Use git blame strategically on files mentioned in the issue or error traces

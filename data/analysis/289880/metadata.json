@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 289880,
+    "title": "VS Code asks me to confirm to quit while a Cloud session is running (fix #289726)",
+    "mergeCommit": "b43a3a3df6c87a1cc49ca73985782b3c94026004",
+    "parentCommit": "d3cca074a06558d2a82cc78966e4fe136f10c490",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 289726,
+    "title": "VS Code asks me to confirm to quit while a Cloud session is running",
+    "author": "joaomoreno",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/289880",
+  "generatedAt": "2026-02-07T20:24:43Z"
+}

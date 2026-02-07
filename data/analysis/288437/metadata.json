@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 288437,
+    "title": "Leak (fix #288398)",
+    "mergeCommit": "1b4cd523aac3670395dba12ae917e4e1fe67ddf7",
+    "parentCommit": "739c2c5a35a84f0364b30d9cfec97d7614a99f3c",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 288398,
+    "title": "Leak",
+    "author": "bpasero",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/288437",
+  "generatedAt": "2026-02-07T21:36:02Z"
+}

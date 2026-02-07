@@ -1,0 +1,1 @@
+src/vs/workbench/browser/parts/editor/editorStatus.ts

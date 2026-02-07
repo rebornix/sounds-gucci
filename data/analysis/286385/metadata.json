@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 286385,
+    "title": "Memory leak related to diff editor (fix #286336)",
+    "mergeCommit": "0a29012f26a80170293ed80cf39977b188dda4f1",
+    "parentCommit": "2294cd06ff23310d8ac282c40654a0f0f7e700d4",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 286336,
+    "title": "Memory leak related to diff editor",
+    "author": "SimonSiefke",
+    "commentCount": 7
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/286385",
+  "generatedAt": "2026-02-07T21:47:16Z"
+}

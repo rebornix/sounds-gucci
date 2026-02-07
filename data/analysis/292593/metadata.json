@@ -1,0 +1,19 @@
+{
+  "pr": {
+    "number": 292593,
+    "title": "can send a chat message with anonymous access (fix #292582)",
+    "mergeCommit": "1adb77d0f4dbadb1077087395d4bf917cd0359cf",
+    "parentCommit": "1ca3a1c1e5e8f1b015d5e76dde7b5eaac0e84a57",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 292582,
+    "title": "can send a chat message with anonymous access",
+    "author": "alexr00",
+    "commentCount": 1
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/292593",
+  "generatedAt": "2026-02-07T08:58:49Z"
+}
