@@ -2,17 +2,21 @@
 set -euo pipefail
 
 # Generate analysis report from bug-analyzer and fix-validator outputs
-# Usage: ./report.sh [--input-dir <path>] [--output <file>]
+# Usage: ./report.sh [--input-dir <path>] [--output <file>] [--model <model>] [--experiment-tag <tag>]
 
 # Default values
 INPUT_DIR="data/analysis"
 OUTPUT_FILE="data/analysis-results.md"
+MODEL="${ANALYSIS_MODEL:-unknown}"
+EXPERIMENT_TAG=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
     --input-dir) INPUT_DIR="$2"; shift 2 ;;
     --output) OUTPUT_FILE="$2"; shift 2 ;;
+    --model) MODEL="$2"; shift 2 ;;
+    --experiment-tag) EXPERIMENT_TAG="$2"; shift 2 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -107,6 +111,8 @@ cat > "$OUTPUT_FILE" << EOF
 # Bug Fix Analysis Results
 
 **Generated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+**Model:** $MODEL
+**Experiment Tag:** ${EXPERIMENT_TAG:-none}
 
 ## Summary
 

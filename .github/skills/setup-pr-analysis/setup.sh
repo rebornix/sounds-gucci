@@ -2,10 +2,12 @@
 set -euo pipefail
 
 # Setup environment for analyzing a PR/issue pair
-# Usage: ./setup.sh --pr <num> --issue <num> --repo <owner/repo> --clone-path <path> [--output-dir <path>]
+# Usage: ./setup.sh --pr <num> --issue <num> --repo <owner/repo> --clone-path <path> [--output-dir <path>] [--model <model>] [--agent-version <version>]
 
 # Default values
 OUTPUT_DIR=""
+MODEL="${ANALYSIS_MODEL:-unknown}"
+AGENT_VERSION="${ANALYSIS_AGENT_VERSION:-1.0}"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -15,6 +17,8 @@ while [[ $# -gt 0 ]]; do
     --repo) REPO="$2"; shift 2 ;;
     --clone-path) CLONE_PATH="$2"; shift 2 ;;
     --output-dir) OUTPUT_DIR="$2"; shift 2 ;;
+    --model) MODEL="$2"; shift 2 ;;
+    --agent-version) AGENT_VERSION="$2"; shift 2 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -168,10 +172,14 @@ cat > "$OUTPUT_DIR/metadata.json" << EOF
     "author": "$ISSUE_AUTHOR",
     "commentCount": $COMMENT_COUNT
   },
+  "experiment": {
+    "model": "$MODEL",
+    "agentVersion": "$AGENT_VERSION",
+    "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  },
   "repo": "$REPO",
   "clonePath": "$CLONE_PATH",
-  "outputDir": "$OUTPUT_DIR",
-  "generatedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  "outputDir": "$OUTPUT_DIR"
 }
 EOF
 
