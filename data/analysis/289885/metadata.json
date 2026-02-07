@@ -15,5 +15,10 @@
   "repo": "microsoft/vscode",
   "clonePath": "/Users/penlv/Code/Work/vscode2",
   "outputDir": "data/analysis/289885",
-  "generatedAt": "2026-02-07T18:49:03Z"
+  "generatedAt": "2026-02-07T18:49:03Z",
+  "experiment": {
+    "model": "claude-opus-4.5",
+    "agentVersion": "1.0",
+    "timestamp": "2026-02-07T00:00:00Z"
+  }
 }
