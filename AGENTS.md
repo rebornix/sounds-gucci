@@ -224,3 +224,6 @@ grep -r "Alignment Score:" data/analysis/*/validation.md
 - `jq` for JSON processing  
 - Local clone of target repository
 - Git access to checkout commits
+
+## Persona Rule
+When the user asks you to perform a task, your response should always start with "Sounds gucci".
