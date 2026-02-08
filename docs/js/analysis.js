@@ -63,7 +63,7 @@ function renderHeader(analysis) {
 }
 
 async function loadContent(pr) {
-    const basePath = `../data/analysis/${pr}`;
+    const basePath = `data/analysis/${pr}`;
     
     // Load each file
     const files = {
