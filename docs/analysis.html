@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Details</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <main class="analysis-layout">
+        <div class="page-header">
+            <a href="index.html" class="back-link">← Back to Dashboard</a>
+            <h1 id="page-title">Analysis Details</h1>
+            <div class="header-meta">
+                <span id="pr-link"></span>
+                <span id="issue-link"></span>
+                <span id="score-badge"></span>
+            </div>
+        </div>
+        <nav class="analysis-nav">
+            <button class="nav-btn active" data-panel="issue">Issue</button>
+            <button class="nav-btn" data-panel="proposal">Proposed Fix</button>
+            <button class="nav-btn" data-panel="actual">Actual Fix</button>
+            <button class="nav-btn" data-panel="validation">Validation</button>
+        </nav>
+
+        <section id="panel-issue" class="panel active">
+            <h2>Bug Issue</h2>
+            <div id="issue-content" class="markdown-content">Loading...</div>
+        </section>
+
+        <section id="panel-proposal" class="panel">
+            <h2>Proposed Fix (by AI)</h2>
+            <div id="proposal-content" class="markdown-content">Loading...</div>
+        </section>
+
+        <section id="panel-actual" class="panel">
+            <h2>Actual PR Changes</h2>
+            <div id="actual-content" class="markdown-content">
+                <pre><code id="diff-content" class="language-diff">Loading...</code></pre>
+            </div>
+        </section>
+
+        <section id="panel-validation" class="panel">
+            <h2>Validation & Comparison</h2>
+            <div id="validation-content" class="markdown-content">Loading...</div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="nav-footer">
+            <a href="#" id="prev-analysis" class="nav-arrow">← Previous</a>
+            <a href="#" id="next-analysis" class="nav-arrow">Next →</a>
+        </div>
+    </footer>
+
+    <script src="js/analysis.js"></script>
+</body>
+</html>
