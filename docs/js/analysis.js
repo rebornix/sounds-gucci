@@ -78,6 +78,10 @@ async function loadContent(pr) {
             if (response.ok) {
                 const content = await response.text();
                 document.getElementById(elementId).innerHTML = marked.parse(content);
+                // Syntax-highlight all code blocks in rendered markdown
+                document.getElementById(elementId).querySelectorAll('pre code').forEach(el => {
+                    hljs.highlightElement(el);
+                });
             } else {
                 document.getElementById(elementId).innerHTML = '<p class="muted">Content not available</p>';
             }
