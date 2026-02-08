@@ -68,7 +68,7 @@ async function loadContent(pr) {
     // Load each file
     const files = {
         'issue-content': 'issue.md',
-        'proposal-content': 'proposal.md',
+        'proposal-content': 'proposed-fix.md',
         'validation-content': 'validation.md'
     };
     

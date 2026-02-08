@@ -20,7 +20,7 @@ for dir in "$ANALYSIS_DIR"/*/; do
     pr_number=$(basename "$dir")
     metadata_file="${dir}metadata.json"
     validation_file="${dir}validation.md"
-    proposal_file="${dir}proposal.md"
+    proposal_file="${dir}proposed-fix.md"
     issue_file="${dir}issue.md"
     
     # Skip if no metadata
