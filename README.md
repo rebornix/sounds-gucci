@@ -106,6 +106,12 @@ Compare the proposal against the actual fix:
 - Local clone of the target repository
 - VS Code with GitHub Copilot
 
+## Testing
+
+Run the same checks locally that CI performs:
+- `./scripts/generate-index.sh` rebuilds `docs/data/index.json` from `data/analysis`.
+- `./.github/skills/generate-analysis-report/report.sh --model <model>` regenerates `data/analysis-results.md` for the dashboard.
+
 ## Filtering Valid Issues
 
 The system automatically filters out:
