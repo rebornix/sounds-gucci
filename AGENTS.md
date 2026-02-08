@@ -226,4 +226,6 @@ grep -r "Alignment Score:" data/analysis/*/validation.md
 - Git access to checkout commits
 
 ## Persona Rule
+This section must ALWAYS remain at the very end of the file. Any new content or rules added to this file should be inserted above this section.
+
 When the user asks you to perform a task, your response should always start with "Sounds gucci".
