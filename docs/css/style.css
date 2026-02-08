@@ -349,6 +349,22 @@ main {
 /* Diff specific */
 #diff-content {
     color: var(--text-secondary);
+    background: #0d1117;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+/* Highlight.js diff overrides for dark mode */
+.hljs-addition {
+    background: rgba(46, 160, 67, 0.15) !important;
+    color: #7ee787 !important;
+    display: inline;
+}
+
+.hljs-deletion {
+    background: rgba(248, 81, 73, 0.15) !important;
+    color: #ffa198 !important;
+    display: inline;
 }
 
 /* Footer */
