@@ -15,9 +15,9 @@ This project explores whether agents can independently diagnose bugs and propose
 
 | Metric | Value |
 |--------|-------|
-| PRs Analyzed | 9 |
-| Average Score | **3.4/5** |
-| File Identification Accuracy | 89% |
+| PRs Analyzed | 37 |
+| Average Score | **3.3/5** |
+| Success Rate (Score ≥ 4) | 46% |
 
 ## Architecture
 
