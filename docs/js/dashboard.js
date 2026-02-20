@@ -1,11 +1,22 @@
 // Dashboard JavaScript - loads data and renders charts/table
 
 let analysisData = [];
+let currentExperiment = 'all';
+let scoreChart = null;
+let categoryChart = null;
 
 async function loadData() {
     try {
         const response = await fetch('data/index.json');
         analysisData = await response.json();
+        
+        // Check URL for experiment param
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('experiment')) {
+            currentExperiment = params.get('experiment');
+        }
+        
+        populateExperimentFilter();
         renderDashboard();
     } catch (err) {
         console.error('Failed to load data:', err);
@@ -14,8 +25,35 @@ async function loadData() {
     }
 }
 
+function populateExperimentFilter() {
+    const select = document.getElementById('experiment-filter');
+    const experiments = [...new Set(analysisData.map(d => d.experimentId))].sort();
+    
+    experiments.forEach(exp => {
+        const opt = document.createElement('option');
+        opt.value = exp;
+        // Format: "claude-opus-4.5 (49c9844)"
+        const parts = exp.match(/^(.+)-([a-f0-9]{7})$/);
+        opt.textContent = parts ? `${parts[1]} (${parts[2]})` : exp;
+        if (exp === currentExperiment) opt.selected = true;
+        select.appendChild(opt);
+    });
+    
+    // If only one experiment, auto-select it
+    if (experiments.length === 1) {
+        currentExperiment = experiments[0];
+        select.value = currentExperiment;
+    }
+}
+
+function getFilteredByExperiment() {
+    if (currentExperiment === 'all') return analysisData;
+    return analysisData.filter(d => d.experimentId === currentExperiment);
+}
+
 function renderDashboard() {
-    const withScores = analysisData.filter(d => d.score !== null);
+    const data = getFilteredByExperiment();
+    const withScores = data.filter(d => d.score !== null);
     
     // Stats
     document.getElementById('total-analyzed').textContent = withScores.length;
@@ -33,15 +71,26 @@ function renderDashboard() {
     const models = [...new Set(withScores.map(d => d.model))];
     document.getElementById('model-name').textContent = models.join(', ') || '-';
     
-    // Charts
-    renderScoreChart(withScores);
-    renderCategoryChart(withScores);
+    // Charts (destroy old ones first)
+    if (scoreChart) scoreChart.destroy();
+    if (categoryChart) categoryChart.destroy();
+    scoreChart = renderScoreChart(withScores);
+    categoryChart = renderCategoryChart(withScores);
     
     // Table
-    renderTable(analysisData);
+    renderTable(data);
     
     // Setup filters
     setupFilters();
+    
+    // Update URL
+    const url = new URL(window.location);
+    if (currentExperiment !== 'all') {
+        url.searchParams.set('experiment', currentExperiment);
+    } else {
+        url.searchParams.delete('experiment');
+    }
+    history.replaceState(null, '', url);
 }
 
 function renderScoreChart(data) {
@@ -52,7 +101,7 @@ function renderScoreChart(data) {
     });
     
     const ctx = document.getElementById('score-chart').getContext('2d');
-    new Chart(ctx, {
+    return new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ['1 - Misaligned', '2 - Weak', '3 - Partial', '4 - Good', '5 - Excellent'],
@@ -94,7 +143,7 @@ function renderCategoryChart(data) {
     };
     
     const ctx = document.getElementById('category-chart').getContext('2d');
-    new Chart(ctx, {
+    return new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: Object.keys(categories),
@@ -125,7 +174,7 @@ function renderTable(data) {
     }
     
     tbody.innerHTML = data.map(d => `
-        <tr onclick="window.location='analysis.html?pr=${d.pr}'">
+        <tr onclick="window.location='analysis.html?pr=${d.pr}&experiment=${d.experimentId}'">
             <td><a href="https://github.com/${d.repo}/pull/${d.pr}" target="_blank" onclick="event.stopPropagation()">#${d.pr}</a></td>
             <td>${d.issue ? `<a href="https://github.com/${d.repo}/issues/${d.issue}" target="_blank" onclick="event.stopPropagation()">#${d.issue}</a>` : '-'}</td>
             <td>${escapeHtml(truncate(d.prTitle || d.issueTitle, 60))}</td>
@@ -143,15 +192,21 @@ function renderScoreBadge(score) {
 }
 
 function setupFilters() {
+    document.getElementById('experiment-filter').addEventListener('change', onExperimentChange);
     document.getElementById('score-filter').addEventListener('change', applyFilters);
     document.getElementById('sort-by').addEventListener('change', applyFilters);
+}
+
+function onExperimentChange() {
+    currentExperiment = document.getElementById('experiment-filter').value;
+    renderDashboard();
 }
 
 function applyFilters() {
     const scoreFilter = document.getElementById('score-filter').value;
     const sortBy = document.getElementById('sort-by').value;
     
-    let filtered = [...analysisData];
+    let filtered = [...getFilteredByExperiment()];
     
     // Filter
     if (scoreFilter !== 'all') {

@@ -261,6 +261,27 @@ main {
     opacity: 1;
 }
 
+/* Experiment selector */
+.experiment-selector {
+    margin-top: 1rem;
+}
+
+.experiment-selector select {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.experiment-selector label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
 /* Tabs */
 .analysis-nav {
     display: flex;

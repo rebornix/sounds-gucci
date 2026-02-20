@@ -9,6 +9,12 @@ OUTPUT_DIR=""
 MODEL="${ANALYSIS_MODEL:-unknown}"
 AGENT_VERSION="${ANALYSIS_AGENT_VERSION:-1.0}"
 
+# Capture agent commit from this repo (sounds-gucci)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+AGENT_COMMIT=$(git -C "$REPO_ROOT" log -1 --format=%H -- .github/agents/bug-analyzer.agent.md 2>/dev/null || echo "unknown")
+AGENT_COMMIT_SHORT="${AGENT_COMMIT:0:7}"
+
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -155,6 +161,9 @@ $BODY
 EOF
 done
 
+# Compute experiment ID
+EXPERIMENT_ID="${MODEL}-${AGENT_COMMIT_SHORT}"
+
 # Write metadata JSON
 echo "Writing metadata..."
 cat > "$OUTPUT_DIR/metadata.json" << EOF
@@ -173,8 +182,10 @@ cat > "$OUTPUT_DIR/metadata.json" << EOF
     "commentCount": $COMMENT_COUNT
   },
   "experiment": {
+    "id": "$EXPERIMENT_ID",
     "model": "$MODEL",
     "agentVersion": "$AGENT_VERSION",
+    "agentCommit": "$AGENT_COMMIT",
     "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
   },
   "repo": "$REPO",

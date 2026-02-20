@@ -2,10 +2,12 @@
 
 let allAnalyses = [];
 let currentPR = null;
+let currentExperiment = null;
 
 async function init() {
     const params = new URLSearchParams(window.location.search);
     currentPR = params.get('pr');
+    currentExperiment = params.get('experiment');
     
     if (!currentPR) {
         showError('No PR specified. Go back to dashboard.');
@@ -17,18 +19,30 @@ async function init() {
         const indexResponse = await fetch('data/index.json');
         allAnalyses = await indexResponse.json();
         
-        // Find current analysis
-        const analysis = allAnalyses.find(a => a.pr == currentPR);
-        if (!analysis) {
+        // Find analyses for this PR
+        const prAnalyses = allAnalyses.filter(a => a.pr == currentPR);
+        if (prAnalyses.length === 0) {
             showError(`Analysis for PR #${currentPR} not found.`);
             return;
         }
         
+        // If no experiment specified, use the first one
+        if (!currentExperiment) {
+            currentExperiment = prAnalyses[0].experimentId;
+        }
+        
+        const analysis = prAnalyses.find(a => a.experimentId === currentExperiment) || prAnalyses[0];
+        
         // Render header
         renderHeader(analysis);
         
+        // Build experiment selector if multiple exist
+        if (prAnalyses.length > 1) {
+            renderExperimentSelector(prAnalyses, currentExperiment);
+        }
+        
         // Load content files
-        await loadContent(currentPR);
+        await loadContent(currentPR, currentExperiment);
         
         // Setup navigation
         setupNavigation();
@@ -62,19 +76,47 @@ function renderHeader(analysis) {
     }
 }
 
-async function loadContent(pr) {
-    const basePath = `data/analysis/${pr}`;
+function renderExperimentSelector(analyses, selected) {
+    const container = document.getElementById('experiment-selector');
+    if (!container) return;
     
-    // Load each file
+    container.innerHTML = `
+        <label>Experiment: 
+            <select id="experiment-select">
+                ${analyses.map(a => {
+                    const parts = a.experimentId.match(/^(.+)-([a-f0-9]{7})$/);
+                    const label = parts ? `${parts[1]} (${parts[2]})` : a.experimentId;
+                    const sel = a.experimentId === selected ? 'selected' : '';
+                    return `<option value="${a.experimentId}" ${sel}>${label}</option>`;
+                }).join('')}
+            </select>
+        </label>
+    `;
+    container.style.display = 'block';
+    
+    document.getElementById('experiment-select').addEventListener('change', (e) => {
+        currentExperiment = e.target.value;
+        const url = new URL(window.location);
+        url.searchParams.set('experiment', currentExperiment);
+        window.location = url;
+    });
+}
+
+async function loadContent(pr, experimentId) {
+    const basePath = `data/analysis/${pr}`;
+    const expPath = `${basePath}/${experimentId}`;
+    
+    // Load experiment-specific files (proposal, validation) from experiment subdirectory
+    // Load shared files (issue) from PR directory
     const files = {
-        'issue-content': 'issue.md',
-        'proposal-content': 'proposed-fix.md',
-        'validation-content': 'validation.md'
+        'issue-content': { path: `${basePath}/issue.md`, markdown: true },
+        'proposal-content': { path: `${expPath}/proposed-fix.md`, markdown: true },
+        'validation-content': { path: `${expPath}/validation.md`, markdown: true }
     };
     
-    for (const [elementId, filename] of Object.entries(files)) {
+    for (const [elementId, config] of Object.entries(files)) {
         try {
-            const response = await fetch(`${basePath}/${filename}`);
+            const response = await fetch(config.path);
             if (response.ok) {
                 const content = await response.text();
                 document.getElementById(elementId).innerHTML = marked.parse(content);
@@ -90,7 +132,7 @@ async function loadContent(pr) {
         }
     }
     
-    // Load diff separately (don't parse as markdown)
+    // Load diff separately from PR directory (shared, don't parse as markdown)
     try {
         const diffResponse = await fetch(`${basePath}/pr-diff.patch`);
         if (diffResponse.ok) {
@@ -122,22 +164,24 @@ function setupNavigation() {
 }
 
 function setupPrevNext() {
-    const currentIndex = allAnalyses.findIndex(a => a.pr == currentPR);
+    // Filter to same experiment for prev/next navigation
+    const sameExp = allAnalyses.filter(a => a.experimentId === currentExperiment);
+    const currentIndex = sameExp.findIndex(a => a.pr == currentPR);
     
     const prevLink = document.getElementById('prev-analysis');
     const nextLink = document.getElementById('next-analysis');
     
     if (currentIndex > 0) {
-        const prev = allAnalyses[currentIndex - 1];
-        prevLink.href = `analysis.html?pr=${prev.pr}`;
+        const prev = sameExp[currentIndex - 1];
+        prevLink.href = `analysis.html?pr=${prev.pr}&experiment=${currentExperiment}`;
         prevLink.textContent = `← PR #${prev.pr}`;
     } else {
         prevLink.classList.add('disabled');
     }
     
-    if (currentIndex < allAnalyses.length - 1) {
-        const next = allAnalyses[currentIndex + 1];
-        nextLink.href = `analysis.html?pr=${next.pr}`;
+    if (currentIndex < sameExp.length - 1) {
+        const next = sameExp[currentIndex + 1];
+        nextLink.href = `analysis.html?pr=${next.pr}&experiment=${currentExperiment}`;
         nextLink.textContent = `PR #${next.pr} →`;
     } else {
         nextLink.classList.add('disabled');

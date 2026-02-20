@@ -14,6 +14,15 @@ Given an issue description and the repository state at a specific commit (the pa
 2. Analyze recent git history to find relevant context
 3. Propose a fix for the bug independently
 
+## Fix Philosophy
+
+Your goal is **thorough root cause analysis** paired with **minimal, targeted fixes**.
+
+- **Analyze deeply, fix surgically.** Invest effort in understanding why the bug happens, but propose the smallest change that resolves it. A one-line fix with clear reasoning beats a multi-file refactor.
+- **Use existing patterns.** Before writing new code, search for existing utility functions, helper methods, and established conventions in the codebase. Reusing existing infrastructure produces more idiomatic and maintainable fixes.
+- **Prefer the simplest correct solution.** When multiple approaches work, lead with the minimal one. A simple guard clause, a constant update, or removing dead code is often the actual fix — not a new abstraction layer.
+- **Present options when there's tension.** If a comprehensive fix and a targeted fix both make sense, present both — but lead with the targeted option and explain the trade-offs.
+
 ## Input
 
 You will receive a path to an analysis directory containing:
@@ -34,6 +43,10 @@ Read ONLY `issue.md` to understand:
 - Steps to reproduce (if provided)
 - Any error messages or stack traces
 - Files or components mentioned
+
+**Read issue comments carefully.** Comments from maintainers often contain critical context about the intended fix approach, scope constraints, or prior failed attempts. Don't skip them.
+
+**Distinguish test bugs from product bugs.** When an issue describes a test failure, read the test code first. The fix may be in the test itself (update an assertion, fix a brittle expectation, skip a flaky test) rather than in the product code.
 
 **WARNING**: If the issue description references a PR or contains phrases like "Follow up from PR #..." or links to merged code, note this as the issue may be retrospective (created after the fix). Still attempt analysis but flag this in your output.
 
@@ -59,6 +72,8 @@ For each relevant commit, examine:
 - **Files changed**: Which files were modified?
 - **Diff content**: What specific changes were made?
 
+**Beware of rabbit holes.** A commit may touch similar concepts but be about a different feature entirely. Always verify that a commit is related to the specific symptom, not just to similar keywords.
+
 ### Step 3: Investigate Suspect Files
 Based on the issue description and git history:
 
@@ -72,20 +87,35 @@ Based on the issue description and git history:
    - Error messages or strings from stack traces
    - Related variable or class names
 
-3. **Compare file versions** if a regression is suspected:
+3. **Search for existing patterns and utilities** before proposing new code:
+   ```bash
+   git grep "patternName" -- "*.ts"
+   ```
+
+4. **Compare file versions** if a regression is suspected:
    ```bash
    git diff <older-commit> HEAD -- <file>
    ```
 
-### Step 4: Formulate the Fix Proposal
+### Step 4: Validate Your Hypothesis
+Before writing the fix proposal, sanity-check your analysis:
+
+1. **Trace the fix mentally.** Ask: "If I make this exact change, does the specific symptom described in the issue go away?" If you can't answer yes with confidence, investigate further.
+
+2. **Verify you have the right file.** Confirm the file you're proposing to change is actually involved in the user's workflow. Check call sites, imports, and whether the code path is reachable from the described scenario.
+
+3. **Check scope.** If the issue or maintainer comments constrain the scope to a specific component or behavior, focus on that — not all similar ones.
+
+### Step 5: Formulate the Fix Proposal
 
 Based on your analysis, propose a fix that includes:
 
 1. **Root Cause**: What is causing the bug?
 2. **Affected Files**: Which files need to be modified?
-3. **Proposed Changes**: Describe the code changes needed
-4. **Confidence Level**: How confident are you? (High/Medium/Low)
-5. **Reasoning**: Why do you believe this fix is correct?
+3. **Proposed Changes**: Describe the code changes needed — lead with the minimal fix
+4. **Alternative Approach** (optional): If a more comprehensive solution exists, describe it separately with trade-offs
+5. **Confidence Level**: How confident are you? (High/Medium/Low)
+6. **Reasoning**: Why do you believe this fix is correct?
 
 ## Time Window Expansion Rules
 
@@ -119,22 +149,26 @@ Structure your response as follows:
 
 ## Proposed Fix
 
-### Affected Files
-- `path/to/file1.ts`
-- `path/to/file2.ts`
+### Option A: Targeted Fix (Recommended)
+**Affected Files:**
+- `path/to/file.ts`
 
-### Changes Required
-<Detailed description of what changes to make>
+**Changes Required:**
+<Minimal change that resolves the symptom>
 
-### Code Sketch (if applicable)
+**Code Sketch:**
 ```<language>
-// Pseudocode or actual code for the fix
+// The smallest correct fix
 ```
+
+### Option B: Comprehensive Fix (Optional)
+<If a broader refactor would also be beneficial, describe it here with trade-offs>
 
 ## Confidence Level: <High/Medium/Low>
 
 ## Reasoning
 <Why this fix addresses the root cause>
+<How you validated that the proposed change resolves the specific symptom>
 ```
 
 ## Important Notes
@@ -144,3 +178,6 @@ Structure your response as follows:
 - Focus on understanding the bug and proposing your own fix
 - Be thorough but efficient - expand the time window only when necessary
 - Use git blame strategically on files mentioned in the issue or error traces
+- **Lead with the minimal fix** - a one-line change with clear reasoning is better than a multi-file refactor
+- **Read issue comments** - maintainers often signal the fix approach in their comments
+- **Validate before proposing** - mentally trace your fix to confirm it addresses the exact symptom

@@ -1,0 +1,8 @@
+{
+  "pr": {"number": 282245, "title": "", "mergeCommit": "", "parentCommit": "", "fileCount": 0},
+  "issue": {"number": 0, "title": "", "author": "", "commentCount": 0},
+  "experiment": {"id": "claude-opus-4.5-49c9844", "model": "claude-opus-4.5", "agentVersion": "1.0", "agentCommit": "49c984493525a5598961b66e253d83f129b40bcc", "timestamp": "2026-02-07T00:00:00Z"},
+  "repo": "microsoft/vscode",
+  "clonePath": "",
+  "outputDir": "data/analysis/282245"
+}
