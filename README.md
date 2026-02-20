@@ -15,9 +15,9 @@ This project explores whether agents can independently diagnose bugs and propose
 
 | Metric | Value |
 |--------|-------|
-| PRs Analyzed | 9 |
-| Average Score | **3.4/5** |
-| File Identification Accuracy | 89% |
+| PRs Analyzed | 37 |
+| Average Score | **3.3/5** |
+| Success Rate (Score ≥ 4) | 46% |
 
 ## Architecture
 
@@ -105,6 +105,12 @@ Compare the proposal against the actual fix:
 - `jq` for JSON processing
 - Local clone of the target repository
 - VS Code with GitHub Copilot
+
+## Testing
+
+Run the same checks locally that CI performs:
+- `./scripts/generate-index.sh` rebuilds `docs/data/index.json` from `data/analysis`.
+- `./.github/skills/generate-analysis-report/report.sh --model <model>` regenerates `data/analysis-results.md` for the dashboard.
 
 ## Filtering Valid Issues
 
