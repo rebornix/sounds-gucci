@@ -43,6 +43,35 @@ function populateExperimentFilter() {
     }
 }
 
+function renderSingleStats(withScores) {
+    const statsSection = document.getElementById('stats');
+    statsSection.className = 'stats-grid';
+    statsSection.innerHTML = `
+        <div class="stat-card">
+            <div class="stat-value">${withScores.length}</div>
+            <div class="stat-label">PRs Analyzed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${withScores.length > 0 ? (withScores.reduce((s,d) => s+d.score, 0) / withScores.length).toFixed(1) : '-'}</div>
+            <div class="stat-label">Avg Score</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${withScores.length > 0 ? Math.round((withScores.filter(d => d.score >= 4).length / withScores.length) * 100) + '%' : '-'}</div>
+            <div class="stat-label">Success Rate (4+)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${[...new Set(withScores.map(d => d.model))].join(', ') || '-'}</div>
+            <div class="stat-label">Model</div>
+        </div>
+    `;
+}
+
+function renderComparisonStats(withScores) {
+    const statsSection = document.getElementById('stats');
+    statsSection.className = 'stats-comparison';
+    statsSection.innerHTML = '';
+}
+
 function getFilteredByExperiment() {
     if (currentExperiment === 'all') return analysisData;
     return analysisData.filter(d => d.experimentId === currentExperiment);
@@ -53,20 +82,11 @@ function renderDashboard() {
     const withScores = data.filter(d => d.score !== null);
     
     // Stats
-    document.getElementById('total-analyzed').textContent = withScores.length;
-    
-    const avgScore = withScores.length > 0 
-        ? (withScores.reduce((sum, d) => sum + d.score, 0) / withScores.length).toFixed(1)
-        : '-';
-    document.getElementById('avg-score').textContent = avgScore;
-    
-    const successRate = withScores.length > 0
-        ? Math.round((withScores.filter(d => d.score >= 4).length / withScores.length) * 100) + '%'
-        : '-';
-    document.getElementById('success-rate').textContent = successRate;
-    
-    const models = [...new Set(withScores.map(d => d.model))];
-    document.getElementById('model-name').textContent = models.join(', ') || '-';
+    if (currentExperiment === 'all') {
+        renderComparisonStats(withScores);
+    } else {
+        renderSingleStats(withScores);
+    }
     
     // Charts (destroy old ones first)
     if (scoreChart) scoreChart.destroy();

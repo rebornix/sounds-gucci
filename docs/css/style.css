@@ -146,6 +146,41 @@ main {
     margin-bottom: 3rem;
 }
 
+.stats-comparison {
+    margin-bottom: 3rem;
+}
+
+.comparison-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.comparison-stats-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.comparison-stats-table td {
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.comparison-stats-table tr:last-child td {
+    border-bottom: none;
+}
+
 .stat-card {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
