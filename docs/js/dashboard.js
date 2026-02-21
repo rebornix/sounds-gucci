@@ -72,7 +72,10 @@ function renderDashboard() {
     // Charts (destroy old ones first)
     if (scoreChart) scoreChart.destroy();
     if (categoryChart) categoryChart.destroy();
-    scoreChart = renderScoreChart(withScores);
+    
+    // Compute global max Y so charts are comparable across experiments
+    const globalMaxY = getGlobalScoreMax();
+    scoreChart = renderScoreChart(withScores, globalMaxY);
     categoryChart = renderCategoryChart(withScores);
     
     // Table
@@ -91,7 +94,21 @@ function renderDashboard() {
     history.replaceState(null, '', url);
 }
 
-function renderScoreChart(data) {
+function getGlobalScoreMax() {
+    const experiments = [...new Set(analysisData.map(d => d.experimentId))];
+    let maxCount = 0;
+    for (const exp of experiments) {
+        const counts = [0, 0, 0, 0, 0];
+        analysisData.filter(d => d.experimentId === exp && d.score).forEach(d => {
+            const idx = Math.floor(d.score) - 1;
+            if (idx >= 0 && idx < 5) counts[idx]++;
+        });
+        maxCount = Math.max(maxCount, ...counts);
+    }
+    return maxCount;
+}
+
+function renderScoreChart(data, maxY) {
     const scoreCounts = [0, 0, 0, 0, 0]; // indices 0-4 for scores 1-5
     data.forEach(d => {
         const idx = Math.floor(d.score) - 1;
@@ -119,7 +136,8 @@ function renderScoreChart(data) {
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { color: '#8b949e' },
+                    max: maxY > 0 ? maxY : undefined,
+                    ticks: { color: '#8b949e', stepSize: 1 },
                     grid: { color: '#30363d' }
                 },
                 x: {
