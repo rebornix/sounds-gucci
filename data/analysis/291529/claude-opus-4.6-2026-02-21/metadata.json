@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 291529,
+    "title": "In agent session window, layout falls over when opening editors (fix #291089)",
+    "mergeCommit": "7a488d0f074748d65b5e017eea3662dc0aa17fbd",
+    "parentCommit": "cceba815b0d6a91d0665261e101a12bed91cb037",
+    "fileCount": 2
+  },
+  "issue": {
+    "number": 291089,
+    "title": "In agent session window, layout falls over when opening editors",
+    "author": "sbatten",
+    "commentCount": 2
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/adfcf77424f9392e6d7bca06c46aa543"
+}

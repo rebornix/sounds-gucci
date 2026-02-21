@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 290038,
+    "title": "Fixes for agent sessions welcome page logic for Insiders and prefill data",
+    "mergeCommit": "e55c97262cbe55dcad1b8f01381056f164d7968c",
+    "parentCommit": "37b8e6d5e05653f776a4168c5261992a3cf580f8",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 289963,
+    "title": "Chat doesnt get passed when opening a workspace",
+    "author": "cwebster-99",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/1675e9039216574f53c5996c9eb5d708"
+}

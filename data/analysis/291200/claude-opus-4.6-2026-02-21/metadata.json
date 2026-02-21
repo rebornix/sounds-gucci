@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 291200,
+    "title": "Chat progress badge not useful and just distracts me (fix #290793)",
+    "mergeCommit": "a066abff0fe2962791823f757767d88f079a036c",
+    "parentCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 290793,
+    "title": "Chat progress badge not useful and just distracts me",
+    "author": "isidorn",
+    "commentCount": 1
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/cb8828ce473c460e4297106dfd316877"
+}

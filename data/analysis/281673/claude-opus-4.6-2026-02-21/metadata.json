@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 281673,
+    "title": "Fix edge case for in progress session",
+    "mergeCommit": "6801a977175147578333faaffeab6a95af8c43b1",
+    "parentCommit": "16bb4a308a90e36f8597a0e344b9fa5a99247213",
+    "fileCount": 5
+  },
+  "issue": {
+    "number": 281642,
+    "title": "Background agent session progress changes to worktree name when it's \"working...\"",
+    "author": "rebornix",
+    "commentCount": 1
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/513a7d21e6c35540c61a9ab18a53b794"
+}

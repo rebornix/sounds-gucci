@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 282245,
+    "title": "Small fix for in progress check for overrides",
+    "mergeCommit": "38fbd7711c6cb70fa1e37ed575b1af81a903fb63",
+    "parentCommit": "ab41693fdd7e34d876bdcc2073f03e5fbd47aeb8",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 282175,
+    "title": "Review copilot PR feedback",
+    "author": "bpasero",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/91c1e8fbcef20c17188b2e19f35d9eda"
+}

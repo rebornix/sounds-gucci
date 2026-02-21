@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 291207,
+    "title": "Don't sort sessions by read/unread state (fix #290858)",
+    "mergeCommit": "555c71bd02142065b21f32c07921b7f072b6bcba",
+    "parentCommit": "a066abff0fe2962791823f757767d88f079a036c",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 290858,
+    "title": "Don't sort sessions by read/unread state",
+    "author": "chrmarti",
+    "commentCount": 1
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/77998d2750879000c8bafb2dd349048e"
+}

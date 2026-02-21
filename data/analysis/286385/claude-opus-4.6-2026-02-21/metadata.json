@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 286385,
+    "title": "Memory leak related to diff editor (fix #286336)",
+    "mergeCommit": "0a29012f26a80170293ed80cf39977b188dda4f1",
+    "parentCommit": "2294cd06ff23310d8ac282c40654a0f0f7e700d4",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 286336,
+    "title": "Memory leak related to diff editor",
+    "author": "SimonSiefke",
+    "commentCount": 7
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/959d1c88c208f520b36bc4a99d2f3fdf"
+}

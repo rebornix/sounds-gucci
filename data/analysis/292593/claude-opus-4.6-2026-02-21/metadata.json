@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 292593,
+    "title": "can send a chat message with anonymous access (fix #292582)",
+    "mergeCommit": "1adb77d0f4dbadb1077087395d4bf917cd0359cf",
+    "parentCommit": "1ca3a1c1e5e8f1b015d5e76dde7b5eaac0e84a57",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 292582,
+    "title": "can send a chat message with anonymous access",
+    "author": "alexr00",
+    "commentCount": 1
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/01b413d18d16c793bfbb4ac7f083dc13"
+}

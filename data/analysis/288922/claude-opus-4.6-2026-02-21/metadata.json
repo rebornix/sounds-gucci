@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 288922,
+    "title": "Explicitly archiving all sessions from Sessions view context menu should not show dialog (fix #288910)",
+    "mergeCommit": "7f460a4ad8472d53c28725e486954b0d1172efbf",
+    "parentCommit": "a320e1230dde778cc68962948d15df11cbf6bbbd",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 288910,
+    "title": "Explicitly archiving all sessions from Sessions view context menu should not show dialog",
+    "author": "ulugbekna",
+    "commentCount": 2
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/143b4a7617297ee45cdf40a14366ef43"
+}

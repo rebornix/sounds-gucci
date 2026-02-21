@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 291227,
+    "title": "Unread state seems flaky and random (fix #290346)",
+    "mergeCommit": "761f19c25f6be7cf9cdf90c8d1bd632f8ba21459",
+    "parentCommit": "4a54efe6fcf72adb92b94891a7c7d35a8753a40e",
+    "fileCount": 2
+  },
+  "issue": {
+    "number": 290346,
+    "title": "Unread state seems flaky and random",
+    "author": "jrieken",
+    "commentCount": 4
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/8bfad308143be42fb1f648006076c4ef"
+}

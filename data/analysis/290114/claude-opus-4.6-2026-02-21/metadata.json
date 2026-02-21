@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 290114,
+    "title": "Agents control: every chat interaction shows 1-progress, 1-unread (fix #289831)",
+    "mergeCommit": "87e6108688849dc201fcd2b50e4e36cd62a6a53e",
+    "parentCommit": "c261eff94d2d4e5c0003dba5950af945f0928d76",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 289831,
+    "title": "Agents control: every chat interaction shows 1 unread",
+    "author": "bpasero",
+    "commentCount": 1
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/ebfc4ee4e6a30184406ce4122e8b1aae"
+}

@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 282325,
+    "title": "Fix for completing response if needed",
+    "mergeCommit": "57f6d3a72c7d24b0719a5a60fd834e41b493c372",
+    "parentCommit": "643aa3a33b39d5e36d7e8ed4e0dc016979b82c74",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 281630,
+    "title": "Duplicated file changes part for background session when `chat.checkpoints.showFileChanges` is turned on",
+    "author": "rebornix",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/d96312bc7b95e96f777daf8749928dde"
+}

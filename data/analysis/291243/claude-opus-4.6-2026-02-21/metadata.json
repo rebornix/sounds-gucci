@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 291243,
+    "title": "Agent session mode breaks the tri-state toggle of the chat icon in the title bar (fix #291099)",
+    "mergeCommit": "e1cede2ffcb069f8021bddca87ca5666be937c8a",
+    "parentCommit": "36a463fd5e7e7b46c549b3bf7772c31a6962a882",
+    "fileCount": 3
+  },
+  "issue": {
+    "number": 291099,
+    "title": "Agent session mode breaks the tri-state toggle of the chat icon in the title bar",
+    "author": "sbatten",
+    "commentCount": 2
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/4f561d7d120d6538943d061ffc69d233"
+}

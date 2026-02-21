@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 292472,
+    "title": "Agent session list collapsed automatically without interaction (fix #291701)",
+    "mergeCommit": "8d864503e1d96ad37e2c4b001b330a75b03261cb",
+    "parentCommit": "df57568c748fb93a4c588e9a5012654107afa0c7",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 291701,
+    "title": "Agent session list collapsed automatically without interaction",
+    "author": "connor4312",
+    "commentCount": 5
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/ed6e17bec7b69737862a41fa4e1d4d80"
+}

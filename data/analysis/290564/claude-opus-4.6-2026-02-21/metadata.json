@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 290564,
+    "title": "fix tabbing around agent status",
+    "mergeCommit": "53db96894dd584e92b7a37ec781defa76420639e",
+    "parentCommit": "c3bbc894fc8289eb2d64f0ef0d5e72461ea8d7d4",
+    "fileCount": 2
+  },
+  "issue": {
+    "number": 289340,
+    "title": "Agent Status: Unable to Focus `Toggle Chat` using keyboard navigation",
+    "author": "benibenj",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/ea1cc7d3cf62ae23810e7151be473b11"
+}

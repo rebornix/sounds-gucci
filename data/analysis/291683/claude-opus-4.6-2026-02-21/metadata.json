@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 291683,
+    "title": "Chat Sessions: Toggling filter collapses More section (fix #291544)",
+    "mergeCommit": "90d24f7d3424df566adb7cc6a3d758ca7f169964",
+    "parentCommit": "a72cd7b63e06ee2bad86679806a56bfff3da30b7",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 291544,
+    "title": "Chat Sessions: Toggling filter collapses More section",
+    "author": "joaomoreno",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/f4ae7d8bb911ec213a23ccf9aa70b0a3"
+}

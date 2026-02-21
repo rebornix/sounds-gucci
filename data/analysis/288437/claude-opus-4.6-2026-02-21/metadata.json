@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 288437,
+    "title": "Leak (fix #288398)",
+    "mergeCommit": "1b4cd523aac3670395dba12ae917e4e1fe67ddf7",
+    "parentCommit": "739c2c5a35a84f0364b30d9cfec97d7614a99f3c",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 288398,
+    "title": "Leak",
+    "author": "bpasero",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/dba42a6954726907229ce21e3c9c0f0c"
+}

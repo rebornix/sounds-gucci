@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 291572,
+    "title": "Agents welcome view UI fixes",
+    "mergeCommit": "16d4fc6d853bf4d5a82768ca4cc1d62f5284f431",
+    "parentCommit": "a0fddd4145fa25afde14b23487d7108e6347e4d7",
+    "fileCount": 3
+  },
+  "issue": {
+    "number": 290790,
+    "title": "Archiving a session results in 2 sessions being archiving",
+    "author": "ulugbekna",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/7e00e84a8a5d68a9117666fac71c7e2d"
+}

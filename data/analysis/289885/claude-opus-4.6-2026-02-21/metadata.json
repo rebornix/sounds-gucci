@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 289885,
+    "title": "Chat drag and drop target much smaller since sessions expanded (fix #289062)",
+    "mergeCommit": "4daeb8f993748295082ef89baef196b54c20adf8",
+    "parentCommit": "dfb16008e8bbec7b994c49c6865d4594fa5030ad",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 289062,
+    "title": "Chat drag and drop target much smaller since sessions expanded",
+    "author": "benibenj",
+    "commentCount": 1
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/5a245ad9f969f25e451f650b20c8f013"
+}

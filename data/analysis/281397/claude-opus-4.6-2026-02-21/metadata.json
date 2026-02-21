@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 281397,
+    "title": "Fix for agent session progress",
+    "mergeCommit": "431aebe28b612f70c046d12bdb41fe3dd307ebd5",
+    "parentCommit": "a649ee8b96e90fc546968710b41aa5230529eeaa",
+    "fileCount": 2
+  },
+  "issue": {
+    "number": 281149,
+    "title": "Local Session shows no empty description/progress when the chat widget is streaming in text",
+    "author": "rebornix",
+    "commentCount": 3
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/281fcba5cfeb03355ff2e89bcc7a16d3"
+}

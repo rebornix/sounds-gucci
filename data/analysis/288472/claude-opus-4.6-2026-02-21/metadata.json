@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 288472,
+    "title": "Chat empty view exp is odd (fix #288400)",
+    "mergeCommit": "998f544bc301ed5601871e38a5051a4bfa27608f",
+    "parentCommit": "0e28a4b7604b3ea6b26e1db4576bb3cf4e14f552",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 288400,
+    "title": "Chat empty view exp is odd",
+    "author": "bpasero",
+    "commentCount": 2
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/7683c03216e9ecac54e4af3088e74839"
+}

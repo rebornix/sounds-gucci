@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 286543,
+    "title": "Disabling AI does not apply without restart when Copilot installed (fix #286498)",
+    "mergeCommit": "cdd00f23b3269f0788538509eb5d7e38f7898e74",
+    "parentCommit": "f0a5b2f90f039bd29de243a9dd58f18f19e5d494",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 286498,
+    "title": "Disabling AI does not apply without restart when Copilot installed",
+    "author": "dmitrivMS",
+    "commentCount": 8
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/0f2f02c5e09849c277efad093d85d8af"
+}

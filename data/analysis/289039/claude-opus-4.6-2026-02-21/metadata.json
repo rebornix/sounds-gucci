@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 289039,
+    "title": "Do not mark sessions which completed while visible in the UI as unread (fix #288369)",
+    "mergeCommit": "4ec8c09e46c06a026cf78bacd77e044ccdc9fa5d",
+    "parentCommit": "d52522be26ca5048ac05c0a9760f56fe4bcda414",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 288369,
+    "title": "Do not mark sessions which completed while visible in the UI as unread",
+    "author": "benibenj",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "claude-opus-4.6",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "claude-opus-4.6-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/9d81fcd6558e4d4273fedc847dccd410"
+}
