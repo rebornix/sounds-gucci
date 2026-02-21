@@ -237,12 +237,23 @@ function renderCategoryChart(data) {
 
 function renderTable(data) {
     const tbody = document.getElementById('results-body');
+    const thead = document.querySelector('#results-table thead tr');
     
     if (data.length === 0) {
+        thead.innerHTML = '<th>PR</th><th>Issue</th><th>Title</th><th>Score</th><th>Model</th>';
         tbody.innerHTML = '<tr><td colspan="5">No data found</td></tr>';
         return;
     }
     
+    if (currentExperiment === 'all') {
+        renderComparisonTable(data, thead, tbody);
+    } else {
+        renderSingleTable(data, thead, tbody);
+    }
+}
+
+function renderSingleTable(data, thead, tbody) {
+    thead.innerHTML = '<th>PR</th><th>Issue</th><th>Title</th><th>Score</th><th>Model</th>';
     tbody.innerHTML = data.map(d => {
         return `
         <tr onclick="window.location='analysis.html?pr=${d.pr}&experiment=${d.experimentId}'">
@@ -251,6 +262,41 @@ function renderTable(data) {
             <td>${escapeHtml(truncate(d.prTitle || d.issueTitle, 60))}</td>
             <td>${renderScoreBadge(d.score)}</td>
             <td>${d.model || '-'}</td>
+        </tr>`;
+    }).join('');
+}
+
+function renderComparisonTable(data, thead, tbody) {
+    const experiments = [...new Set(data.map(d => d.experimentId))].sort();
+    const modelLabels = experiments.map(exp => 
+        exp.replace(/-\d{4}-\d{2}-\d{2}$/, '').replace(/-[a-f0-9]{7}$/, '')
+    );
+    
+    thead.innerHTML = '<th>PR</th><th>Issue</th><th>Title</th>' + 
+        modelLabels.map(m => `<th>${escapeHtml(m)}</th>`).join('');
+    
+    // Group by PR
+    const byPR = new Map();
+    data.forEach(d => {
+        if (!byPR.has(d.pr)) {
+            byPR.set(d.pr, { pr: d.pr, issue: d.issue, repo: d.repo, title: d.prTitle || d.issueTitle, scores: {} });
+        }
+        byPR.get(d.pr).scores[d.experimentId] = d;
+    });
+    
+    tbody.innerHTML = [...byPR.values()].map(row => {
+        const firstExp = experiments.find(e => row.scores[e]) || experiments[0];
+        const scoreCells = experiments.map(exp => {
+            const d = row.scores[exp];
+            if (!d) return '<td>-</td>';
+            return `<td onclick="event.stopPropagation(); window.location='analysis.html?pr=${row.pr}&experiment=${exp}'" style="cursor:pointer">${renderScoreBadge(d.score)}</td>`;
+        }).join('');
+        return `
+        <tr onclick="window.location='analysis.html?pr=${row.pr}&experiment=${firstExp}'" style="cursor:pointer">
+            <td><a href="https://github.com/${row.repo}/pull/${row.pr}" target="_blank" onclick="event.stopPropagation()">#${row.pr}</a></td>
+            <td>${row.issue ? `<a href="https://github.com/${row.repo}/issues/${row.issue}" target="_blank" onclick="event.stopPropagation()">#${row.issue}</a>` : '-'}</td>
+            <td>${escapeHtml(truncate(row.title, 60))}</td>
+            ${scoreCells}
         </tr>`;
     }).join('');
 }
