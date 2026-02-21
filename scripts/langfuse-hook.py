@@ -94,7 +94,7 @@ def split_events_by_pr(events):
     # Scan for task tool calls to identify PR boundaries
     task_ranges = []  # (start_idx, end_idx, pr_number)
     for i, event in enumerate(events):
-        if event.get("type") == "tool.execution_start":
+        if event.get("type") in ("tool.execution_start", "tool.start"):
             data = event.get("data", {})
             if data.get("toolName") == "task":
                 args = data.get("arguments", {})
@@ -106,7 +106,7 @@ def split_events_by_pr(events):
                     end_idx = i
                     tool_call_id = data.get("toolCallId")
                     for j in range(i + 1, len(events)):
-                        if (events[j].get("type") == "tool.execution_complete"
+                        if (events[j].get("type") in ("tool.execution_complete", "tool.complete")
                                 and events[j].get("data", {}).get("toolCallId") == tool_call_id):
                             end_idx = j
                             break
@@ -225,7 +225,7 @@ def process_segment(langfuse, segment, session_id, cwd, segment_index, pr_number
             )
             gen.end(end_time=_parse_ts(event_ts))
 
-        elif entry_type == "tool.execution_start":
+        elif entry_type in ("tool.execution_start", "tool.start"):
             tool_name = data.get("toolName", "unknown")
             args = data.get("arguments", {})
 
@@ -244,7 +244,7 @@ def process_segment(langfuse, segment, session_id, cwd, segment_index, pr_number
             # Find matching execution_complete within this segment
             end_ts = event_ts
             for j in range(i + 1, len(segment)):
-                if (segment[j].get("type") == "tool.execution_complete"
+                if (segment[j].get("type") in ("tool.execution_complete", "tool.complete")
                         and segment[j].get("data", {}).get("toolCallId") == data.get("toolCallId")):
                     result = segment[j].get("data", {}).get("result", {})
                     result_content = result.get("content", "") if isinstance(result, dict) else str(result)
