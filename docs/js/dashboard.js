@@ -37,10 +37,9 @@ function populateExperimentFilter() {
         select.appendChild(opt);
     });
     
-    // Auto-select first experiment if none specified
-    if (currentExperiment === 'all' && experiments.length >= 1) {
-        currentExperiment = experiments[0];
-        select.value = currentExperiment;
+    // Default to 'all' if none specified
+    if (currentExperiment === 'all') {
+        select.value = 'all';
     }
 }
 
