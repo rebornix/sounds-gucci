@@ -102,8 +102,8 @@ function renderDashboard() {
         categoryChart = renderCategoryChart(withScores);
     }
     
-    // Table
-    renderTable(data);
+    // Table (apply current sort/filter)
+    applyFilters();
     
     // Setup filters
     setupFilters();

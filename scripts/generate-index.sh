@@ -36,6 +36,9 @@ for pr_dir in "$ANALYSIS_DIR"/*/; do
         
         experiment_id=$(basename "$exp_dir")
         
+        # Skip deprecated experiments
+        [ -f "${exp_dir}.deprecated" ] && continue
+        
         # Extract score from validation.md
         score=""
         if [ -f "$validation_file" ]; then
