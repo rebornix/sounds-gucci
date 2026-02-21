@@ -32,15 +32,13 @@ function populateExperimentFilter() {
     experiments.forEach(exp => {
         const opt = document.createElement('option');
         opt.value = exp;
-        // Format: "claude-opus-4.5 (49c9844)"
-        const parts = exp.match(/^(.+)-([a-f0-9]{7})$/);
-        opt.textContent = parts ? `${parts[1]} (${parts[2]})` : exp;
+        opt.textContent = exp;
         if (exp === currentExperiment) opt.selected = true;
         select.appendChild(opt);
     });
     
-    // If only one experiment, auto-select it
-    if (experiments.length === 1) {
+    // Auto-select first experiment if none specified
+    if (currentExperiment === 'all' && experiments.length >= 1) {
         currentExperiment = experiments[0];
         select.value = currentExperiment;
     }

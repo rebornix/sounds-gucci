@@ -87,6 +87,32 @@ main {
     max-width: 600px;
 }
 
+/* Experiment Picker */
+.experiment-picker {
+    margin-bottom: 2rem;
+}
+
+.experiment-picker select {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.experiment-picker select:hover {
+    border-color: var(--text-secondary);
+}
+
+.experiment-picker label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
 /* Stats Cards */
 .stats-grid {
     display: grid;
@@ -369,6 +395,13 @@ main {
     padding: 1.5rem;
     overflow-x: auto;
     margin: 1.5rem 0;
+}
+
+.markdown-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
 }
 
 .markdown-content pre code {

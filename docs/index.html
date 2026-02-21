@@ -14,6 +14,15 @@
             <p class="description">General Understanding of Code Change Insights</p>
         </div>
 
+        <section id="experiment-picker" class="experiment-picker">
+            <label>
+                Experiment:
+                <select id="experiment-filter">
+                    <option value="all">All Experiments</option>
+                </select>
+            </label>
+        </section>
+
         <section id="stats" class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value" id="total-analyzed">-</div>
@@ -45,12 +54,6 @@
         </section>
 
         <section id="filters" class="filters">
-            <label>
-                Experiment:
-                <select id="experiment-filter">
-                    <option value="all">All Experiments</option>
-                </select>
-            </label>
             <label>
                 Filter by score:
                 <select id="score-filter">
