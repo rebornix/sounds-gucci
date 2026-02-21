@@ -92,25 +92,30 @@ main {
     margin-bottom: 2rem;
 }
 
-.experiment-picker select {
-    background: var(--bg-card);
+.experiment-picker label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Shared select styles */
+.experiment-picker select,
+.filters select {
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--bg-card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 0.75rem center;
     color: var(--text-primary);
     border: 1px solid var(--border-subtle);
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 2rem 0.5rem 1rem;
     border-radius: 6px;
     font-family: var(--font-sans);
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
     outline: none;
 }
 
-.experiment-picker select:hover {
+.experiment-picker select:hover,
+.filters select:hover {
     border-color: var(--text-secondary);
-}
-
-.experiment-picker label {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
 }
 
 /* Stats Cards */
@@ -180,22 +185,6 @@ main {
     margin-bottom: 1.5rem;
     display: flex;
     gap: 1rem;
-}
-
-.filters select {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-family: var(--font-sans);
-    font-size: 0.9rem;
-    cursor: pointer;
-    outline: none;
-}
-
-.filters select:hover {
-    border-color: var(--text-secondary);
 }
 
 /* Table */
