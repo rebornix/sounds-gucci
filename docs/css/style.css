@@ -551,6 +551,7 @@ main {
     font-family: var(--font-mono);
     font-size: 0.72rem;
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 .trace-span-bar-container {
