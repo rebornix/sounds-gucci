@@ -99,6 +99,9 @@ function renderExperimentSelector(analyses, selected) {
         currentExperiment = e.target.value;
         const url = new URL(window.location);
         url.searchParams.set('experiment', currentExperiment);
+        // Preserve active tab
+        const activePanel = document.querySelector('.nav-btn.active')?.dataset.panel;
+        if (activePanel) url.searchParams.set('tab', activePanel);
         window.location = url;
     });
 }
@@ -298,31 +301,48 @@ function toggleSpanDetail(id) {
 
 function setupNavigation() {
     const buttons = document.querySelectorAll('.nav-btn');
+    
+    // Restore tab from URL param
+    const savedTab = new URLSearchParams(window.location.search).get('tab');
+    if (savedTab) {
+        const target = document.querySelector(`.nav-btn[data-panel="${savedTab}"]`);
+        if (target) {
+            buttons.forEach(b => b.classList.remove('active'));
+            target.classList.add('active');
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`panel-${savedTab}`).classList.add('active');
+        }
+    }
+    
     buttons.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Update active button
             buttons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            // Show corresponding panel
             const panelId = `panel-${btn.dataset.panel}`;
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.getElementById(panelId).classList.add('active');
+            
+            // Update URL param without reload
+            const url = new URL(window.location);
+            url.searchParams.set('tab', btn.dataset.panel);
+            history.replaceState(null, '', url);
         });
     });
 }
 
 function setupPrevNext() {
-    // Filter to same experiment for prev/next navigation
     const sameExp = allAnalyses.filter(a => a.experimentId === currentExperiment);
     const currentIndex = sameExp.findIndex(a => a.pr == currentPR);
+    const activeTab = new URLSearchParams(window.location.search).get('tab') || '';
+    const tabParam = activeTab ? `&tab=${activeTab}` : '';
     
     const prevLink = document.getElementById('prev-analysis');
     const nextLink = document.getElementById('next-analysis');
     
     if (currentIndex > 0) {
         const prev = sameExp[currentIndex - 1];
-        prevLink.href = `analysis.html?pr=${prev.pr}&experiment=${currentExperiment}`;
+        prevLink.href = `analysis.html?pr=${prev.pr}&experiment=${currentExperiment}${tabParam}`;
         prevLink.textContent = `← PR #${prev.pr}`;
     } else {
         prevLink.classList.add('disabled');
@@ -330,7 +350,7 @@ function setupPrevNext() {
     
     if (currentIndex < sameExp.length - 1) {
         const next = sameExp[currentIndex + 1];
-        nextLink.href = `analysis.html?pr=${next.pr}&experiment=${currentExperiment}`;
+        nextLink.href = `analysis.html?pr=${next.pr}&experiment=${currentExperiment}${tabParam}`;
         nextLink.textContent = `PR #${next.pr} →`;
     } else {
         nextLink.classList.add('disabled');
