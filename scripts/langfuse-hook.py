@@ -242,20 +242,34 @@ def process_segment(langfuse, segment, session_id, cwd, segment_index, pr_number
 
 
 def save_trace_url(cwd, pr_number, trace_url):
-    """Save trace URL to the most recently modified experiment metadata.json for a PR."""
+    """Save trace URL to the current model's experiment metadata.json for a PR."""
     pr_dir = Path(cwd) / "data" / "analysis" / pr_number
     if not pr_dir.exists():
         log(f"PR directory not found: {pr_dir}")
         return
 
-    # Find the most recently modified metadata.json in experiment subdirs
+    # Read current model from .model file to target the right experiment dir
+    model_name = None
+    model_file = Path(cwd) / ".model"
+    if model_file.exists():
+        model_name = model_file.read_text().strip()
+
     best_meta = None
-    best_mtime = 0
-    for meta_file in pr_dir.glob("*/metadata.json"):
-        mtime = meta_file.stat().st_mtime
-        if mtime > best_mtime:
-            best_mtime = mtime
-            best_meta = meta_file
+    if model_name:
+        # Find experiment dir matching the current model
+        for meta_file in pr_dir.glob("*/metadata.json"):
+            if meta_file.parent.name.startswith(model_name):
+                best_meta = meta_file
+                break
+
+    # Fallback: most recently modified (only if no model match found)
+    if not best_meta:
+        best_mtime = 0
+        for meta_file in pr_dir.glob("*/metadata.json"):
+            mtime = meta_file.stat().st_mtime
+            if mtime > best_mtime:
+                best_mtime = mtime
+                best_meta = meta_file
 
     if best_meta:
         try:
