@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 290564,
+    "title": "fix tabbing around agent status",
+    "mergeCommit": "53db96894dd584e92b7a37ec781defa76420639e",
+    "parentCommit": "c3bbc894fc8289eb2d64f0ef0d5e72461ea8d7d4",
+    "fileCount": 2
+  },
+  "issue": {
+    "number": 289340,
+    "title": "Agent Status: Unable to Focus `Toggle Chat` using keyboard navigation",
+    "author": "benibenj",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "experiment": {
+    "model": "gpt-5.3-codex",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "gpt-5.3-codex-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  }
+}

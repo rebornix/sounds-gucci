@@ -1,0 +1,26 @@
+{
+  "pr": {
+    "number": 288437,
+    "title": "Leak (fix #288398)",
+    "mergeCommit": "1b4cd523aac3670395dba12ae917e4e1fe67ddf7",
+    "parentCommit": "739c2c5a35a84f0364b30d9cfec97d7614a99f3c",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 288398,
+    "title": "Leak",
+    "author": "bpasero",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/288437",
+  "experiment": {
+    "model": "gpt-5.3-codex",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "gpt-5.3-codex-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/6bae9f01e9f41c43b6f4fa98754669e9"
+}

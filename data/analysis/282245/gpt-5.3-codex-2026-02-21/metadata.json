@@ -1,0 +1,25 @@
+{
+  "pr": {
+    "number": 282245,
+    "title": "Small fix for in progress check for overrides",
+    "mergeCommit": "38fbd7711c6cb70fa1e37ed575b1af81a903fb63",
+    "parentCommit": "ab41693fdd7e34d876bdcc2073f03e5fbd47aeb8",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 282175,
+    "title": "Review copilot PR feedback",
+    "author": "bpasero",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "../vscode",
+  "experiment": {
+    "model": "gpt-5.3-codex",
+    "agentVersion": "1.0",
+    "agentCommit": "8227e0889452573eab6ba2abc9340c9d936ab4f0",
+    "id": "gpt-5.3-codex-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/8d1aa8f49d0795536d5e03f4b10293dd"
+}

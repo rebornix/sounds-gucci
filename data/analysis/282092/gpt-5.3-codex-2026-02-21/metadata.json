@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 282092,
+    "title": "Fix for cloud multi diff stats",
+    "mergeCommit": "5fbb91b1657478e7429c3e67554c23fee865e121",
+    "parentCommit": "2759242b92514d676a6f489945693820fbe4b23e",
+    "fileCount": 2
+  },
+  "issue": {
+    "number": 281924,
+    "title": "Chat agent: cloud session does not show changes",
+    "author": "bpasero",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "gpt-5.3-codex",
+    "agentVersion": "1.0",
+    "agentCommit": "8227e0889452573eab6ba2abc9340c9d936ab4f0",
+    "id": "gpt-5.3-codex-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/8d1aa8f49d0795536d5e03f4b10293dd"
+}

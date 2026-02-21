@@ -1,0 +1,26 @@
+{
+  "pr": {
+    "number": 291200,
+    "title": "Chat progress badge not useful and just distracts me (fix #290793)",
+    "mergeCommit": "a066abff0fe2962791823f757767d88f079a036c",
+    "parentCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
+    "fileCount": 1
+  },
+  "issue": {
+    "number": 290793,
+    "title": "Chat progress badge not useful and just distracts me",
+    "author": "isidorn",
+    "commentCount": 1
+  },
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "outputDir": "data/analysis/291200",
+  "generatedAt": "2026-02-21T00:00:00Z",
+  "experiment": {
+    "model": "gpt-5.3-codex",
+    "agentVersion": "1.0",
+    "timestamp": "2026-02-21T00:00:00Z",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "gpt-5.3-codex-2026-02-21"
+  }
+}
