@@ -87,6 +87,24 @@ main {
     max-width: 600px;
 }
 
+.subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-width: 720px;
+    margin-top: 0.5rem;
+}
+
+.subtitle a {
+    color: var(--text-secondary);
+    text-decoration: underline;
+    text-decoration-color: var(--border-subtle);
+}
+
+.subtitle a:hover {
+    color: var(--accent);
+}
+
 /* Experiment Picker */
 .experiment-picker {
     margin-bottom: 2rem;
