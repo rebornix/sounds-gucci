@@ -24,8 +24,19 @@ import hashlib
 import os
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
+
+
+def _parse_ts(ts_str):
+    """Parse ISO timestamp string to epoch milliseconds for Langfuse."""
+    if not ts_str:
+        return None
+    try:
+        dt = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+        return int(dt.timestamp() * 1000)
+    except (ValueError, TypeError):
+        return None
 
 
 def load_dotenv():
@@ -189,6 +200,7 @@ def process_segment(langfuse, segment, session_id, cwd, segment_index, pr_number
     for i, entry in enumerate(segment):
         entry_type = entry.get("type", "")
         data = entry.get("data", {})
+        event_ts = entry.get("timestamp")
 
         if entry_type == "user.message":
             span = root.start_span(
@@ -196,7 +208,7 @@ def process_segment(langfuse, segment, session_id, cwd, segment_index, pr_number
                 input=data.get("content", ""),
                 metadata={"type": entry_type},
             )
-            span.end()
+            span.end(end_time=_parse_ts(event_ts))
 
         elif entry_type == "assistant.message":
             content = data.get("content", "")
@@ -211,7 +223,7 @@ def process_segment(langfuse, segment, session_id, cwd, segment_index, pr_number
                     "reasoningText": data.get("reasoningText"),
                 },
             )
-            gen.end()
+            gen.end(end_time=_parse_ts(event_ts))
 
         elif entry_type == "tool.execution_start":
             tool_name = data.get("toolName", "unknown")
@@ -230,14 +242,33 @@ def process_segment(langfuse, segment, session_id, cwd, segment_index, pr_number
                 metadata={"type": entry_type, "toolCallId": data.get("toolCallId")},
             )
             # Find matching execution_complete within this segment
+            end_ts = event_ts
             for j in range(i + 1, len(segment)):
                 if (segment[j].get("type") == "tool.execution_complete"
                         and segment[j].get("data", {}).get("toolCallId") == data.get("toolCallId")):
                     result = segment[j].get("data", {}).get("result", {})
                     result_content = result.get("content", "") if isinstance(result, dict) else str(result)
                     span.update(output=result_content[:5000])
+                    end_ts = segment[j].get("timestamp", event_ts)
                     break
-            span.end()
+            span.end(end_time=_parse_ts(end_ts))
+
+        elif entry_type == "subagent.started":
+            agent_name = data.get("agentName", data.get("agentDisplayName", "unknown"))
+            display_name = f"subagent:{agent_name}"
+            span = root.start_span(
+                name=display_name,
+                input=data.get("prompt", ""),
+                metadata={"type": entry_type, "toolCallId": data.get("toolCallId")},
+            )
+            # Find matching subagent.completed
+            end_ts = event_ts
+            for j in range(i + 1, len(segment)):
+                if (segment[j].get("type") == "subagent.completed"
+                        and segment[j].get("data", {}).get("toolCallId") == data.get("toolCallId")):
+                    end_ts = segment[j].get("timestamp", event_ts)
+                    break
+            span.end(end_time=_parse_ts(end_ts))
 
     root.end()
     langfuse.flush()
