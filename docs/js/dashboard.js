@@ -72,10 +72,15 @@ function renderDashboard() {
     if (scoreChart) scoreChart.destroy();
     if (categoryChart) categoryChart.destroy();
     
-    // Compute global max Y so charts are comparable across experiments
     const globalMaxY = getGlobalScoreMax();
-    scoreChart = renderScoreChart(withScores, globalMaxY);
-    categoryChart = renderCategoryChart(withScores);
+    
+    if (currentExperiment === 'all') {
+        scoreChart = renderComparisonChart(globalMaxY);
+        categoryChart = renderCategoryChart(withScores);
+    } else {
+        scoreChart = renderScoreChart(withScores, globalMaxY);
+        categoryChart = renderCategoryChart(withScores);
+    }
     
     // Table
     renderTable(data);
@@ -105,6 +110,56 @@ function getGlobalScoreMax() {
         maxCount = Math.max(maxCount, ...counts);
     }
     return maxCount;
+}
+
+function renderComparisonChart(maxY) {
+    const experiments = [...new Set(analysisData.map(d => d.experimentId))].sort();
+    const colors = ['#58a6ff', '#3fb950', '#d29922', '#f778ba', '#db6d28'];
+    
+    const datasets = experiments.map((exp, i) => {
+        const counts = [0, 0, 0, 0, 0];
+        analysisData.filter(d => d.experimentId === exp && d.score).forEach(d => {
+            const idx = Math.floor(d.score) - 1;
+            if (idx >= 0 && idx < 5) counts[idx]++;
+        });
+        const label = exp.replace(/-\d{4}-\d{2}-\d{2}$/, '').replace(/-[a-f0-9]{7}$/, '');
+        return {
+            label,
+            data: counts,
+            backgroundColor: colors[i % colors.length],
+            borderWidth: 0
+        };
+    });
+    
+    const ctx = document.getElementById('score-chart').getContext('2d');
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['1 - Misaligned', '2 - Weak', '3 - Partial', '4 - Good', '5 - Excellent'],
+            datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { color: '#e6edf3' }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: maxY > 0 ? maxY : undefined,
+                    ticks: { color: '#8b949e', stepSize: 1 },
+                    grid: { color: '#30363d' }
+                },
+                x: {
+                    ticks: { color: '#8b949e' },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
 }
 
 function renderScoreChart(data, maxY) {
