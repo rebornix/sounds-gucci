@@ -21,5 +21,13 @@
     "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
     "id": "gpt-5.3-codex-2026-02-21",
     "timestamp": "2026-02-21T00:00:00Z"
-  }
+  },
+  "validation": {
+    "timestamp": "2026-02-21T06:43:16Z",
+    "score": 3,
+    "label": "Partial",
+    "filesOverlap": "1/3 (33%)",
+    "validatedBy": "fix-validator"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/2de9760790f648195f402c5d9f02efb6"
 }
