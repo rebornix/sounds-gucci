@@ -17,14 +17,28 @@ You must evaluate how well the proposal aligns with the real solution.
 
 ## Input
 
-You will receive a path to an analysis directory containing:
+You will receive a path to an analysis directory (e.g., `data/analysis/12345`).
+
+**Shared files** at the analysis directory level:
 - `issue.md` - The original bug issue
 - `pr.md` - The PR description
 - `pr-diff.patch` - The actual changes made in the PR
-- `proposal.md` - The fix proposal from bug-analyzer (if saved)
+
+**Experiment files** in a subdirectory:
+- `proposed-fix.md` - The fix proposal from bug-analyzer
 - `metadata.json` - Structured metadata
 
-If `proposal.md` doesn't exist, ask for the proposal to be provided in the conversation.
+### Finding the experiment directory
+
+If no specific experiment subdirectory is given, find the **most recent** one:
+1. List subdirectories in the analysis directory (e.g., `ls data/analysis/12345/`)
+2. Experiment directories are named `<model>-<date>` (e.g., `gpt-5.2-codex-2026-02-20`)
+3. Pick the one that sorts last alphabetically (most recent by date)
+4. Read `proposed-fix.md` from that subdirectory
+
+### Saving output
+
+Save your `validation.md` to the **same experiment subdirectory** where you found `proposed-fix.md`.
 
 ## Validation Process
 

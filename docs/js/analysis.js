@@ -80,6 +80,11 @@ function renderExperimentSelector(analyses, selected) {
     const container = document.getElementById('experiment-selector');
     if (!container) return;
     
+    const currentAnalysis = analyses.find(a => a.experimentId === selected) || analyses[0];
+    const traceLink = currentAnalysis.traceUrl 
+        ? `<a href="${currentAnalysis.traceUrl}" target="_blank" class="trace-link" title="View trace in Langfuse">📊 Trace</a>`
+        : '';
+
     container.innerHTML = `
         <label>Experiment: 
             <select id="experiment-select">
@@ -91,6 +96,7 @@ function renderExperimentSelector(analyses, selected) {
                 }).join('')}
             </select>
         </label>
+        ${traceLink}
     `;
     container.style.display = 'block';
     

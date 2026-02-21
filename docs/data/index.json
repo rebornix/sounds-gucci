@@ -14,7 +14,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 2,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 281589,
@@ -31,7 +32,26 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 3,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
+  },
+  {
+    "pr": 281589,
+    "prTitle": "Various fixes for session progress",
+    "prMergeCommit": "87466737669c9645a336f7647d4b46ecf7d84bf7",
+    "issue": 275332,
+    "issueTitle": "Agent sessions single view: standardize the session item entries",
+    "issueAuthor": "osortega",
+    "repo": "microsoft/vscode",
+    "score": 2,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "1.0",
+    "agentCommit": "8227e0889452573eab6ba2abc9340c9d936ab4f0",
+    "experimentId": "gpt-5.3-codex-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z",
+    "fileCount": 3,
+    "proposalSummary": "",
+    "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/431e46a40dc7190fac36937608aba16e"
   },
   {
     "pr": 281673,
@@ -48,7 +68,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 5,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 282092,
@@ -65,7 +86,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 0,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 282245,
@@ -82,7 +104,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 0,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 282325,
@@ -99,7 +122,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 286385,
@@ -116,7 +140,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 286543,
@@ -133,7 +158,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 288359,
@@ -150,7 +176,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 288437,
@@ -167,7 +194,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 288472,
@@ -184,7 +212,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 288922,
@@ -201,7 +230,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 289039,
@@ -218,7 +248,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 289808,
@@ -235,7 +266,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 2,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 289880,
@@ -252,7 +284,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 289883,
@@ -269,7 +302,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 289885,
@@ -286,7 +320,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 290020,
@@ -303,7 +338,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 290038,
@@ -320,7 +356,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 0,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 290114,
@@ -337,7 +374,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 290497,
@@ -354,7 +392,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 290564,
@@ -371,7 +410,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 2,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 291199,
@@ -388,7 +428,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 291200,
@@ -405,7 +446,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 291207,
@@ -422,7 +464,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 291227,
@@ -439,7 +482,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 2,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 291243,
@@ -456,7 +500,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 3,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 291262,
@@ -473,7 +518,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 291529,
@@ -490,7 +536,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 2,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 291572,
@@ -507,7 +554,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 3,
-    "proposalSummary": "The welcome page implements a 2-column layout by applying fixed `nth-child` CSS transforms to the virtualized list rows and a negative bottom margin to compress the list height. When the session list "
+    "proposalSummary": "The welcome page implements a 2-column layout by applying fixed `nth-child` CSS transforms to the virtualized list rows and a negative bottom margin to compress the list height. When the session list ",
+    "traceUrl": ""
   },
   {
     "pr": 291683,
@@ -524,7 +572,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 291805,
@@ -541,7 +590,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 5,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 291911,
@@ -558,7 +608,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 291919,
@@ -575,7 +626,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 292160,
@@ -592,7 +644,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 292341,
@@ -609,7 +662,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 4,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 292472,
@@ -626,7 +680,8 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   },
   {
     "pr": 292593,
@@ -643,6 +698,7 @@
     "experimentId": "claude-opus-4.5-49c9844",
     "timestamp": "2026-02-07T00:00:00Z",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": ""
   }
 ]

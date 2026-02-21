@@ -59,6 +59,7 @@ for pr_dir in "$ANALYSIS_DIR"/*/; do
         agent_version=$(jq -r '.experiment.agentVersion // "unknown"' "$metadata_file")
         agent_commit=$(jq -r '.experiment.agentCommit // "unknown"' "$metadata_file")
         timestamp=$(jq -r '.experiment.timestamp // ""' "$metadata_file")
+        trace_url=$(jq -r '.traceUrl // ""' "$metadata_file")
         file_count=$(jq -r '.pr.fileCount // 0' "$metadata_file")
         
         # Build JSON entry using jq for proper escaping
@@ -78,6 +79,7 @@ for pr_dir in "$ANALYSIS_DIR"/*/; do
             --arg timestamp "$timestamp" \
             --argjson fileCount "${file_count:-0}" \
             --arg proposalSummary "$proposal_summary" \
+            --arg traceUrl "$trace_url" \
             '{
                 pr: $pr,
                 prTitle: $prTitle,
@@ -93,7 +95,8 @@ for pr_dir in "$ANALYSIS_DIR"/*/; do
                 experimentId: $experimentId,
                 timestamp: $timestamp,
                 fileCount: $fileCount,
-                proposalSummary: $proposalSummary
+                proposalSummary: $proposalSummary,
+                traceUrl: $traceUrl
             }')
         
         entries=$(echo "$entries" | jq --argjson e "$entry" '. += [$e]')

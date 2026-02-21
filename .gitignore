@@ -6,3 +6,4 @@
 .DS_Store
 docs/data/analysis
 dist
+.env

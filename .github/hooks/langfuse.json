@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "python3 ./scripts/langfuse-hook.py",
+        "timeoutSec": 30,
+        "env": {
+          "LANGFUSE_HOOK_EVENT": "sessionEnd"
+        }
+      }
+    ]
+  }
+}
