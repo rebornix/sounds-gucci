@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 291805,
+    "title": "Agent sessions - Session grouping doesn't seem to always account for \"yesterday\" sessions (fix #291589)",
+    "mergeCommit": "dc1437b20d1a2087321d030461981bbc48d2607f",
+    "parentCommit": "cfb2e3e39a3f6911ddd8ca70937b4f221a5264a8",
+    "fileCount": 5
+  },
+  "issue": {
+    "number": 291589,
+    "title": "Agent sessions - Session grouping doesn't seem to always account for \"yesterday\" sessions",
+    "author": "lostintangent",
+    "commentCount": 0
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "gpt-5.3-codex",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "gpt-5.3-codex-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/363d2108f7658a070a051351e3465b52"
+}

@@ -167,14 +167,11 @@ function renderTable(data) {
     const tbody = document.getElementById('results-body');
     
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6">No data found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5">No data found</td></tr>';
         return;
     }
     
     tbody.innerHTML = data.map(d => {
-        const trace = d.traceUrl 
-            ? `<a href="${d.traceUrl}" target="_blank" onclick="event.stopPropagation()" title="View trace">📊</a>` 
-            : '';
         return `
         <tr onclick="window.location='analysis.html?pr=${d.pr}&experiment=${d.experimentId}'">
             <td><a href="https://github.com/${d.repo}/pull/${d.pr}" target="_blank" onclick="event.stopPropagation()">#${d.pr}</a></td>
@@ -182,7 +179,6 @@ function renderTable(data) {
             <td>${escapeHtml(truncate(d.prTitle || d.issueTitle, 60))}</td>
             <td>${renderScoreBadge(d.score)}</td>
             <td>${d.model || '-'}</td>
-            <td>${trace}</td>
         </tr>`;
     }).join('');
 }

@@ -1,0 +1,24 @@
+{
+  "pr": {
+    "number": 289808,
+    "title": "Target picker fixes",
+    "mergeCommit": "f8bd1cfbc94b253e95852185b71646f4ea42770f",
+    "parentCommit": "a649ee8b96e90fc546968710b41aa5230529eeaa",
+    "fileCount": 2
+  },
+  "issue": {
+    "number": 289229,
+    "title": "Cannot switch targets after initiating chat from welcome page",
+    "author": "cwebster-99",
+    "commentCount": 2
+  },
+  "repo": "microsoft/vscode",
+  "experiment": {
+    "model": "gpt-5.3-codex",
+    "agentVersion": "1.0",
+    "agentCommit": "d4de682a8cf09e6f259309876565d89dab93b4df",
+    "id": "gpt-5.3-codex-2026-02-21",
+    "timestamp": "2026-02-21T00:00:00Z"
+  },
+  "traceUrl": "https://us.cloud.langfuse.com/project/cmlvj1xsa03ycad07dbi01nil/traces/02aa6dadeaf505ab15693d4a8f6d1809"
+}

@@ -1,0 +1,103 @@
+{
+  "traceId": "3b436ee780977ce771d2685f3bedb3d0",
+  "name": "sounds-gucci/pr-281589",
+  "timestamp": "2026-02-21T07:38:54.691Z",
+  "tags": [
+    "pr-281589",
+    "sessionEnd",
+    "sounds-gucci"
+  ],
+  "sessionId": "69de68e0-1e4f-4e24-9647-298bdaa2e48b",
+  "latency": 0,
+  "totalCost": 0,
+  "spans": [
+    {
+      "id": "fa3138f07d2d278b",
+      "parentId": "447a27e85027ea9e",
+      "name": "assistant-message",
+      "type": "GENERATION",
+      "startTime": "2026-02-21T07:38:54.691Z",
+      "endTime": "2026-02-21T07:38:54.691Z",
+      "latency": 0,
+      "input": null,
+      "output": null,
+      "metadata": {
+        "type": "assistant.message",
+        "messageId": "8c08667f-d27b-41a5-b8fd-6cf44a056513",
+        "toolRequests": [
+          "task"
+        ],
+        "resourceAttributes": {
+          "telemetry.sdk.language": "python",
+          "telemetry.sdk.name": "opentelemetry",
+          "telemetry.sdk.version": "1.39.1",
+          "service.name": "unknown_service"
+        },
+        "scope": {
+          "name": "langfuse-sdk",
+          "version": "3.14.4",
+          "attributes": {
+            "public_key": "pk-lf-4b9b0385-7470-4971-9151-e127d0d6235f"
+          }
+        }
+      }
+    },
+    {
+      "id": "447a27e85027ea9e",
+      "parentId": null,
+      "name": "sounds-gucci/pr-281589",
+      "type": "SPAN",
+      "startTime": "2026-02-21T07:38:54.691Z",
+      "endTime": "2026-02-21T07:38:54.691Z",
+      "latency": 0,
+      "input": null,
+      "output": null,
+      "metadata": {
+        "hookEvent": "sessionEnd",
+        "cwd": "/Users/penlv/Code/Work/sounds-gucci",
+        "pr": 281589,
+        "resourceAttributes": {
+          "telemetry.sdk.language": "python",
+          "telemetry.sdk.name": "opentelemetry",
+          "telemetry.sdk.version": "1.39.1",
+          "service.name": "unknown_service"
+        },
+        "scope": {
+          "name": "langfuse-sdk",
+          "version": "3.14.4",
+          "attributes": {
+            "public_key": "pk-lf-4b9b0385-7470-4971-9151-e127d0d6235f"
+          }
+        }
+      }
+    },
+    {
+      "id": "96e6fc16e82aba3f",
+      "parentId": "447a27e85027ea9e",
+      "name": "subagent:bug-analyzer",
+      "type": "SPAN",
+      "startTime": "2026-02-21T07:38:54.691Z",
+      "endTime": "2026-02-21T07:38:54.691Z",
+      "latency": 0,
+      "input": "{\"description\": \"Run bug-analyzer on 281589\", \"agent_type\": \"bug-analyzer\", \"prompt\": \"Analyze the bug in data/analysis/281589. Read ONLY issue.md from that directory. Do NOT read pr.md, pr-diff.patch, changed-files.txt, or any files in the claude-opus-4.5-49c9844 subdirectory \\u2014 those contain solution hints.\\n\\nThe vscode clone is at /Users/penlv/Code/Work/vscode. Check metadata.json in an existing experiment subdirectory for the parent commit to checkout.\\n\\nRemember to:\\n1. Read .model file for model name\\n2. Create the experiment directory with metadata.json\\n3. Save proposed-fix.md in the experiment directory\", \"mode\": \"sync\"}",
+      "output": null,
+      "metadata": {
+        "type": "tool.execution_start",
+        "toolCallId": "toolu_vrtx_01Vgo6Fu4wk8HhNDB4vabLwn",
+        "resourceAttributes": {
+          "telemetry.sdk.language": "python",
+          "telemetry.sdk.name": "opentelemetry",
+          "telemetry.sdk.version": "1.39.1",
+          "service.name": "unknown_service"
+        },
+        "scope": {
+          "name": "langfuse-sdk",
+          "version": "3.14.4",
+          "attributes": {
+            "public_key": "pk-lf-4b9b0385-7470-4971-9151-e127d0d6235f"
+          }
+        }
+      }
+    }
+  ]
+}

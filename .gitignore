@@ -7,3 +7,4 @@
 docs/data/analysis
 dist
 .env
+__pycache__/

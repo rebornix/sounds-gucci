@@ -20,6 +20,7 @@ Optional:
 """
 
 import json
+import hashlib
 import os
 import re
 import sys
@@ -164,8 +165,18 @@ def process_segment(langfuse, segment, session_id, cwd, segment_index, pr_number
     else:
         trace_name = f"{project_name}/prompt-{segment_index}"
 
+    # Deterministic trace ID: one trace per PR per model experiment
+    # Re-sends from the same or different sessions overwrite instead of duplicating
+    model_name = ""
+    model_file = Path(cwd) / ".model" if cwd else None
+    if model_file and model_file.exists():
+        model_name = model_file.read_text().strip()
+    trace_key = f"{pr_number or segment_index}:{model_name}"
+    det_trace_id = hashlib.md5(trace_key.encode()).hexdigest()
+
     root = langfuse.start_span(
         name=trace_name,
+        trace_context={"trace_id": det_trace_id},
         metadata={"hookEvent": "sessionEnd", "cwd": cwd, "pr": pr_number},
     )
     root.update_trace(
@@ -262,14 +273,9 @@ def save_trace_url(cwd, pr_number, trace_url):
                 best_meta = meta_file
                 break
 
-    # Fallback: most recently modified (only if no model match found)
     if not best_meta:
-        best_mtime = 0
-        for meta_file in pr_dir.glob("*/metadata.json"):
-            mtime = meta_file.stat().st_mtime
-            if mtime > best_mtime:
-                best_mtime = mtime
-                best_meta = meta_file
+        log(f"No experiment dir matching model '{model_name}' for PR {pr_number}, skipping")
+        return
 
     if best_meta:
         try:

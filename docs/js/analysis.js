@@ -151,6 +151,154 @@ async function loadContent(pr, experimentId) {
     } catch {
         document.getElementById('diff-content').textContent = 'Failed to load diff';
     }
+
+    // Load trace
+    try {
+        const traceResponse = await fetch(`${expPath}/trace.json`);
+        if (traceResponse.ok) {
+            const trace = await traceResponse.json();
+            document.getElementById('trace-content').innerHTML = renderTrace(trace);
+        } else {
+            document.getElementById('trace-content').innerHTML = '<p class="muted">No trace data available. Run <code>python3 scripts/fetch-traces.py</code> to fetch.</p>';
+        }
+    } catch {
+        document.getElementById('trace-content').innerHTML = '<p class="muted">Failed to load trace</p>';
+    }
+}
+
+function renderTrace(trace) {
+    const spans = trace.spans || [];
+    if (spans.length === 0) return '<p class="muted">No spans in trace</p>';
+
+    // Find the root span and compute time range
+    const times = spans
+        .filter(s => s.startTime)
+        .map(s => new Date(s.startTime).getTime());
+    const minTime = Math.min(...times);
+    const maxTime = Math.max(...times);
+    const totalDuration = maxTime - minTime || 1;
+
+    // Build parent-child map
+    const childMap = {};
+    spans.forEach(s => {
+        const pid = s.parentId || 'root';
+        if (!childMap[pid]) childMap[pid] = [];
+        childMap[pid].push(s);
+    });
+
+    // Find root spans (no parent or parent is the trace root)
+    const rootId = spans.find(s => s.name === trace.name)?.id;
+    const rootChildren = childMap[rootId] || childMap['root'] || spans;
+
+    // Flatten tree in DFS order with depth
+    const flatSpans = [];
+    function walk(spanList, depth) {
+        for (const span of spanList) {
+            flatSpans.push({ ...span, depth });
+            if (childMap[span.id]) {
+                walk(childMap[span.id], depth + 1);
+            }
+        }
+    }
+    walk(rootChildren, 0);
+
+    // Render timeline
+    let html = `<div class="trace-header">
+        <span class="trace-meta">${spans.length} spans</span>
+        ${trace.latency ? `<span class="trace-meta">${trace.latency.toFixed(1)}s total</span>` : ''}
+        ${trace.tags?.map(t => `<span class="trace-tag">${t}</span>`).join('') || ''}
+    </div>`;
+
+    html += '<div class="trace-spans">';
+    for (const [idx, span] of flatSpans.entries()) {
+        const startMs = span.startTime ? new Date(span.startTime).getTime() - minTime : 0;
+        const endMs = span.endTime ? new Date(span.endTime).getTime() - minTime : startMs;
+        const leftPct = (startMs / totalDuration * 100).toFixed(2);
+        const widthPct = Math.max(0.5, ((endMs - startMs) / totalDuration * 100)).toFixed(2);
+
+        const spanClass = getSpanClass(span.name);
+        const indent = span.depth * 16;
+        const latencyLabel = span.latency != null ? `${span.latency.toFixed(2)}s` : '';
+        const hasContent = span.input || span.output;
+        const spanId = `span-${idx}`;
+
+        // Build preview text
+        let preview = '';
+        if (span.name === 'assistant-message' && span.output) {
+            preview = span.output.substring(0, 100);
+        } else if (span.name.startsWith('tool:') && span.input) {
+            try {
+                const args = JSON.parse(span.input);
+                if (args.command) preview = args.command.substring(0, 100);
+                else if (args.path) preview = args.path;
+                else if (args.pattern) preview = args.pattern;
+                else preview = span.input.substring(0, 100);
+            } catch { preview = span.input.substring(0, 100); }
+        } else if (span.name === 'user-message' && span.input) {
+            preview = span.input.substring(0, 100);
+        } else if (span.name.startsWith('subagent:') && span.input) {
+            try {
+                const args = JSON.parse(span.input);
+                preview = (args.prompt || args.description || '').substring(0, 100);
+            } catch { preview = span.input.substring(0, 100); }
+        }
+
+        html += `<div class="trace-span ${hasContent ? 'clickable' : ''}" ${hasContent ? `onclick="toggleSpanDetail('${spanId}')"` : ''}>
+            <div class="trace-span-label" style="padding-left:${indent}px">
+                <span class="trace-span-icon ${spanClass}"></span>
+                <span class="trace-span-name">${escapeHtml(span.name)}</span>
+                ${preview ? `<span class="trace-span-preview">${escapeHtml(preview)}</span>` : ''}
+                <span class="trace-span-duration">${latencyLabel}</span>
+            </div>
+            <div class="trace-span-bar-container">
+                <div class="trace-span-bar ${spanClass}" style="left:${leftPct}%;width:${widthPct}%"></div>
+            </div>
+        </div>`;
+
+        // Expandable detail panel
+        if (hasContent) {
+            html += `<div id="${spanId}" class="trace-span-detail" style="display:none">`;
+            if (span.input) {
+                html += `<div class="trace-detail-section">
+                    <div class="trace-detail-label">Input</div>
+                    <pre class="trace-detail-content">${escapeHtml(span.input)}</pre>
+                </div>`;
+            }
+            if (span.output) {
+                html += `<div class="trace-detail-section">
+                    <div class="trace-detail-label">Output</div>
+                    <pre class="trace-detail-content">${escapeHtml(span.output)}</pre>
+                </div>`;
+            }
+            html += '</div>';
+        }
+    }
+    html += '</div>';
+
+    return html;
+}
+
+function getSpanClass(name) {
+    if (name.startsWith('subagent:')) return 'span-subagent';
+    if (name.startsWith('tool:')) return 'span-tool';
+    if (name === 'user-message') return 'span-user';
+    if (name === 'assistant-message') return 'span-assistant';
+    return 'span-default';
+}
+
+function escapeAttr(str) {
+    return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function toggleSpanDetail(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
 function setupNavigation() {
