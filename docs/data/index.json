@@ -40,6 +40,27 @@
     ]
   },
   {
+    "pr": 255490,
+    "prTitle": "add layover to new cells correctly and dispose of listeners as cells are removed",
+    "prMergeCommit": "ce37a385e43c4cfa00f150801e0575f32db40bbc",
+    "issue": 251601,
+    "issueTitle": "ListError [NotebookCellList] Invalid index 50",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 2,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`createMarkupPreview` validates that the cell exists in `viewModel` and is not hidden, but then directly calls:",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
     "pr": 280217,
     "prTitle": "Fix illegal characters in Dynamic Auth Provider logger filename",
     "prMergeCommit": "2d96f38ce6ffb7355ade0ad99ca2dcb927d298ae",
@@ -55,6 +76,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 280217,
+    "prTitle": "Fix illegal characters in Dynamic Auth Provider logger filename",
+    "prMergeCommit": "2d96f38ce6ffb7355ade0ad99ca2dcb927d298ae",
+    "issue": 269810,
+    "issueTitle": "`loggerIpc#deregisterLogger` fails with Scheme contains illegal characters",
+    "issueAuthor": "bpasero",
+    "repo": "microsoft/vscode",
+    "score": 3,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`DynamicAuthProvider` uses `this.id` (authorization URL + optional resource) directly as the logger identifier/file stem when calling `createLogger(stringId, ...)`.",
     "traceUrl": "",
     "tags": [
       "error-telemetry"
@@ -334,6 +376,27 @@
     ]
   },
   {
+    "pr": 282221,
+    "prTitle": "Fix race condition causing \\\"Model is disposed!\\\" error in virtual document updates",
+    "prMergeCommit": "5639dca9912d7ab8896929b1a09f30f883ead43f",
+    "issue": 212713,
+    "issueTitle": "Model is disposed!",
+    "issueAuthor": "vscodenpa",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "`$onVirtualDocumentChange` stores a live `ITextModel` reference, awaits `computeMoreMinimalEdits`, and then calls `model.applyEdits(...)` without verifying the model is still alive.",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
     "pr": 282245,
     "prTitle": "",
     "prMergeCommit": "",
@@ -439,6 +502,27 @@
     ]
   },
   {
+    "pr": 283630,
+    "prTitle": "fix: error in epoch bounds in edit timeline",
+    "prMergeCommit": "059761d01f46380f93c4b0be42f4422285cdac59",
+    "issue": 283304,
+    "issueTitle": "Cannot read properties of undefined (reading 'requestId')",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`_getRequestEpochBounds` does not guard negative `startIndex` when `stopRequestId` is provided.",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
     "pr": 283844,
     "prTitle": "Remove non null assertion",
     "prMergeCommit": "934a4f6b490505737f043f830e3993f76bc264ff",
@@ -460,6 +544,27 @@
     ]
   },
   {
+    "pr": 283844,
+    "prTitle": "Remove non null assertion",
+    "prMergeCommit": "934a4f6b490505737f043f830e3993f76bc264ff",
+    "issue": 283302,
+    "issueTitle": "Cannot read properties of undefined (reading 'setAttribute')",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`ModePickerActionItem` assumes `this.element` is always initialized after command execution and uses a non-null assertion:",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
     "pr": 283868,
     "prTitle": "wait for xterm element vs assuming it's defined",
     "prMergeCommit": "f4367f568f22aff90295edb026ab877eb0d61cc0",
@@ -475,6 +580,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 283868,
+    "prTitle": "wait for xterm element vs assuming it's defined",
+    "prMergeCommit": "f4367f568f22aff90295edb026ab877eb0d61cc0",
+    "issue": 283287,
+    "issueTitle": "Cannot read properties of undefined (reading 'querySelector')",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "A lifecycle timing mismatch: the config-change path treats `xterm.raw` as sufficient readiness and calls `_loadAddons`, but `_loadAddons` requires a mounted DOM element (`xterm.element`) and screen no",
     "traceUrl": "",
     "tags": [
       "error-telemetry"
