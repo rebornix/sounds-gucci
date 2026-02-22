@@ -103,6 +103,27 @@
     ]
   },
   {
+    "pr": 281397,
+    "prTitle": "Fix for agent session progress",
+    "prMergeCommit": "431aebe28b612f70c046d12bdb41fe3dd307ebd5",
+    "issue": 281149,
+    "issueTitle": "Local Session shows no empty description/progress when the chat widget is streaming in text",
+    "issueAuthor": "rebornix",
+    "repo": "microsoft/vscode",
+    "score": 3,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "There are two coupled issues:",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 281589,
     "prTitle": "Various fixes for session progress",
     "prMergeCommit": "87466737669c9645a336f7647d4b46ecf7d84bf7",
@@ -139,6 +160,27 @@
     "timestamp": "",
     "fileCount": 3,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 281589,
+    "prTitle": "Various fixes for session progress",
+    "prMergeCommit": "87466737669c9645a336f7647d4b46ecf7d84bf7",
+    "issue": 275332,
+    "issueTitle": "Agent sessions single view: standardize the session item entries",
+    "issueAuthor": "osortega",
+    "repo": "microsoft/vscode",
+    "score": 2,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 3,
+    "proposalSummary": "The rendering model in `agentSessionsViewer.ts` treats edit stats (`changes`) as a separate details action and **suppresses description rendering** when changes are present:",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -187,6 +229,27 @@
     ]
   },
   {
+    "pr": 281673,
+    "prTitle": "Fix edge case for in progress session",
+    "prMergeCommit": "6801a977175147578333faaffeab6a95af8c43b1",
+    "issue": 281642,
+    "issueTitle": "Background agent session progress changes to worktree name when it's \\\"working...\\\"",
+    "issueAuthor": "rebornix",
+    "repo": "microsoft/vscode",
+    "score": 2,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 5,
+    "proposalSummary": "`ChatSessionsService.getSessionDescription` in `chatSessions.contribution.ts` uses `toolInvocation.generatedTitle` as top priority for in-progress tool invocation description. For agent/worktree tools",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 282092,
     "prTitle": "Fix for cloud multi diff stats",
     "prMergeCommit": "5fbb91b1657478e7429c3e67554c23fee865e121",
@@ -223,6 +286,27 @@
     "timestamp": "",
     "fileCount": 2,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 282092,
+    "prTitle": "Fix for cloud multi diff stats",
+    "prMergeCommit": "5fbb91b1657478e7429c3e67554c23fee865e121",
+    "issue": 281924,
+    "issueTitle": "Chat agent: cloud session does not show changes",
+    "issueAuthor": "bpasero",
+    "repo": "microsoft/vscode",
+    "score": 3,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "`IAgentSession.changes` rendering expects canonical fields:",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -286,6 +370,27 @@
     "timestamp": "",
     "fileCount": 0,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 282245,
+    "prTitle": "",
+    "prMergeCommit": "",
+    "issue": 0,
+    "issueTitle": "",
+    "issueAuthor": "",
+    "repo": "microsoft/vscode",
+    "score": 2,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 0,
+    "proposalSummary": "In `src/vs/workbench/contrib/chat/browser/agentSessions/localAgentSessionsProvider.ts`, `toChatSessionItem()` assigns:",
     "traceUrl": "",
     "tags": [
       "sessions"
