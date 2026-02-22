@@ -48,6 +48,12 @@ jobs:
           # Fix permissions
           chmod -R 755 docs/data
           
+          # Cache-bust local CSS/JS references with commit hash
+          HASH=$(git rev-parse --short HEAD)
+          sed -i "s|css/style.css|css/style.css?v=${HASH}|g" docs/index.html docs/analysis.html
+          sed -i "s|js/dashboard.js|js/dashboard.js?v=${HASH}|g" docs/index.html
+          sed -i "s|js/analysis.js|js/analysis.js?v=${HASH}|g" docs/analysis.html
+          
           echo "Listing destination data with sizes:"
           ls -lR docs/data
           

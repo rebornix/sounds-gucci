@@ -12,7 +12,43 @@
         <div class="page-header">
             <h1>sounds gucci</h1>
             <p class="description">General Understanding of Code Change Insights</p>
+            <p class="subtitle">Benchmarking AI bug diagnosis on <a href="https://github.com/microsoft/vscode">VS Code</a> — a large, fast-moving codebase where agents must navigate active development history and cross-repo dependencies. The goal isn't to find the optimal harness + model combination, but to understand how well current models reason about real-world bugs using standard tool-use capabilities.</p>
         </div>
+
+        <section id="experiment-picker" class="experiment-picker">
+            <label>
+                Experiment:
+                <select id="experiment-filter">
+                    <option value="all">All Experiments</option>
+                </select>
+            </label>
+            <label>
+                Tag:
+                <select id="tag-filter">
+                    <option value="all">All Tags</option>
+                </select>
+            </label>
+            <label>
+                Score:
+                <select id="score-filter">
+                    <option value="all">All</option>
+                    <option value="5">Excellent (5)</option>
+                    <option value="4">Good (4)</option>
+                    <option value="3">Partial (3)</option>
+                    <option value="2">Weak (2)</option>
+                    <option value="1">Misaligned (1)</option>
+                </select>
+            </label>
+            <label>
+                Sort:
+                <select id="sort-by">
+                    <option value="pr-desc">PR # (Recent)</option>
+                    <option value="pr-asc">PR # (Oldest)</option>
+                    <option value="score-desc">Score (High → Low)</option>
+                    <option value="score-asc">Score (Low → High)</option>
+                </select>
+            </label>
+        </section>
 
         <section id="stats" class="stats-grid">
             <div class="stat-card">
@@ -44,29 +80,6 @@
             </div>
         </section>
 
-        <section id="filters" class="filters">
-            <label>
-                Filter by score:
-                <select id="score-filter">
-                    <option value="all">All</option>
-                    <option value="5">Excellent (5)</option>
-                    <option value="4">Good (4)</option>
-                    <option value="3">Partial (3)</option>
-                    <option value="2">Weak (2)</option>
-                    <option value="1">Misaligned (1)</option>
-                </select>
-            </label>
-            <label>
-                Sort by:
-                <select id="sort-by">
-                    <option value="score-desc">Score (High → Low)</option>
-                    <option value="score-asc">Score (Low → High)</option>
-                    <option value="pr-desc">PR # (Recent)</option>
-                    <option value="pr-asc">PR # (Oldest)</option>
-                </select>
-            </label>
-        </section>
-
         <section id="results">
             <h2>Analysis Results</h2>
             <table id="results-table">
@@ -77,6 +90,7 @@
                         <th>Title</th>
                         <th>Score</th>
                         <th>Model</th>
+
                     </tr>
                 </thead>
                 <tbody id="results-body">

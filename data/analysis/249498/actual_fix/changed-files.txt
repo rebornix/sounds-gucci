@@ -1,0 +1,6 @@
+src/vs/workbench/contrib/mcp/browser/mcpAddContextContribution.ts
+src/vs/workbench/contrib/mcp/browser/mcpResourceQuickAccess.ts
+src/vs/workbench/contrib/mcp/common/mcpServer.ts
+src/vs/workbench/contrib/mcp/common/mcpTypes.ts
+src/vs/workbench/contrib/mcp/common/uriTemplate.ts
+src/vs/workbench/contrib/mcp/test/common/uriTemplate.test.ts

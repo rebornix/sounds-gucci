@@ -1,0 +1,15 @@
+{
+  "pr": 283630,
+  "prTitle": "fix: error in epoch bounds in edit timeline",
+  "mergeCommit": "059761d01f46380f93c4b0be42f4422285cdac59",
+  "parentCommit": "a8f71903a6e3dd3f63831d3e1501c3107540ff11",
+  "fileCount": 1,
+  "issue": 283304,
+  "issueTitle": "Cannot read properties of undefined (reading 'requestId')",
+  "issueAuthor": "app/vs-code-engineering",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

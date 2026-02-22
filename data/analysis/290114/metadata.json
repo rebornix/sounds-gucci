@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 290114,
-    "title": "Agents control: every chat interaction shows 1-progress, 1-unread (fix #289831)",
-    "mergeCommit": "87e6108688849dc201fcd2b50e4e36cd62a6a53e",
-    "parentCommit": "c261eff94d2d4e5c0003dba5950af945f0928d76",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 289831,
-    "title": "Agents control: every chat interaction shows 1 unread",
-    "author": "bpasero",
-    "commentCount": 1
-  },
+  "pr": 290114,
+  "prTitle": "Agents control: every chat interaction shows 1-progress, 1-unread (fix #289831)",
+  "mergeCommit": "87e6108688849dc201fcd2b50e4e36cd62a6a53e",
+  "parentCommit": "c261eff94d2d4e5c0003dba5950af945f0928d76",
+  "fileCount": 1,
+  "issue": 289831,
+  "issueTitle": "Agents control: every chat interaction shows 1 unread",
+  "issueAuthor": "bpasero",
+  "commentCount": 1,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/290114",
-  "generatedAt": "2026-02-07T18:41:42Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

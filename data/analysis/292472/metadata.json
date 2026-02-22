@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 292472,
-    "title": "Agent session list collapsed automatically without interaction (fix #291701)",
-    "mergeCommit": "8d864503e1d96ad37e2c4b001b330a75b03261cb",
-    "parentCommit": "df57568c748fb93a4c588e9a5012654107afa0c7",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 291701,
-    "title": "Agent session list collapsed automatically without interaction",
-    "author": "connor4312",
-    "commentCount": 5
-  },
+  "pr": 292472,
+  "prTitle": "Agent session list collapsed automatically without interaction (fix #291701)",
+  "mergeCommit": "8d864503e1d96ad37e2c4b001b330a75b03261cb",
+  "parentCommit": "df57568c748fb93a4c588e9a5012654107afa0c7",
+  "fileCount": 1,
+  "issue": 291701,
+  "issueTitle": "Agent session list collapsed automatically without interaction",
+  "issueAuthor": "connor4312",
+  "commentCount": 5,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/292472",
-  "generatedAt": "2026-02-07T09:03:31Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

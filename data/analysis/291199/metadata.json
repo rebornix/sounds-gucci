@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 291199,
-    "title": "Running chat not marked as 'in-progress' if currently viewed (fix #290642)",
-    "mergeCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
-    "parentCommit": "ba4c38776a45cd3e2429a44a64fd770b0ee95af8",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 290642,
-    "title": "Running chat not marked as 'in-progress' if currently viewed",
-    "author": "joshspicer",
-    "commentCount": 5
-  },
+  "pr": 291199,
+  "prTitle": "Running chat not marked as 'in-progress' if currently viewed (fix #290642)",
+  "mergeCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
+  "parentCommit": "ba4c38776a45cd3e2429a44a64fd770b0ee95af8",
+  "fileCount": 1,
+  "issue": 290642,
+  "issueTitle": "Running chat not marked as 'in-progress' if currently viewed",
+  "issueAuthor": "joshspicer",
+  "commentCount": 5,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/291199",
-  "generatedAt": "2026-02-07T18:38:14Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

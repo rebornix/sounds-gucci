@@ -1,0 +1,15 @@
+{
+  "pr": 255490,
+  "prTitle": "add layover to new cells correctly and dispose of listeners as cells are removed",
+  "mergeCommit": "ce37a385e43c4cfa00f150801e0575f32db40bbc",
+  "parentCommit": "d9d3f3c6ec078295746c5f3b7ac21f608af15552",
+  "fileCount": 1,
+  "issue": 251601,
+  "issueTitle": "ListError [NotebookCellList] Invalid index 50",
+  "issueAuthor": "app/vs-code-engineering",
+  "commentCount": 1,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

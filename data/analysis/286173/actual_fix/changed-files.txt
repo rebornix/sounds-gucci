@@ -1,0 +1,1 @@
+src/vs/workbench/contrib/terminalContrib/suggest/browser/terminalSuggestAddon.ts

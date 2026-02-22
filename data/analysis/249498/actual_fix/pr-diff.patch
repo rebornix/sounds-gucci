@@ -1,0 +1,1268 @@
+diff --git a/src/vs/workbench/contrib/mcp/browser/mcpAddContextContribution.ts b/src/vs/workbench/contrib/mcp/browser/mcpAddContextContribution.ts
+index 5c85a438cc3dd..a55ccfe7de821 100644
+--- a/src/vs/workbench/contrib/mcp/browser/mcpAddContextContribution.ts
++++ b/src/vs/workbench/contrib/mcp/browser/mcpAddContextContribution.ts
+@@ -5,6 +5,7 @@
+ 
+ import { CancellationToken } from '../../../../base/common/cancellation.js';
+ import { Codicon } from '../../../../base/common/codicons.js';
++import { CancellationError } from '../../../../base/common/errors.js';
+ import { Disposable, MutableDisposable } from '../../../../base/common/lifecycle.js';
+ import { autorun, observableValue } from '../../../../base/common/observable.js';
+ import { localize } from '../../../../nls.js';
+@@ -59,7 +60,13 @@ export class McpAddContextContribution extends Disposable implements IWorkbenchC
+ 				for (const resource of resources) {
+ 					picks.push({
+ 						...McpResourcePickHelper.item(resource),
+-						asAttachment: () => this._helper.toAttachment(resource),
++						asAttachment: () => this._helper.toAttachment(resource).then(r => {
++							if (!r) {
++								throw new CancellationError();
++							} else {
++								return r;
++							}
++						}),
+ 					});
+ 				}
+ 			}
+diff --git a/src/vs/workbench/contrib/mcp/browser/mcpResourceQuickAccess.ts b/src/vs/workbench/contrib/mcp/browser/mcpResourceQuickAccess.ts
+index 77eb11dda1e36..e95631fabf8c6 100644
+--- a/src/vs/workbench/contrib/mcp/browser/mcpResourceQuickAccess.ts
++++ b/src/vs/workbench/contrib/mcp/browser/mcpResourceQuickAccess.ts
+@@ -3,23 +3,26 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+ 
++import { RunOnceScheduler } from '../../../../base/common/async.js';
+ import { CancellationToken, CancellationTokenSource } from '../../../../base/common/cancellation.js';
+ import { Codicon } from '../../../../base/common/codicons.js';
+ import { DisposableStore, IDisposable, toDisposable } from '../../../../base/common/lifecycle.js';
+ import { autorun, derived } from '../../../../base/common/observable.js';
+ import { ThemeIcon } from '../../../../base/common/themables.js';
+ import { URI } from '../../../../base/common/uri.js';
++import { generateUuid } from '../../../../base/common/uuid.js';
+ import { localize } from '../../../../nls.js';
+ import { IDialogService } from '../../../../platform/dialogs/common/dialogs.js';
+ import { ByteSize, IFileService } from '../../../../platform/files/common/files.js';
+ import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
+ import { DefaultQuickAccessFilterValue, IQuickAccessProvider, IQuickAccessProviderRunOptions } from '../../../../platform/quickinput/common/quickAccess.js';
+-import { IQuickPick, IQuickPickItem, IQuickPickSeparator } from '../../../../platform/quickinput/common/quickInput.js';
++import { IQuickInputService, IQuickPick, IQuickPickItem, IQuickPickSeparator } from '../../../../platform/quickinput/common/quickInput.js';
+ import { IEditorService } from '../../../services/editor/common/editorService.js';
+ import { IChatWidgetService } from '../../chat/browser/chat.js';
+ import { resolveImageEditorAttachContext } from '../../chat/browser/chatAttachmentResolve.js';
+ import { IChatRequestVariableEntry } from '../../chat/common/chatModel.js';
+-import { IMcpResource, IMcpServer, IMcpService, McpCapability } from '../common/mcpTypes.js';
++import { IMcpResource, IMcpResourceTemplate, IMcpServer, IMcpService, isMcpResourceTemplate, McpCapability, McpConnectionState } from '../common/mcpTypes.js';
++import { IUriTemplateVariable } from '../common/uriTemplate.js';
+ 
+ export class McpResourcePickHelper {
+ 	public static sep(server: IMcpServer): IQuickPickSeparator {
+@@ -30,7 +33,16 @@ export class McpResourcePickHelper {
+ 		};
+ 	}
+ 
+-	public static item(resource: IMcpResource): IQuickPickItem {
++	public static item(resource: IMcpResource | IMcpResourceTemplate): IQuickPickItem {
++		if (isMcpResourceTemplate(resource)) {
++			return {
++				id: resource.template.template,
++				label: resource.name,
++				description: resource.description,
++				detail: localize('mcp.resource.template', 'Resource template: {0}', resource.template.template),
++			};
++		}
++
+ 		return {
+ 			id: resource.uri.toString(),
+ 			label: resource.name,
+@@ -58,9 +70,26 @@ export class McpResourcePickHelper {
+ 		@IMcpService private readonly _mcpService: IMcpService,
+ 		@IFileService private readonly _fileService: IFileService,
+ 		@IDialogService private readonly _dialogService: IDialogService,
++		@IQuickInputService private readonly _quickInputService: IQuickInputService,
+ 	) { }
+ 
+-	public async toAttachment(resource: IMcpResource): Promise<IChatRequestVariableEntry> {
++	public async toAttachment(resource: IMcpResource | IMcpResourceTemplate): Promise<IChatRequestVariableEntry | undefined> {
++		if (isMcpResourceTemplate(resource)) {
++			return this._resourceTemplateToAttachment(resource);
++		} else {
++			return this._resourceToAttachment(resource);
++		}
++	}
++
++	public async toURI(resource: IMcpResource | IMcpResourceTemplate): Promise<URI | undefined> {
++		if (isMcpResourceTemplate(resource)) {
++			return this._resourceTemplateToURI(resource);
++		} else {
++			return resource.uri;
++		}
++	}
++
++	private async _resourceToAttachment(resource: { uri: URI; name: string; mimeType?: string }): Promise<IChatRequestVariableEntry | undefined> {
+ 		const asImage = await resolveImageEditorAttachContext(this._fileService, this._dialogService, resource.uri, undefined, resource.mimeType);
+ 		if (asImage) {
+ 			return asImage;
+@@ -74,30 +103,162 @@ export class McpResourcePickHelper {
+ 		};
+ 	}
+ 
+-	public getPicks(onChange: (value: Map<IMcpServer, IMcpResource[]>) => void, token?: CancellationToken) {
++	private async _resourceTemplateToAttachment(rt: IMcpResourceTemplate) {
++		const uri = await this._resourceTemplateToURI(rt);
++		return uri && this._resourceToAttachment({
++			uri,
++			name: rt.name,
++			mimeType: rt.mimeType,
++		});
++	}
++
++	private async _resourceTemplateToURI(rt: IMcpResourceTemplate) {
++		const todo = rt.template.components.flatMap(c => typeof c === 'object' ? c.variables : []);
++
++		const quickInput = this._quickInputService.createQuickPick();
++		const cts = new CancellationTokenSource();
++
++		const vars: Record<string, string | string[]> = {};
++		for (const variable of todo) {
++			vars[variable.name] = `$${variable.name.toUpperCase()}`;
++		}
++
++		quickInput.totalSteps = todo.length;
++		quickInput.ignoreFocusOut = true;
++
++		const initialCompletions = todo.map(variable => rt.complete(variable.name, '', cts.token));
++
++		try {
++			for (let i = 0; i < todo.length; i++) {
++				const variable = todo[i];
++				const resolved = await this._promptForTemplateValue(quickInput, variable, initialCompletions[i], rt.template.resolve(vars), rt);
++				if (resolved === undefined) {
++					return undefined;
++				}
++				vars[todo[i].name] = variable.repeatable ? resolved.split('/') : resolved;
++			}
++			return rt.resolveURI(vars);
++		} finally {
++			cts.dispose(true);
++			quickInput.dispose();
++		}
++	}
++
++	private _promptForTemplateValue(input: IQuickPick<IQuickPickItem>, variable: IUriTemplateVariable, initialCompletions: Promise<string[]>, uriSoFar: string, rt: IMcpResourceTemplate): Promise<string | undefined> {
++		const store = new DisposableStore();
++		const completions = new Map<string, Promise<string[]>>([['', initialCompletions]]);
++
++		let placeholder = localize('mcp.resource.template.placeholder', "Value for ${0} in {1}", variable.name.toUpperCase(), uriSoFar.replaceAll('%24', '$'));
++		if (variable.optional) {
++			placeholder += ' (' + localize('mcp.resource.template.optional', "Optional") + ')';
++		}
++
++		input.placeholder = placeholder;
++		input.value = '';
++		input.show();
++
++		const currentID = generateUuid();
++		const setItems = (value: string, completed: string[] = []) => {
++			const items = completed.filter(c => c !== value).map(c => ({ id: c, label: c }));
++			if (value) {
++				items.unshift({ id: currentID, label: value });
++			} else if (variable.optional) {
++				items.unshift({ id: currentID, label: localize('mcp.resource.template.empty', "<Empty>") });
++			}
++
++			input.items = items;
++		};
++
++		let changeCancellation = store.add(new CancellationTokenSource());
++		const getCompletionItems = () => {
++			const inputValue = input.value;
++			let promise = completions.get(inputValue);
++			if (!promise) {
++				promise = rt.complete(variable.name, inputValue, changeCancellation.token);
++				completions.set(inputValue, promise);
++			}
++
++			promise.then(values => {
++				if (!changeCancellation.token.isCancellationRequested) {
++					setItems(inputValue, values);
++				}
++			}).catch(() => {
++				completions.delete(inputValue);
++			}).finally(() => {
++				if (!changeCancellation.token.isCancellationRequested) {
++					input.busy = false;
++				}
++			});
++		};
++
++		const getCompletionItemsScheduler = store.add(new RunOnceScheduler(getCompletionItems, 300));
++
++		return new Promise(resolve => {
++			store.add(input.onDidHide(() => resolve(undefined)));
++			store.add(input.onDidAccept(() => {
++				const item = input.selectedItems[0];
++				if (item.id === currentID) {
++					resolve(input.value);
++				} else {
++					resolve(item.label);
++				}
++			}));
++			store.add(input.onDidChangeValue(value => {
++				input.busy = true;
++				changeCancellation.dispose(true);
++				store.delete(changeCancellation);
++				changeCancellation = store.add(new CancellationTokenSource());
++				getCompletionItemsScheduler.cancel();
++				setItems(value);
++
++				if (completions.has(input.value)) {
++					getCompletionItems();
++				} else {
++					getCompletionItemsScheduler.schedule();
++				}
++			}));
++
++			getCompletionItems();
++		});
++	}
++
++	public getPicks(onChange: (value: Map<IMcpServer, (IMcpResourceTemplate | IMcpResource)[]>) => void, token?: CancellationToken) {
+ 		const cts = new CancellationTokenSource(token);
+ 		const store = new DisposableStore();
+ 		store.add(toDisposable(() => cts.dispose(true)));
+ 
+-		const servers = new Map<IMcpServer, IMcpResource[]>();
+-		const addServerResources = async (server: IMcpServer, writeInto: IMcpResource[]) => {
+-			for await (const page of server.resources(cts.token)) {
+-				for (const resource of page) {
+-					writeInto.push(resource);
+-				}
+-				onChange(servers);
+-			}
++		const servers = new Map<IMcpServer, (IMcpResourceTemplate | IMcpResource)[]>();
++		const addServerResources = async (server: IMcpServer, writeInto: (IMcpResourceTemplate | IMcpResource)[]) => {
++			return Promise.all([
++				(async () => {
++					for await (const page of server.resources(cts.token)) {
++						for (const resource of page) {
++							writeInto.push(resource);
++						}
++						onChange(servers);
++					}
++				})(),
++				server.resourceTemplates(cts.token).then(templates => {
++					writeInto.unshift(...templates);
++				}).catch(() => {
++					// no templat support, not rare
++				}),
++			]);
+ 		};
+ 
+ 		// Enumerate servers and start servers that need to be started to get capabilities
+ 		return Promise.all(this._mcpService.servers.get().map(async server => {
+ 			let cap = server.capabilities.get();
+-			const arr: IMcpResource[] = [];
++			const arr: (IMcpResourceTemplate | IMcpResource)[] = [];
+ 			servers.set(server, arr); // always add it to retain order
+ 
+ 			if (cap === undefined) {
+ 				cap = await new Promise(resolve => {
+-					server.start();
++					server.start().then(state => {
++						if (state.state === McpConnectionState.Kind.Error || state.state === McpConnectionState.Kind.Stopped) {
++							resolve(undefined);
++						}
++					});
+ 					store.add(cts.token.onCancellationRequested(() => resolve(undefined)));
+ 					store.add(autorun(reader => {
+ 						const cap2 = server.capabilities.read(reader);
+@@ -132,7 +293,7 @@ export class McpResourceQuickAccess implements IQuickAccessProvider {
+ 		picker.canAcceptInBackground = true;
+ 		picker.busy = true;
+ 
+-		type ResourceQuickPickItem = IQuickPickItem & { resource: IMcpResource };
++		type ResourceQuickPickItem = IQuickPickItem & { resource: IMcpResource | IMcpResourceTemplate };
+ 
+ 		const chatWidget = this._chatWidgetService.lastFocusedWidget;
+ 		const attachButton = localize('mcp.quickaccess.attach', "Attach to chat");
+@@ -160,13 +321,15 @@ export class McpResourceQuickAccess implements IQuickAccessProvider {
+ 			if (event.button.tooltip === attachButton && chatWidget) {
+ 				picker.busy = true;
+ 				helper.toAttachment((event.item as ResourceQuickPickItem).resource).then(a => {
+-					chatWidget.attachmentModel.addContext(a);
++					if (a) {
++						chatWidget.attachmentModel.addContext(a);
++					}
+ 					picker.hide();
+ 				});
+ 			}
+ 		}));
+ 
+-		store.add(picker.onDidAccept(event => {
++		store.add(picker.onDidAccept(async event => {
+ 			if (!event.inBackground) {
+ 				picker.hide(); // hide picker unless we accept in background
+ 			}
+@@ -175,7 +338,10 @@ export class McpResourceQuickAccess implements IQuickAccessProvider {
+ 				runOptions.handleAccept?.(picker.activeItems[0], event.inBackground);
+ 			} else {
+ 				const [item] = picker.selectedItems;
+-				this._editorService.openEditor({ resource: URI.parse(item.id!), options: { preserveFocus: event.inBackground } });
++				const uri = await helper.toURI((item as ResourceQuickPickItem).resource);
++				if (uri) {
++					this._editorService.openEditor({ resource: uri, options: { preserveFocus: event.inBackground } });
++				}
+ 			}
+ 		}));
+ 
+diff --git a/src/vs/workbench/contrib/mcp/common/mcpServer.ts b/src/vs/workbench/contrib/mcp/common/mcpServer.ts
+index 23d230c5700f9..b2b639784e3b4 100644
+--- a/src/vs/workbench/contrib/mcp/common/mcpServer.ts
++++ b/src/vs/workbench/contrib/mcp/common/mcpServer.ts
+@@ -29,8 +29,9 @@ import { mcpActivationEvent } from './mcpConfiguration.js';
+ import { McpDevModeServerAttache } from './mcpDevMode.js';
+ import { IMcpRegistry } from './mcpRegistryTypes.js';
+ import { McpServerRequestHandler } from './mcpServerRequestHandler.js';
+-import { extensionMcpCollectionPrefix, IMcpPrompt, IMcpPromptMessage, IMcpResource, IMcpServer, IMcpServerConnection, IMcpServerStartOpts, IMcpTool, McpCollectionDefinition, McpCollectionReference, McpConnectionFailedError, McpConnectionState, McpDefinitionReference, McpResourceURI, McpServerDefinition, McpServerCacheState, McpServerTransportType, McpCapability } from './mcpTypes.js';
++import { extensionMcpCollectionPrefix, IMcpPrompt, IMcpPromptMessage, IMcpResource, IMcpServer, IMcpServerConnection, IMcpServerStartOpts, IMcpTool, McpCollectionDefinition, McpCollectionReference, McpConnectionFailedError, McpConnectionState, McpDefinitionReference, McpResourceURI, McpServerDefinition, McpServerCacheState, McpServerTransportType, McpCapability, IMcpResourceTemplate } from './mcpTypes.js';
+ import { MCP } from './modelContextProtocol.js';
++import { UriTemplate } from './uriTemplate.js';
+ 
+ type ServerBootData = {
+ 	supportsLogging: boolean;
+@@ -398,6 +399,13 @@ export class McpServer extends Disposable implements IMcpServer {
+ 		}, () => cts.dispose(true));
+ 	}
+ 
++	public resourceTemplates(token?: CancellationToken): Promise<IMcpResourceTemplate[]> {
++		return McpServer.callOn(this, async (handler) => {
++			const templates = await handler.listResourceTemplates({}, token);
++			return templates.map(t => new McpResourceTemplate(this, t));
++		}, token);
++	}
++
+ 	public start({ isFromInteraction, debug }: IMcpServerStartOpts = {}): Promise<McpConnectionState> {
+ 		return this._connectionSequencer.queue(async () => {
+ 			const activationEvent = mcpActivationEvent(this.collection.id.slice(extensionMcpCollectionPrefix.length));
+@@ -651,6 +659,14 @@ class McpPrompt implements IMcpPrompt {
+ 		const result = await McpServer.callOn(this._server, h => h.getPrompt({ name: this._definition.name, arguments: args }, token), token);
+ 		return result.messages;
+ 	}
++
++	async complete(argument: string, prefix: string, token?: CancellationToken): Promise<string[]> {
++		const result = await McpServer.callOn(this._server, h => h.complete({
++			ref: { type: 'ref/prompt', name: this._definition.name },
++			argument: { name: argument, value: prefix, }
++		}, token), token);
++		return result.completion.values;
++	}
+ }
+ 
+ function encodeCapabilities(cap: MCP.ServerCapabilities): McpCapability {
+@@ -787,3 +803,33 @@ class McpResource implements IMcpResource {
+ 		this.sizeInBytes = original.size;
+ 	}
+ }
++
++class McpResourceTemplate implements IMcpResourceTemplate {
++	readonly name: string;
++	readonly description?: string;
++	readonly mimeType?: string;
++	readonly template: UriTemplate;
++
++	constructor(
++		private readonly _server: McpServer,
++		private readonly _definition: MCP.ResourceTemplate,
++	) {
++		this.name = _definition.name;
++		this.description = _definition.description;
++		this.mimeType = _definition.mimeType;
++		this.template = UriTemplate.parse(_definition.uriTemplate);
++	}
++
++	public resolveURI(vars: Record<string, unknown>): URI {
++		const serverUri = this.template.resolve(vars);
++		return McpResourceURI.fromServer(this._server.definition, serverUri);
++	}
++
++	async complete(templatePart: string, prefix: string, token?: CancellationToken): Promise<string[]> {
++		const result = await McpServer.callOn(this._server, h => h.complete({
++			ref: { type: 'ref/resource', uri: this._definition.uriTemplate },
++			argument: { name: templatePart, value: prefix, }
++		}, token), token);
++		return result.completion.values;
++	}
++}
+diff --git a/src/vs/workbench/contrib/mcp/common/mcpTypes.ts b/src/vs/workbench/contrib/mcp/common/mcpTypes.ts
+index 32686df5b3612..20e04864cac1e 100644
+--- a/src/vs/workbench/contrib/mcp/common/mcpTypes.ts
++++ b/src/vs/workbench/contrib/mcp/common/mcpTypes.ts
+@@ -28,6 +28,7 @@ import { IWorkspaceFolderData } from '../../../../platform/workspace/common/work
+ import { ToolProgress } from '../../chat/common/languageModelToolsService.js';
+ import { McpServerRequestHandler } from './mcpServerRequestHandler.js';
+ import { MCP } from './modelContextProtocol.js';
++import { UriTemplate } from './uriTemplate.js';
+ 
+ export const extensionMcpCollectionPrefix = 'ext.';
+ 
+@@ -261,6 +262,11 @@ export interface IMcpServer extends IDisposable {
+ 	 * Lists all resources on the server.
+ 	 */
+ 	resources(token?: CancellationToken): AsyncIterable<IMcpResource[]>;
++
++	/**
++	 * List resource templates on the server.
++	 */
++	resourceTemplates(token?: CancellationToken): Promise<IMcpResourceTemplate[]>;
+ }
+ 
+ /**
+@@ -278,6 +284,26 @@ export interface IMcpResource {
+ 	readonly sizeInBytes?: number;
+ }
+ 
++export interface IMcpResourceTemplate {
++	readonly name: string;
++	readonly description?: string;
++	readonly mimeType?: string;
++	readonly template: UriTemplate;
++
++	/** Gets string completions for the given template part. */
++	complete(templatePart: string, prefix: string, token: CancellationToken): Promise<string[]>;
++
++	/** Gets the resolved URI from template parts. */
++	resolveURI(vars: Record<string, unknown>): URI;
++}
++
++export const isMcpResourceTemplate = (obj: IMcpResource | IMcpResourceTemplate): obj is IMcpResourceTemplate => {
++	return (obj as IMcpResourceTemplate).template !== undefined;
++};
++export const isMcpResource = (obj: IMcpResource | IMcpResourceTemplate): obj is IMcpResource => {
++	return (obj as IMcpResource).mcpUri !== undefined;
++};
++
+ export const enum McpServerCacheState {
+ 	/** Tools have not been read before */
+ 	Unknown,
+@@ -299,6 +325,9 @@ export interface IMcpPrompt {
+ 	readonly description?: string;
+ 	readonly arguments: readonly MCP.PromptArgument[];
+ 
++	/** Gets string completions for the given prompt part. */
++	complete(argument: string, prefix: string, token: CancellationToken): Promise<string[]>;
++
+ 	resolve(args: Record<string, string>, token?: CancellationToken): Promise<IMcpPromptMessage[]>;
+ }
+ 
+diff --git a/src/vs/workbench/contrib/mcp/common/uriTemplate.ts b/src/vs/workbench/contrib/mcp/common/uriTemplate.ts
+new file mode 100644
+index 0000000000000..601267b273a24
+--- /dev/null
++++ b/src/vs/workbench/contrib/mcp/common/uriTemplate.ts
+@@ -0,0 +1,305 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright (c) Microsoft Corporation. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++export interface IUriTemplateVariable {
++	readonly explodable: boolean;
++	readonly name: string;
++	readonly optional: boolean;
++	readonly prefixLength?: number;
++	readonly repeatable: boolean;
++}
++
++interface IUriTemplateComponent {
++	readonly expression: string;
++	readonly operator: string;
++	readonly variables: readonly IUriTemplateVariable[];
++}
++
++/**
++ * Represents an RFC 6570 URI Template.
++ */
++export class UriTemplate {
++	/**
++	 * The parsed template components (expressions).
++	 */
++	public readonly components: ReadonlyArray<IUriTemplateComponent | string>;
++
++	private constructor(
++		public readonly template: string,
++		components: ReadonlyArray<IUriTemplateComponent | string>
++	) {
++		this.template = template;
++		this.components = components;
++	}
++
++	/**
++	 * Parses a URI template string into a UriTemplate instance.
++	 */
++	public static parse(template: string): UriTemplate {
++		const components: Array<IUriTemplateComponent | string> = [];
++		const regex = /\{([^{}]+)\}/g;
++		let match: RegExpExecArray | null;
++		let lastPos = 0;
++		while ((match = regex.exec(template))) {
++			const [expression, inner] = match;
++			components.push(template.slice(lastPos, match.index));
++			lastPos = match.index + expression.length;
++
++			// Handle escaped braces: treat '{{' and '}}' as literals, not expressions
++			if (template[match.index - 1] === '{' || template[lastPos] === '}') {
++				components.push(inner);
++				continue;
++			}
++
++			let operator = '';
++			let rest = inner;
++			if (rest.length > 0 && UriTemplate._isOperator(rest[0])) {
++				operator = rest[0];
++				rest = rest.slice(1);
++			}
++			const variables = rest.split(',').map((v): IUriTemplateVariable => {
++				let name = v;
++				let explodable = false;
++				let repeatable = false;
++				let prefixLength: number | undefined = undefined;
++				let optional = false;
++				if (name.endsWith('*')) {
++					explodable = true;
++					repeatable = true;
++					name = name.slice(0, -1);
++				}
++				const prefixMatch = name.match(/^(.*?):(\d+)$/);
++				if (prefixMatch) {
++					name = prefixMatch[1];
++					prefixLength = parseInt(prefixMatch[2], 10);
++				}
++				if (name.endsWith('?')) {
++					optional = true;
++					name = name.slice(0, -1);
++				}
++				return { explodable, name, optional, prefixLength, repeatable };
++			});
++			components.push({ expression, operator, variables });
++		}
++		components.push(template.slice(lastPos));
++
++		return new UriTemplate(template, components);
++	}
++
++	private static _operators = ['+', '#', '.', '/', ';', '?', '&'] as const;
++	private static _isOperator(ch: string): boolean {
++		return (UriTemplate._operators as readonly string[]).includes(ch);
++	}
++
++	/**
++	 * Resolves the template with the given variables.
++	 */
++	public resolve(variables: Record<string, unknown>): string {
++		let result = '';
++		for (const comp of this.components) {
++			if (typeof comp === 'string') {
++				result += comp;
++			} else {
++				result += this._expand(comp, variables);
++			}
++		}
++		return result;
++	}
++
++	private _expand(comp: IUriTemplateComponent, variables: Record<string, unknown>): string {
++		const op = comp.operator;
++		const varSpecs = comp.variables;
++		if (varSpecs.length === 0) {
++			return comp.expression;
++		}
++		const vals: string[] = [];
++		const isNamed = op === ';' || op === '?' || op === '&';
++		const isReserved = op === '+' || op === '#';
++		const isFragment = op === '#';
++		const isLabel = op === '.';
++		const isPath = op === '/';
++		const isForm = op === '?';
++		const isFormCont = op === '&';
++		const isParam = op === ';';
++
++		let prefix = '';
++		if (op === '+') { prefix = ''; }
++		else if (op === '#') { prefix = '#'; }
++		else if (op === '.') { prefix = '.'; }
++		else if (op === '/') { prefix = ''; }
++		else if (op === ';') { prefix = ';'; }
++		else if (op === '?') { prefix = '?'; }
++		else if (op === '&') { prefix = '&'; }
++
++		for (const v of varSpecs) {
++			const value = variables[v.name];
++			const defined = Object.prototype.hasOwnProperty.call(variables, v.name);
++			if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
++				if (isParam) {
++					if (defined && (value === null || value === undefined)) {
++						vals.push(v.name);
++					}
++					continue;
++				}
++				if (isForm || isFormCont) {
++					if (defined) {
++						vals.push(UriTemplate._formPair(v.name, '', isNamed));
++					}
++					continue;
++				}
++				continue;
++			}
++			if (typeof value === 'object' && !Array.isArray(value)) {
++				if (v.explodable) {
++					const pairs: string[] = [];
++					for (const k in value) {
++						if (Object.prototype.hasOwnProperty.call(value, k)) {
++							const thisVal = String((value as any)[k]);
++							if (isParam) {
++								pairs.push(k + '=' + thisVal);
++							} else if (isForm || isFormCont) {
++								pairs.push(k + '=' + thisVal);
++							} else if (isLabel) {
++								pairs.push(k + '=' + thisVal);
++							} else if (isPath) {
++								pairs.push('/' + k + '=' + UriTemplate._encode(thisVal, isReserved));
++							} else {
++								pairs.push(k + '=' + UriTemplate._encode(thisVal, isReserved));
++							}
++						}
++					}
++					if (isLabel) {
++						vals.push(pairs.join('.'));
++					} else if (isPath) {
++						vals.push(pairs.join(''));
++					} else if (isParam) {
++						vals.push(pairs.join(';'));
++					} else if (isForm || isFormCont) {
++						vals.push(pairs.join('&'));
++					} else {
++						vals.push(pairs.join(','));
++					}
++				} else {
++					// Not explodable: join as k1,v1,k2,v2,... and assign to variable name
++					const pairs: string[] = [];
++					for (const k in value) {
++						if (Object.prototype.hasOwnProperty.call(value, k)) {
++							pairs.push(k);
++							pairs.push(String((value as any)[k]));
++						}
++					}
++					// For label, param, form, join as keys=semi,;,dot,.,comma,, (no encoding of , or ;)
++					const joined = pairs.join(',');
++					if (isLabel) {
++						vals.push(joined);
++					} else if (isParam || isForm || isFormCont) {
++						vals.push(v.name + '=' + joined);
++					} else {
++						vals.push(joined);
++					}
++				}
++				continue;
++			}
++			if (Array.isArray(value)) {
++				if (v.explodable) {
++					if (isLabel) {
++						vals.push(value.join('.'));
++					} else if (isPath) {
++						vals.push(value.map(x => '/' + UriTemplate._encode(x, isReserved)).join(''));
++					} else if (isParam) {
++						vals.push(value.map(x => v.name + '=' + String(x)).join(';'));
++					} else if (isForm || isFormCont) {
++						vals.push(value.map(x => v.name + '=' + String(x)).join('&'));
++					} else {
++						vals.push(value.map(x => UriTemplate._encode(x, isReserved)).join(','));
++					}
++				} else {
++					if (isLabel) {
++						vals.push(value.join(','));
++					} else if (isParam) {
++						vals.push(v.name + '=' + value.join(','));
++					} else if (isForm || isFormCont) {
++						vals.push(v.name + '=' + value.join(','));
++					} else {
++						vals.push(value.map(x => UriTemplate._encode(x, isReserved)).join(','));
++					}
++				}
++				continue;
++			}
++			let str = String(value);
++			if (v.prefixLength !== undefined) {
++				str = str.substring(0, v.prefixLength);
++			}
++			// For simple expansion, encode ! as well (not reserved)
++			// Only + and # are reserved
++			const enc = UriTemplate._encode(str, op === '+' || op === '#');
++			if (isParam) {
++				vals.push(v.name + '=' + enc);
++			} else if (isForm || isFormCont) {
++				vals.push(v.name + '=' + enc);
++			} else if (isLabel) {
++				vals.push(enc);
++			} else if (isPath) {
++				vals.push('/' + enc);
++			} else {
++				vals.push(enc);
++			}
++		}
++
++		let joined = '';
++		if (isLabel) {
++			// Remove trailing dot for missing values
++			const filtered = vals.filter(v => v !== '');
++			joined = filtered.length ? prefix + filtered.join('.') : '';
++		} else if (isPath) {
++			// Remove empty segments for undefined/null
++			const filtered = vals.filter(v => v !== '');
++			joined = filtered.length ? filtered.join('') : '';
++			if (joined && !joined.startsWith('/')) {
++				joined = '/' + joined;
++			}
++		} else if (isParam) {
++			// For param, if value is empty string, just append ;name
++			joined = vals.length ? prefix + vals.map(v => v.replace(/=\s*$/, '')).join(';') : '';
++		} else if (isForm) {
++			joined = vals.length ? prefix + vals.join('&') : '';
++		} else if (isFormCont) {
++			joined = vals.length ? prefix + vals.join('&') : '';
++		} else if (isFragment) {
++			joined = prefix + vals.join(',');
++		} else if (isReserved) {
++			joined = vals.join(',');
++		} else {
++			joined = vals.join(',');
++		}
++		return joined;
++	}
++
++	private static _encode(str: string, reserved: boolean): string {
++		return reserved ? encodeURI(str) : pctEncode(str);
++	}
++
++	private static _formPair(k: string, v: unknown, named: boolean): string {
++		return named ? k + '=' + encodeURIComponent(String(v)) : encodeURIComponent(String(v));
++	}
++}
++
++function pctEncode(str: string): string {
++	let out = '';
++	for (let i = 0; i < str.length; i++) {
++		const chr = str.charCodeAt(i);
++		if (
++			// alphanum ranges:
++			(chr >= 0x30 && chr <= 0x39 || chr >= 0x41 && chr <= 0x5a || chr >= 0x61 && chr <= 0x7a) ||
++			// unreserved characters:
++			(chr === 0x2d || chr === 0x2e || chr === 0x5f || chr === 0x7e)
++		) {
++			out += str[i];
++		} else {
++			out += '%' + chr.toString(16).toUpperCase();
++		}
++	}
++	return out;
++}
+diff --git a/src/vs/workbench/contrib/mcp/test/common/uriTemplate.test.ts b/src/vs/workbench/contrib/mcp/test/common/uriTemplate.test.ts
+new file mode 100644
+index 0000000000000..7433d08f5a5be
+--- /dev/null
++++ b/src/vs/workbench/contrib/mcp/test/common/uriTemplate.test.ts
+@@ -0,0 +1,493 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright (c) Microsoft Corporation. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../../base/test/common/utils.js';
++import { UriTemplate } from '../../common/uriTemplate.js';
++import * as assert from 'assert';
++
++suite('UriTemplate', () => {
++	ensureNoDisposablesAreLeakedInTestSuite();
++
++	/**
++	 * Helper function to test template parsing and component extraction
++	 */
++	function testParsing(template: string, expectedComponents: any[]) {
++		const templ = UriTemplate.parse(template);
++		assert.deepStrictEqual(templ.components.filter(c => typeof c === 'object'), expectedComponents);
++		return templ;
++	}
++
++	/**
++	 * Helper function to test template resolution
++	 */
++	function testResolution(template: string, variables: Record<string, any>, expected: string) {
++		const templ = UriTemplate.parse(template);
++		const result = templ.resolve(variables);
++		assert.strictEqual(result, expected);
++	}
++
++	test('simple replacement', () => {
++		const templ = UriTemplate.parse('http://example.com/{var}');
++		assert.deepStrictEqual(templ.components, ['http://example.com/', {
++			expression: "{var}",
++			operator: '',
++			variables: [{ explodable: false, name: "var", optional: false, prefixLength: undefined, repeatable: false }]
++		}, '']);
++		const result = templ.resolve({ var: 'value' });
++		assert.strictEqual(result, 'http://example.com/value');
++	});
++
++	test('parsing components correctly', () => {
++		// Simple component
++		testParsing('http://example.com/{var}', [{
++			expression: "{var}",
++			operator: '',
++			variables: [{ explodable: false, name: "var", optional: false, prefixLength: undefined, repeatable: false }]
++		}]);
++
++		// Component with operator
++		testParsing('http://example.com/{+path}', [{
++			expression: "{+path}",
++			operator: '+',
++			variables: [{ explodable: false, name: "path", optional: false, prefixLength: undefined, repeatable: false }]
++		}]);
++
++		// Component with multiple variables
++		testParsing('http://example.com/{x,y}', [{
++			expression: "{x,y}",
++			operator: '',
++			variables: [
++				{ explodable: false, name: "x", optional: false, prefixLength: undefined, repeatable: false },
++				{ explodable: false, name: "y", optional: false, prefixLength: undefined, repeatable: false }
++			]
++		}]);
++
++		// Component with value modifiers
++		testParsing('http://example.com/{var:3}', [{
++			expression: "{var:3}",
++			operator: '',
++			variables: [{ explodable: false, name: "var", optional: false, prefixLength: 3, repeatable: false }]
++		}]);
++
++		testParsing('http://example.com/{list*}', [{
++			expression: "{list*}",
++			operator: '',
++			variables: [{ explodable: true, name: "list", optional: false, prefixLength: undefined, repeatable: true }]
++		}]);
++
++		// Multiple components
++		testParsing('http://example.com/{x}/path/{y}', [
++			{
++				expression: "{x}",
++				operator: '',
++				variables: [{ explodable: false, name: "x", optional: false, prefixLength: undefined, repeatable: false }]
++			},
++			{
++				expression: "{y}",
++				operator: '',
++				variables: [{ explodable: false, name: "y", optional: false, prefixLength: undefined, repeatable: false }]
++			}
++		]);
++	});
++
++	test('Level 1 - Simple string expansion', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			var: 'value',
++			hello: 'Hello World!'
++		};
++
++		testResolution('{var}', variables, 'value');
++		testResolution('{hello}', variables, 'Hello%20World%21');
++	});
++
++	test('Level 2 - Reserved expansion', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			var: 'value',
++			hello: 'Hello World!',
++			path: '/foo/bar'
++		};
++
++		testResolution('{+var}', variables, 'value');
++		testResolution('{+hello}', variables, 'Hello%20World!');
++		testResolution('{+path}/here', variables, '/foo/bar/here');
++		testResolution('here?ref={+path}', variables, 'here?ref=/foo/bar');
++	});
++
++	test('Level 2 - Fragment expansion', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			var: 'value',
++			hello: 'Hello World!'
++		};
++
++		testResolution('X{#var}', variables, 'X#value');
++		testResolution('X{#hello}', variables, 'X#Hello%20World!');
++	});
++
++	test('Level 3 - String expansion with multiple variables', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			var: 'value',
++			hello: 'Hello World!',
++			empty: '',
++			path: '/foo/bar',
++			x: '1024',
++			y: '768'
++		};
++
++		testResolution('map?{x,y}', variables, 'map?1024,768');
++		testResolution('{x,hello,y}', variables, '1024,Hello%20World%21,768');
++	});
++
++	test('Level 3 - Reserved expansion with multiple variables', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			var: 'value',
++			hello: 'Hello World!',
++			path: '/foo/bar',
++			x: '1024',
++			y: '768'
++		};
++
++		testResolution('{+x,hello,y}', variables, '1024,Hello%20World!,768');
++		testResolution('{+path,x}/here', variables, '/foo/bar,1024/here');
++	});
++
++	test('Level 3 - Fragment expansion with multiple variables', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			var: 'value',
++			hello: 'Hello World!',
++			path: '/foo/bar',
++			x: '1024',
++			y: '768'
++		};
++
++		testResolution('{#x,hello,y}', variables, '#1024,Hello%20World!,768');
++		testResolution('{#path,x}/here', variables, '#/foo/bar,1024/here');
++	});
++
++	test('Level 3 - Label expansion with dot-prefix', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			var: 'value',
++			x: '1024',
++			y: '768'
++		};
++
++		testResolution('X{.var}', variables, 'X.value');
++		testResolution('X{.x,y}', variables, 'X.1024.768');
++	});
++
++	test('Level 3 - Path segments expansion', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			var: 'value',
++			x: '1024'
++		};
++
++		testResolution('{/var}', variables, '/value');
++		testResolution('{/var,x}/here', variables, '/value/1024/here');
++	});
++
++	test('Level 3 - Path-style parameter expansion', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			x: '1024',
++			y: '768',
++			empty: ''
++		};
++
++		testResolution('{;x,y}', variables, ';x=1024;y=768');
++		testResolution('{;x,y,empty}', variables, ';x=1024;y=768;empty');
++	});
++
++	test('Level 3 - Form-style query expansion', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			x: '1024',
++			y: '768',
++			empty: ''
++		};
++
++		testResolution('{?x,y}', variables, '?x=1024&y=768');
++		testResolution('{?x,y,empty}', variables, '?x=1024&y=768&empty=');
++	});
++
++	test('Level 3 - Form-style query continuation', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			x: '1024',
++			y: '768',
++			empty: ''
++		};
++
++		testResolution('?fixed=yes{&x}', variables, '?fixed=yes&x=1024');
++		testResolution('{&x,y,empty}', variables, '&x=1024&y=768&empty=');
++	});
++
++	test('Level 4 - String expansion with value modifiers', () => {
++		// Test cases from RFC 6570 Section 1.2
++		const variables = {
++			var: 'value',
++			hello: 'Hello World!',
++			path: '/foo/bar',
++			list: ['red', 'green', 'blue'],
++			keys: {
++				semi: ';',
++				dot: '.',
++				comma: ','
++			}
++		};
++
++		testResolution('{var:3}', variables, 'val');
++		testResolution('{var:30}', variables, 'value');
++		testResolution('{list}', variables, 'red,green,blue');
++		testResolution('{list*}', variables, 'red,green,blue');
++	});
++
++	test('Level 4 - Reserved expansion with value modifiers', () => {
++		// Test cases related to Level 4 features
++		const variables = {
++			var: 'value',
++			hello: 'Hello World!',
++			path: '/foo/bar',
++			list: ['red', 'green', 'blue'],
++			keys: {
++				semi: ';',
++				dot: '.',
++				comma: ','
++			}
++		};
++
++		testResolution('{+path:6}/here', variables, '/foo/b/here');
++		testResolution('{+list}', variables, 'red,green,blue');
++		testResolution('{+list*}', variables, 'red,green,blue');
++		testResolution('{+keys}', variables, 'semi,;,dot,.,comma,,');
++		testResolution('{+keys*}', variables, 'semi=;,dot=.,comma=,');
++	});
++
++	test('Level 4 - Fragment expansion with value modifiers', () => {
++		// Test cases related to Level 4 features
++		const variables = {
++			var: 'value',
++			hello: 'Hello World!',
++			path: '/foo/bar',
++			list: ['red', 'green', 'blue'],
++			keys: {
++				semi: ';',
++				dot: '.',
++				comma: ','
++			}
++		};
++
++		testResolution('{#path:6}/here', variables, '#/foo/b/here');
++		testResolution('{#list}', variables, '#red,green,blue');
++		testResolution('{#list*}', variables, '#red,green,blue');
++		testResolution('{#keys}', variables, '#semi,;,dot,.,comma,,');
++		testResolution('{#keys*}', variables, '#semi=;,dot=.,comma=,');
++	});
++
++	test('Level 4 - Label expansion with value modifiers', () => {
++		// Test cases related to Level 4 features
++		const variables = {
++			var: 'value',
++			list: ['red', 'green', 'blue'],
++			keys: {
++				semi: ';',
++				dot: '.',
++				comma: ','
++			}
++		};
++
++		testResolution('X{.var:3}', variables, 'X.val');
++		testResolution('X{.list}', variables, 'X.red,green,blue');
++		testResolution('X{.list*}', variables, 'X.red.green.blue');
++		testResolution('X{.keys}', variables, 'X.semi,;,dot,.,comma,,');
++		testResolution('X{.keys*}', variables, 'X.semi=;.dot=..comma=,');
++	});
++
++	test('Level 4 - Path expansion with value modifiers', () => {
++		// Test cases related to Level 4 features
++		const variables = {
++			var: 'value',
++			list: ['red', 'green', 'blue'],
++			path: '/foo/bar',
++			keys: {
++				semi: ';',
++				dot: '.',
++				comma: ','
++			}
++		};
++
++		testResolution('{/var:1,var}', variables, '/v/value');
++		testResolution('{/list}', variables, '/red,green,blue');
++		testResolution('{/list*}', variables, '/red/green/blue');
++		testResolution('{/list*,path:4}', variables, '/red/green/blue/%2Ffoo');
++		testResolution('{/keys}', variables, '/semi,;,dot,.,comma,,');
++		testResolution('{/keys*}', variables, '/semi=%3B/dot=./comma=%2C');
++	});
++
++	test('Level 4 - Path-style parameters with value modifiers', () => {
++		// Test cases related to Level 4 features
++		const variables = {
++			var: 'value',
++			list: ['red', 'green', 'blue'],
++			keys: {
++				semi: ';',
++				dot: '.',
++				comma: ','
++			}
++		};
++
++		testResolution('{;hello:5}', { hello: 'Hello World!' }, ';hello=Hello');
++		testResolution('{;list}', variables, ';list=red,green,blue');
++		testResolution('{;list*}', variables, ';list=red;list=green;list=blue');
++		testResolution('{;keys}', variables, ';keys=semi,;,dot,.,comma,,');
++		testResolution('{;keys*}', variables, ';semi=;;dot=.;comma=,');
++	});
++
++	test('Level 4 - Form-style query with value modifiers', () => {
++		// Test cases related to Level 4 features
++		const variables = {
++			var: 'value',
++			list: ['red', 'green', 'blue'],
++			keys: {
++				semi: ';',
++				dot: '.',
++				comma: ','
++			}
++		};
++
++		testResolution('{?var:3}', variables, '?var=val');
++		testResolution('{?list}', variables, '?list=red,green,blue');
++		testResolution('{?list*}', variables, '?list=red&list=green&list=blue');
++		testResolution('{?keys}', variables, '?keys=semi,;,dot,.,comma,,');
++		testResolution('{?keys*}', variables, '?semi=;&dot=.&comma=,');
++	});
++
++	test('Level 4 - Form-style query continuation with value modifiers', () => {
++		// Test cases related to Level 4 features
++		const variables = {
++			var: 'value',
++			list: ['red', 'green', 'blue'],
++			keys: {
++				semi: ';',
++				dot: '.',
++				comma: ','
++			}
++		};
++
++		testResolution('?fixed=yes{&var:3}', variables, '?fixed=yes&var=val');
++		testResolution('?fixed=yes{&list}', variables, '?fixed=yes&list=red,green,blue');
++		testResolution('?fixed=yes{&list*}', variables, '?fixed=yes&list=red&list=green&list=blue');
++		testResolution('?fixed=yes{&keys}', variables, '?fixed=yes&keys=semi,;,dot,.,comma,,');
++		testResolution('?fixed=yes{&keys*}', variables, '?fixed=yes&semi=;&dot=.&comma=,');
++	});
++
++	test('handling undefined or null values', () => {
++		// Test handling of undefined/null values for different operators
++		const variables = {
++			defined: 'value',
++			undef: undefined,
++			null: null,
++			empty: ''
++		};
++
++		// Simple string expansion
++		testResolution('{defined,undef,null,empty}', variables, 'value,');
++
++		// Reserved expansion
++		testResolution('{+defined,undef,null,empty}', variables, 'value,');
++
++		// Fragment expansion
++		testResolution('{#defined,undef,null,empty}', variables, '#value,');
++
++		// Label expansion
++		testResolution('X{.defined,undef,null,empty}', variables, 'X.value');
++
++		// Path segments
++		testResolution('{/defined,undef,null}', variables, '/value');
++
++		// Path-style parameters
++		testResolution('{;defined,empty}', variables, ';defined=value;empty');
++
++		// Form-style query
++		testResolution('{?defined,undef,null,empty}', variables, '?defined=value&undef=&null=&empty=');
++
++		// Form-style query continuation
++		testResolution('{&defined,undef,null,empty}', variables, '&defined=value&undef=&null=&empty=');
++	});
++
++	test('complex templates', () => {
++		// Test more complex template combinations
++		const variables = {
++			domain: 'example.com',
++			user: 'fred',
++			path: ['path', 'to', 'resource'],
++			query: 'search',
++			page: 5,
++			lang: 'en',
++			sessionId: '123abc',
++			filters: ['color:blue', 'shape:square'],
++			coordinates: { lat: '37.7', lon: '-122.4' }
++		};
++
++		// RESTful URL pattern
++		testResolution('https://{domain}/api/v1/users/{user}{/path*}{?query,page,lang}',
++			variables,
++			'https://example.com/api/v1/users/fred/path/to/resource?query=search&page=5&lang=en');
++
++		// Complex query parameters
++		testResolution('https://{domain}/search{?query,filters,coordinates*}',
++			variables,
++			'https://example.com/search?query=search&filters=color:blue,shape:square&lat=37.7&lon=-122.4');
++
++		// Multiple expression types
++		testResolution('https://{domain}/users/{user}/profile{.lang}{?sessionId}{#path}',
++			variables,
++			'https://example.com/users/fred/profile.en?sessionId=123abc#path,to,resource');
++	});
++
++	test('literals and escaping', () => {
++		// Test literal segments and escaping
++		testParsing('http://example.com/literal', []);
++		testParsing('http://example.com/{var}literal{var2}', [
++			{
++				expression: '{var}',
++				operator: '',
++				variables: [{ explodable: false, name: 'var', optional: false, prefixLength: undefined, repeatable: false }]
++			},
++			{
++				expression: '{var2}',
++				operator: '',
++				variables: [{ explodable: false, name: 'var2', optional: false, prefixLength: undefined, repeatable: false }]
++			}
++		]);
++
++		// Test that escaped braces are treated as literals
++		// Note: The current implementation might not handle this case
++		testResolution('http://example.com/{{var}}', { var: 'value' }, 'http://example.com/{var}');
++	});
++
++	test('edge cases', () => {
++		// Empty template
++		testResolution('', {}, '');
++
++		// Template with only literals
++		testResolution('http://example.com/path', {}, 'http://example.com/path');
++
++		// No variables provided for resolution
++		testResolution('{var}', {}, '');
++
++		// Multiple sequential expressions
++		testResolution('{a}{b}{c}', { a: '1', b: '2', c: '3' }, '123');
++
++		// Expressions with special characters in variable names
++		testResolution('{_hidden.var-name$}', { '_hidden.var-name$': 'value' }, 'value');
++	});
++});

@@ -1,0 +1,15 @@
+{
+  "pr": 296709,
+  "prTitle": "Fix ViewModel issue where all lines were hidden",
+  "mergeCommit": "9c99e8fb20933a838deb6a62a0a9e2ab1919290f",
+  "parentCommit": "beb0fcb0c5f07a15ca107ff36ab5df856d9f9051",
+  "fileCount": 6,
+  "issue": 293365,
+  "issueTitle": "[Unhandled Error] Cannot read properties of undefined (reading 'getViewLineMinColumn')",
+  "issueAuthor": "alexr00",
+  "commentCount": 14,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

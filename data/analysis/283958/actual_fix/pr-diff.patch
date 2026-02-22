@@ -1,0 +1,23 @@
+diff --git a/src/vs/workbench/contrib/terminalContrib/suggest/browser/terminalSuggestAddon.ts b/src/vs/workbench/contrib/terminalContrib/suggest/browser/terminalSuggestAddon.ts
+index 93634679ae08f..66a2e03cd9df7 100644
+--- a/src/vs/workbench/contrib/terminalContrib/suggest/browser/terminalSuggestAddon.ts
++++ b/src/vs/workbench/contrib/terminalContrib/suggest/browser/terminalSuggestAddon.ts
+@@ -569,11 +569,13 @@ export class SuggestAddon extends Disposable implements ITerminalAddon, ISuggest
+ 					if (config.suggestOnTriggerCharacters && !sent && this._mostRecentPromptInputState.cursorIndex > 0) {
+ 						const char = this._mostRecentPromptInputState.value[this._mostRecentPromptInputState.cursorIndex - 1];
+ 						if (
+-							// Only trigger on `\` and `/` if it's a directory. Not doing so causes problems
+-							// with git branches in particular
+-							this._isFilteringDirectories && char.match(/[\\\/]$/) ||
+-							// Check if the character is a trigger character from providers
+-							this._checkProviderTriggerCharacters(char)
++							char && (
++								// Only trigger on `\` and `/` if it's a directory. Not doing so causes problems
++								// with git branches in particular
++								this._isFilteringDirectories && char.match(/[\\\/]$/) ||
++								// Check if the character is a trigger character from providers
++								this._checkProviderTriggerCharacters(char)
++							)
+ 						) {
+ 							sent = this._requestTriggerCharQuickSuggestCompletions();
+ 						}

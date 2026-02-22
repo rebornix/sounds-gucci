@@ -1,0 +1,15 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/modelPicker/modePickerActionItem.ts b/src/vs/workbench/contrib/chat/browser/modelPicker/modePickerActionItem.ts
+index 4955a2182d3c7..94c4044490fd7 100644
+--- a/src/vs/workbench/contrib/chat/browser/modelPicker/modePickerActionItem.ts
++++ b/src/vs/workbench/contrib/chat/browser/modelPicker/modePickerActionItem.ts
+@@ -81,7 +81,9 @@ export class ModePickerActionItem extends ActionWidgetDropdownActionViewItem {
+ 						ToggleAgentModeActionId,
+ 						{ modeId: mode.id, sessionResource: this.delegate.sessionResource() } satisfies IToggleChatModeArgs
+ 					);
+-					this.renderLabel(this.element!);
++					if (this.element) {
++						this.renderLabel(this.element);
++					}
+ 					return result;
+ 				},
+ 				category: isDisabledViaPolicy ? policyDisabledCategory : builtInCategory

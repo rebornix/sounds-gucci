@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 291262,
-    "title": "In stacked view filtering resets the more expansion making filtering hard to see (fix #290873)",
-    "mergeCommit": "9961a3a8b0a359d52663daf2de3067a0f525733c",
-    "parentCommit": "1bf610daabec2beeaa632dc1e33d92f21df41237",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 290873,
-    "title": "In stacked view filtering resets the more expansion making filtering hard to see",
-    "author": "lramos15",
-    "commentCount": 3
-  },
+  "pr": 291262,
+  "prTitle": "In stacked view filtering resets the more expansion making filtering hard to see (fix #290873)",
+  "mergeCommit": "9961a3a8b0a359d52663daf2de3067a0f525733c",
+  "parentCommit": "1bf610daabec2beeaa632dc1e33d92f21df41237",
+  "fileCount": 1,
+  "issue": 290873,
+  "issueTitle": "In stacked view filtering resets the more expansion making filtering hard to see",
+  "issueAuthor": "lramos15",
+  "commentCount": 3,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/291262",
-  "generatedAt": "2026-02-07T09:27:30Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

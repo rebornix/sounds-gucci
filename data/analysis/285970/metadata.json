@@ -1,0 +1,15 @@
+{
+  "pr": 285970,
+  "prTitle": "Fix querySelector TypeError in terminal suggest when xterm element becomes undefined",
+  "mergeCommit": "de56ab16ef93a6e348ddfabd4118d585d7746d7d",
+  "parentCommit": "8fdef917440591b1cfdf1593db5472dfb4c75753",
+  "fileCount": 1,
+  "issue": 285923,
+  "issueTitle": "Cannot read properties of undefined (reading 'querySelector')",
+  "issueAuthor": "app/vs-code-engineering",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

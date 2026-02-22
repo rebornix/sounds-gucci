@@ -1,0 +1,2 @@
+src/vs/workbench/api/browser/mainThreadDocumentContentProviders.ts
+src/vs/workbench/api/test/browser/mainThreadDocumentContentProviders.test.ts

@@ -1,0 +1,15 @@
+{
+  "pr": 283844,
+  "prTitle": "Remove non null assertion",
+  "mergeCommit": "934a4f6b490505737f043f830e3993f76bc264ff",
+  "parentCommit": "9b01c97248e9e36520d3f43f078c946b83836344",
+  "fileCount": 1,
+  "issue": 283302,
+  "issueTitle": "Cannot read properties of undefined (reading 'setAttribute')",
+  "issueAuthor": "app/vs-code-engineering",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

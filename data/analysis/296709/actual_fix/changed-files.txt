@@ -1,0 +1,6 @@
+src/vs/editor/common/model/prefixSumComputer.ts
+src/vs/editor/common/model/textModel.ts
+src/vs/editor/common/viewModel/viewModelImpl.ts
+src/vs/editor/common/viewModel/viewModelLines.ts
+src/vs/editor/test/browser/viewModel/viewModelImpl.test.ts
+src/vs/editor/test/common/viewModel/prefixSumComputer.test.ts

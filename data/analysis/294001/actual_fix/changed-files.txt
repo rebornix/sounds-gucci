@@ -1,0 +1,4 @@
+.github/prompts/fix-error.prompt.md
+.github/skills/fix-errors/SKILL.md
+src/vs/base/common/uri.ts
+src/vs/platform/log/common/logIpc.ts

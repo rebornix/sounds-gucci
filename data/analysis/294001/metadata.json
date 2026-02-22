@@ -1,0 +1,15 @@
+{
+  "pr": 294001,
+  "prTitle": "Fix URI scheme error in LoggerChannelClient.deregisterLogger",
+  "mergeCommit": "0c3d14a4802fd082e75ce6360d39c8f8f3c11992",
+  "parentCommit": "a5c413088d48bdf56932ab1735cde1cb5446cd65",
+  "fileCount": 4,
+  "issue": 293503,
+  "issueTitle": "[Unhandled Error] [UriError]: Scheme contains illegal characters.",
+  "issueAuthor": "bryanchen-d",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

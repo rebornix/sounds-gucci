@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 291200,
-    "title": "Chat progress badge not useful and just distracts me (fix #290793)",
-    "mergeCommit": "a066abff0fe2962791823f757767d88f079a036c",
-    "parentCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 290793,
-    "title": "Chat progress badge not useful and just distracts me",
-    "author": "isidorn",
-    "commentCount": 1
-  },
+  "pr": 291200,
+  "prTitle": "Chat progress badge not useful and just distracts me (fix #290793)",
+  "mergeCommit": "a066abff0fe2962791823f757767d88f079a036c",
+  "parentCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
+  "fileCount": 1,
+  "issue": 290793,
+  "issueTitle": "Chat progress badge not useful and just distracts me",
+  "issueAuthor": "isidorn",
+  "commentCount": 1,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/291200",
-  "generatedAt": "2026-02-07T18:34:54Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

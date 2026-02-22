@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 291572,
-    "title": "Agents welcome view UI fixes",
-    "mergeCommit": "16d4fc6d853bf4d5a82768ca4cc1d62f5284f431",
-    "parentCommit": "a0fddd4145fa25afde14b23487d7108e6347e4d7",
-    "fileCount": 3
-  },
-  "issue": {
-    "number": 290790,
-    "title": "Archiving a session results in 2 sessions being archiving",
-    "author": "ulugbekna",
-    "commentCount": 0
-  },
+  "pr": 291572,
+  "prTitle": "Agents welcome view UI fixes",
+  "mergeCommit": "16d4fc6d853bf4d5a82768ca4cc1d62f5284f431",
+  "parentCommit": "a0fddd4145fa25afde14b23487d7108e6347e4d7",
+  "fileCount": 3,
+  "issue": 290790,
+  "issueTitle": "Archiving a session results in 2 sessions being archiving",
+  "issueAuthor": "ulugbekna",
+  "commentCount": 0,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/291572",
-  "generatedAt": "2026-02-07T06:40:37Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

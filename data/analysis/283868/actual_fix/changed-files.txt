@@ -1,0 +1,1 @@
+src/vs/workbench/contrib/terminalContrib/suggest/browser/terminal.suggest.contribution.ts

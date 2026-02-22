@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 290020,
-    "title": "Claude Agent integration: Archiving a Chat does not prompt me to decide if I want to keep/discard my changes from that chat (fix #289688)",
-    "mergeCommit": "042b8f0ae7375cc67b2575a7d0cffaad501736c6",
-    "parentCommit": "6d68d6c2478cf10eb75ccdb1d94eacf822ae3e2b",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 289688,
-    "title": "Claude Agent integration: Archiving a Chat does not prompt me to decide if I want to keep/discard my changes from that chat",
-    "author": "TylerLeonhardt",
-    "commentCount": 5
-  },
+  "pr": 290020,
+  "prTitle": "Claude Agent integration: Archiving a Chat does not prompt me to decide if I want to keep/discard my changes from that chat (fix #289688)",
+  "mergeCommit": "042b8f0ae7375cc67b2575a7d0cffaad501736c6",
+  "parentCommit": "6d68d6c2478cf10eb75ccdb1d94eacf822ae3e2b",
+  "fileCount": 1,
+  "issue": 289688,
+  "issueTitle": "Claude Agent integration: Archiving a Chat does not prompt me to decide if I want to keep/discard my changes from that chat",
+  "issueAuthor": "TylerLeonhardt",
+  "commentCount": 5,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/290020",
-  "generatedAt": "2026-02-07T18:45:45Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

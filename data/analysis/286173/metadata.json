@@ -1,0 +1,15 @@
+{
+  "pr": 286173,
+  "prTitle": "Fix race condition in terminal suggest widget initialization causing appendChild crash",
+  "mergeCommit": "a9676225eb6c43be43f8debcac2826ee989cc145",
+  "parentCommit": "08070ad04628042936cce80229c1e21698d06480",
+  "fileCount": 1,
+  "issue": 283291,
+  "issueTitle": "Cannot read properties of undefined (reading 'appendChild')",
+  "issueAuthor": "app/vs-code-engineering",
+  "commentCount": 1,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

@@ -5,3 +5,6 @@
 # OS files
 .DS_Store
 docs/data/analysis
+dist
+.env
+__pycache__/

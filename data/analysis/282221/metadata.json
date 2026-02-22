@@ -1,0 +1,15 @@
+{
+  "pr": 282221,
+  "prTitle": "Fix race condition causing \"Model is disposed!\" error in virtual document updates",
+  "mergeCommit": "5639dca9912d7ab8896929b1a09f30f883ead43f",
+  "parentCommit": "5a6cdd0697cbeaadf0fff04abe4855e00b813e75",
+  "fileCount": 2,
+  "issue": 212713,
+  "issueTitle": "Model is disposed!",
+  "issueAuthor": "vscodenpa",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

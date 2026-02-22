@@ -1,0 +1,22 @@
+diff --git a/src/vs/workbench/contrib/scm/browser/scmViewPane.ts b/src/vs/workbench/contrib/scm/browser/scmViewPane.ts
+index e9977c33a87e4..d854fcdb68cbe 100644
+--- a/src/vs/workbench/contrib/scm/browser/scmViewPane.ts
++++ b/src/vs/workbench/contrib/scm/browser/scmViewPane.ts
+@@ -3070,6 +3070,8 @@ class SCMTreeDataSource extends Disposable implements IAsyncDataSource<ISCMViewS
+ 			return result;
+ 		} else if (isSCMInput(element)) {
+ 			return element.repository;
++		} else if (isSCMActionButton(element)) {
++			return element.repository;
+ 		} else if (isSCMResourceGroup(element)) {
+ 			const repository = this.scmViewService.visibleRepositories.find(r => r.provider === element.provider);
+ 			if (!repository) {
+@@ -3077,6 +3079,8 @@ class SCMTreeDataSource extends Disposable implements IAsyncDataSource<ISCMViewS
+ 			}
+ 
+ 			return repository;
++		} else if (isSCMRepository(element)) {
++			return this.scmViewService;
+ 		} else {
+ 			throw new Error('Unexpected call to getParent');
+ 		}

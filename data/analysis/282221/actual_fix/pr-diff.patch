@@ -1,0 +1,68 @@
+diff --git a/src/vs/workbench/api/browser/mainThreadDocumentContentProviders.ts b/src/vs/workbench/api/browser/mainThreadDocumentContentProviders.ts
+index 7ff4687fdf28e..fcaaa833a55dc 100644
+--- a/src/vs/workbench/api/browser/mainThreadDocumentContentProviders.ts
++++ b/src/vs/workbench/api/browser/mainThreadDocumentContentProviders.ts
+@@ -83,6 +83,11 @@ export class MainThreadDocumentContentProviders implements MainThreadDocumentCon
+ 				// ignore this
+ 				return;
+ 			}
++
++			if (model.isDisposed()) {
++				// model was disposed during the async operation
++				return;
++			}
+ 			if (edits && edits.length > 0) {
+ 				// use the evil-edit as these models show in readonly-editor only
+ 				model.applyEdits(edits.map(edit => EditOperation.replace(Range.lift(edit.range), edit.text)));
+diff --git a/src/vs/workbench/api/test/browser/mainThreadDocumentContentProviders.test.ts b/src/vs/workbench/api/test/browser/mainThreadDocumentContentProviders.test.ts
+index c999d3339382b..7fbaee21bce40 100644
+--- a/src/vs/workbench/api/test/browser/mainThreadDocumentContentProviders.test.ts
++++ b/src/vs/workbench/api/test/browser/mainThreadDocumentContentProviders.test.ts
+@@ -59,4 +59,47 @@ suite('MainThreadDocumentContentProviders', function () {
+ 			providers.$onVirtualDocumentChange(uri, '1\n2\n3');
+ 		});
+ 	});
++
++	test('model disposed during async operation', async function () {
++		const uri = URI.parse('test:disposed');
++		const model = createTextModel('initial', undefined, undefined, uri);
++
++		let disposeModelDuringEdit = false;
++
++		const providers = new MainThreadDocumentContentProviders(new TestRPCProtocol(), null!, null!,
++			new class extends mock<IModelService>() {
++				override getModel(_uri: URI) {
++					assert.strictEqual(uri.toString(), _uri.toString());
++					return model;
++				}
++			},
++			new class extends mock<IEditorWorkerService>() {
++				override async computeMoreMinimalEdits(_uri: URI, data: TextEdit[] | undefined) {
++					// Simulate async operation
++					await new Promise(resolve => setTimeout(resolve, 10));
++
++					// Dispose model during the async operation if flag is set
++					if (disposeModelDuringEdit) {
++						model.dispose();
++					}
++
++					return data;
++				}
++			},
++		);
++
++		store.add(model);
++		store.add(providers);
++
++		// First call should work normally
++		await providers.$onVirtualDocumentChange(uri, 'updated');
++		assert.strictEqual(model.getValue(), 'updated');
++
++		// Second call should not throw even though model gets disposed during async operation
++		disposeModelDuringEdit = true;
++		await providers.$onVirtualDocumentChange(uri, 'should not apply');
++
++		// Model should be disposed and value unchanged
++		assert.ok(model.isDisposed());
++	});
+ });

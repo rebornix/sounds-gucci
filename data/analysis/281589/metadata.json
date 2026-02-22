@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 281589,
-    "title": "Various fixes for session progress",
-    "mergeCommit": "87466737669c9645a336f7647d4b46ecf7d84bf7",
-    "parentCommit": "4038871b29e9b3d7bae2518c9ac424574cdd9316",
-    "fileCount": 3
-  },
-  "issue": {
-    "number": 275332,
-    "title": "Agent sessions single view: standardize the session item entries",
-    "author": "osortega",
-    "commentCount": 6
-  },
+  "pr": 281589,
+  "prTitle": "Various fixes for session progress",
+  "mergeCommit": "87466737669c9645a336f7647d4b46ecf7d84bf7",
+  "parentCommit": "4038871b29e9b3d7bae2518c9ac424574cdd9316",
+  "fileCount": 3,
+  "issue": 275332,
+  "issueTitle": "Agent sessions single view: standardize the session item entries",
+  "issueAuthor": "osortega",
+  "commentCount": 6,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/281589",
-  "generatedAt": "2026-02-03T00:00:00Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

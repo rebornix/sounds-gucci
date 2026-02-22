@@ -1,0 +1,1 @@
+src/vs/platform/log/common/log.ts

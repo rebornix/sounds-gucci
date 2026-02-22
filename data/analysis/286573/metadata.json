@@ -1,0 +1,15 @@
+{
+  "pr": 286573,
+  "prTitle": "Fix error in rasterizeGlyph",
+  "mergeCommit": "e78547593cf2a52bf8386e64d71f6fdc4588a79c",
+  "parentCommit": "7939bad01cdd5c04ada7688e662f653ddc864b27",
+  "fileCount": 1,
+  "issue": 246658,
+  "issueTitle": "Uncaught TypeError: Cannot read properties of undefined (reading 'substring')",
+  "issueAuthor": "app/vs-code-engineering",
+  "commentCount": 2,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

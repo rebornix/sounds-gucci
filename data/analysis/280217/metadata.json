@@ -1,0 +1,15 @@
+{
+  "pr": 280217,
+  "prTitle": "Fix illegal characters in Dynamic Auth Provider logger filename",
+  "mergeCommit": "2d96f38ce6ffb7355ade0ad99ca2dcb927d298ae",
+  "parentCommit": "940183214480d867f179b9146e116d870f1c77dc",
+  "fileCount": 1,
+  "issue": 269810,
+  "issueTitle": "`loggerIpc#deregisterLogger` fails with Scheme contains illegal characters",
+  "issueAuthor": "bpasero",
+  "commentCount": 1,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

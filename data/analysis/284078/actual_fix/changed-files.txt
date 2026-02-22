@@ -1,0 +1,1 @@
+src/vs/workbench/contrib/update/browser/releaseNotesEditor.ts

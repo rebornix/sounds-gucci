@@ -1,0 +1,15 @@
+diff --git a/src/vs/workbench/contrib/update/browser/releaseNotesEditor.ts b/src/vs/workbench/contrib/update/browser/releaseNotesEditor.ts
+index 68738027aee7c..94603fb67e687 100644
+--- a/src/vs/workbench/contrib/update/browser/releaseNotesEditor.ts
++++ b/src/vs/workbench/contrib/update/browser/releaseNotesEditor.ts
+@@ -65,8 +65,8 @@ export class ReleaseNotesManager extends Disposable {
+ 			return this.updateHtml();
+ 		}));
+ 
+-		this._register(_configurationService.onDidChangeConfiguration(this.onDidChangeConfiguration));
+-		this._register(_webviewWorkbenchService.onDidChangeActiveWebviewEditor(this.onDidChangeActiveWebviewEditor));
++		this._register(_configurationService.onDidChangeConfiguration((e) => this.onDidChangeConfiguration(e)));
++		this._register(_webviewWorkbenchService.onDidChangeActiveWebviewEditor((e) => this.onDidChangeActiveWebviewEditor(e)));
+ 		this._simpleSettingRenderer = this._instantiationService.createInstance(SimpleSettingRenderer);
+ 	}
+ 

@@ -1,0 +1,1 @@
+src/vs/editor/browser/gpu/raster/glyphRasterizer.ts

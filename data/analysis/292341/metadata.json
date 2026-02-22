@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 292341,
-    "title": "Chat Anonymous: can send a chat message with anonymous access (fix #292296)",
-    "mergeCommit": "1951d880562601ebdb30c0a509d6b7bd37a05f09",
-    "parentCommit": "01d74202958c4b636a323abd72ba75be581a01d4",
-    "fileCount": 4
-  },
-  "issue": {
-    "number": 292296,
-    "title": "Chat Anonymous: can send a chat message with anonymous access",
-    "author": "alexr00",
-    "commentCount": 0
-  },
+  "pr": 292341,
+  "prTitle": "Chat Anonymous: can send a chat message with anonymous access (fix #292296)",
+  "mergeCommit": "1951d880562601ebdb30c0a509d6b7bd37a05f09",
+  "parentCommit": "01d74202958c4b636a323abd72ba75be581a01d4",
+  "fileCount": 4,
+  "issue": 292296,
+  "issueTitle": "Chat Anonymous: can send a chat message with anonymous access",
+  "issueAuthor": "alexr00",
+  "commentCount": 0,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/292341",
-  "generatedAt": "2026-02-07T09:07:40Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

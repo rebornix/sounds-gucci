@@ -2,12 +2,11 @@
 set -euo pipefail
 
 # Setup environment for analyzing a PR/issue pair
-# Usage: ./setup.sh --pr <num> --issue <num> --repo <owner/repo> --clone-path <path> [--output-dir <path>] [--model <model>] [--agent-version <version>]
+# Usage: ./setup.sh --pr <num> --issue <num> --repo <owner/repo> --clone-path <path> [--output-dir <path>] [--model <model>] [--agent-version <version>] [--tags <comma-separated>]
 
 # Default values
 OUTPUT_DIR=""
-MODEL="${ANALYSIS_MODEL:-unknown}"
-AGENT_VERSION="${ANALYSIS_AGENT_VERSION:-1.0}"
+TAGS=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -17,8 +16,7 @@ while [[ $# -gt 0 ]]; do
     --repo) REPO="$2"; shift 2 ;;
     --clone-path) CLONE_PATH="$2"; shift 2 ;;
     --output-dir) OUTPUT_DIR="$2"; shift 2 ;;
-    --model) MODEL="$2"; shift 2 ;;
-    --agent-version) AGENT_VERSION="$2"; shift 2 ;;
+    --tags) TAGS="$2"; shift 2 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -68,14 +66,15 @@ echo "  Parent commit: $PARENT_COMMIT"
 
 # Get changed files
 echo "Extracting changed files..."
-echo "$PR_DATA" | jq -r '.files[].path' > "$OUTPUT_DIR/changed-files.txt"
-FILE_COUNT=$(wc -l < "$OUTPUT_DIR/changed-files.txt" | tr -d ' ')
+mkdir -p "$OUTPUT_DIR/actual_fix"
+echo "$PR_DATA" | jq -r '.files[].path' > "$OUTPUT_DIR/actual_fix/changed-files.txt"
+FILE_COUNT=$(wc -l < "$OUTPUT_DIR/actual_fix/changed-files.txt" | tr -d ' ')
 echo "  $FILE_COUNT files changed"
 
 # Fetch PR diff
 echo "Fetching PR diff..."
-gh pr diff "$PR_NUM" --repo "$REPO" > "$OUTPUT_DIR/pr-diff.patch" 2>/dev/null || \
-  gh api "repos/$REPO/pulls/$PR_NUM" -H "Accept: application/vnd.github.v3.diff" > "$OUTPUT_DIR/pr-diff.patch"
+gh pr diff "$PR_NUM" --repo "$REPO" > "$OUTPUT_DIR/actual_fix/pr-diff.patch" 2>/dev/null || \
+  gh api "repos/$REPO/pulls/$PR_NUM" -H "Accept: application/vnd.github.v3.diff" > "$OUTPUT_DIR/actual_fix/pr-diff.patch"
 
 # Fetch commit messages
 echo "Extracting commit messages..."
@@ -83,7 +82,7 @@ COMMIT_MESSAGES=$(echo "$PR_DATA" | jq -r '.commits[].messageHeadline' | sed 's/
 
 # Write PR context file
 echo "Writing PR context..."
-cat > "$OUTPUT_DIR/pr.md" << EOF
+cat > "$OUTPUT_DIR/actual_fix/pr.md" << EOF
 # PR #$PR_NUM: $PR_TITLE
 
 **Repository:** $REPO
@@ -101,7 +100,7 @@ $COMMIT_MESSAGES
 
 ## Changed Files
 
-$(cat "$OUTPUT_DIR/changed-files.txt" | sed 's/^/- /')
+$(cat "$OUTPUT_DIR/actual_fix/changed-files.txt" | sed 's/^/- /')
 EOF
 
 # Fetch issue details
@@ -159,27 +158,18 @@ done
 echo "Writing metadata..."
 cat > "$OUTPUT_DIR/metadata.json" << EOF
 {
-  "pr": {
-    "number": $PR_NUM,
-    "title": $(echo "$PR_TITLE" | jq -R .),
-    "mergeCommit": "$MERGE_COMMIT",
-    "parentCommit": "$PARENT_COMMIT",
-    "fileCount": $FILE_COUNT
-  },
-  "issue": {
-    "number": $ISSUE_NUM,
-    "title": $(echo "$ISSUE_TITLE" | jq -R .),
-    "author": "$ISSUE_AUTHOR",
-    "commentCount": $COMMENT_COUNT
-  },
-  "experiment": {
-    "model": "$MODEL",
-    "agentVersion": "$AGENT_VERSION",
-    "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-  },
+  "pr": $PR_NUM,
+  "prTitle": $(echo "$PR_TITLE" | jq -R .),
+  "mergeCommit": "$MERGE_COMMIT",
+  "parentCommit": "$PARENT_COMMIT",
+  "fileCount": $FILE_COUNT,
+  "issue": $ISSUE_NUM,
+  "issueTitle": $(echo "$ISSUE_TITLE" | jq -R .),
+  "issueAuthor": "$ISSUE_AUTHOR",
+  "commentCount": $COMMENT_COUNT,
   "repo": "$REPO",
   "clonePath": "$CLONE_PATH",
-  "outputDir": "$OUTPUT_DIR"
+  "tags": [$(echo "$TAGS" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -v '^$' | jq -R . | paste -sd, -)]
 }
 EOF
 
@@ -217,11 +207,11 @@ echo "Setup complete!"
 echo "=========================================="
 echo ""
 echo "Context files created in: $OUTPUT_DIR"
-echo "  - issue.md          : Issue description and comments"
-echo "  - pr.md             : PR description and commit messages"
-echo "  - pr-diff.patch     : Actual PR diff (for validation)"
-echo "  - changed-files.txt : List of changed files"
-echo "  - metadata.json     : Structured metadata"
+echo "  - issue.md                   : Issue description and comments"
+echo "  - metadata.json              : PR/issue metadata"
+echo "  - actual_fix/pr.md           : PR description and commit messages"
+echo "  - actual_fix/pr-diff.patch   : Actual PR diff (for validation)"
+echo "  - actual_fix/changed-files.txt : List of changed files"
 echo ""
 echo "Local clone checked out to parent commit: ${PARENT_COMMIT:0:7}"
 echo ""

@@ -1,0 +1,15 @@
+{
+  "pr": 287189,
+  "prTitle": "fix undefined property error from getViewLineMinColumn",
+  "mergeCommit": "aee9b1b3f6916f1e177d2945389cdbeb655e1654",
+  "parentCommit": "3df70f337dc3638daaa337c694363957296934ee",
+  "fileCount": 1,
+  "issue": 284539,
+  "issueTitle": "[Unhandled Error] Cannot read properties of undefined (reading 'getViewLineMinColumn')",
+  "issueAuthor": "bryanchen-d",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

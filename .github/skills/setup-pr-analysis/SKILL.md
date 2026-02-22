@@ -12,7 +12,7 @@ This skill prepares the local environment for analyzing a bug-fix PR by checking
 Run the `setup.sh` script with the following parameters:
 
 ```bash
-./setup.sh --pr <number> --issue <number> --repo <owner/repo> --clone-path <path> [--output-dir <path>]
+./setup.sh --pr <number> --issue <number> --repo <owner/repo> --clone-path <path> [--output-dir <path>] [--tags <comma-separated>]
 ```
 
 ### Parameters
@@ -24,6 +24,7 @@ Run the `setup.sh` script with the following parameters:
 | `--repo` | Yes | Repository in `owner/repo` format | `microsoft/vscode` |
 | `--clone-path` | Yes | Path to local repo clone | `/Users/penlv/Code/Work/vscode2` |
 | `--output-dir` | No | Directory for context files (default: `data/analysis/<pr>`) | `./context` |
+| `--tags` | No | Comma-separated tags for categorization | `sessions,error-telemetry` |
 
 ### Example
 
@@ -43,20 +44,21 @@ Run the `setup.sh` script with the following parameters:
 3. **Checks out parent commit**: Switches local clone to the state before the fix
 4. **Generates context files**:
   - `issue.md` - Issue title, body, and comments
-  - `pr.md` - PR title, body, and commit messages (for fix-validator only)
-  - `pr-diff.patch` - The actual PR diff (for validator comparison)
-  - `changed-files.txt` - List of files changed in the PR (for validator comparison)
-  - `metadata.json` - Structured data for scripts
+  - `metadata.json` - PR/issue metadata (no model info)
+  - `actual_fix/pr.md` - PR title, body, and commit messages (for fix-validator only)
+  - `actual_fix/pr-diff.patch` - The actual PR diff (for validator comparison)
+  - `actual_fix/changed-files.txt` - List of files changed in the PR
 
 ## Output Structure
 
 ```
 data/analysis/<pr>/
 ├── issue.md           # Issue context for bug-analyzer
-├── pr.md              # PR context (fix-validator only)
-├── pr-diff.patch      # Actual fix (for validator)
-├── changed-files.txt  # Files touched by the PR
-└── metadata.json      # Structured metadata
+├── metadata.json      # PR/issue metadata
+└── actual_fix/        # Real solution (for fix-validator only)
+    ├── pr.md          # PR description
+    ├── pr-diff.patch  # Actual fix diff
+    └── changed-files.txt
 ```
 
 ## Prerequisites

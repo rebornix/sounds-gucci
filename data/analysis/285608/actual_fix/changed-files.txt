@@ -1,0 +1,1 @@
+src/vs/workbench/contrib/scm/browser/scmViewPane.ts

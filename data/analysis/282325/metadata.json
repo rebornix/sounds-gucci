@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 282325,
-    "title": "Fix for completing response if needed",
-    "mergeCommit": "57f6d3a72c7d24b0719a5a60fd834e41b493c372",
-    "parentCommit": "643aa3a33b39d5e36d7e8ed4e0dc016979b82c74",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 281630,
-    "title": "Duplicated file changes part for background session when `chat.checkpoints.showFileChanges` is turned on",
-    "author": "rebornix",
-    "commentCount": 0
-  },
+  "pr": 282325,
+  "prTitle": "Fix for completing response if needed",
+  "mergeCommit": "57f6d3a72c7d24b0719a5a60fd834e41b493c372",
+  "parentCommit": "643aa3a33b39d5e36d7e8ed4e0dc016979b82c74",
+  "fileCount": 1,
+  "issue": 281630,
+  "issueTitle": "Duplicated file changes part for background session when `chat.checkpoints.showFileChanges` is turned on",
+  "issueAuthor": "rebornix",
+  "commentCount": 0,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/282325",
-  "generatedAt": "2026-02-04T04:24:46Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

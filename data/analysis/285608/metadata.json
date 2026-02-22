@@ -1,0 +1,15 @@
+{
+  "pr": 285608,
+  "prTitle": "Handle more cases in scmViewPane.getParent",
+  "mergeCommit": "1eee6eb1488c56f9fc344909050b583ee604cf72",
+  "parentCommit": "c1dd529294e7e75b4f077696cba08f84d4aef586",
+  "fileCount": 1,
+  "issue": 204995,
+  "issueTitle": "Unexpected call to getParent",
+  "issueAuthor": "vscodenpa",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

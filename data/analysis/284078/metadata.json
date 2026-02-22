@@ -1,0 +1,15 @@
+{
+  "pr": 284078,
+  "prTitle": "Fix error in releasenotes editor",
+  "mergeCommit": "39cf2824f01fd67709286034d433743adb5885b3",
+  "parentCommit": "a679af06a57a052e42d9a8bdae9728233b912b38",
+  "fileCount": 1,
+  "issue": 283296,
+  "issueTitle": "this.O is not a function",
+  "issueAuthor": "app/vs-code-engineering",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

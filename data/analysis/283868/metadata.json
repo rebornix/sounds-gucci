@@ -1,0 +1,15 @@
+{
+  "pr": 283868,
+  "prTitle": "wait for xterm element vs assuming it's defined",
+  "mergeCommit": "f4367f568f22aff90295edb026ab877eb0d61cc0",
+  "parentCommit": "5fd25940173706ecaab09fd7da1d56e933b47f29",
+  "fileCount": 1,
+  "issue": 283287,
+  "issueTitle": "Cannot read properties of undefined (reading 'querySelector')",
+  "issueAuthor": "app/vs-code-engineering",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

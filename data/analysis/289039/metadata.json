@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 289039,
-    "title": "Do not mark sessions which completed while visible in the UI as unread (fix #288369)",
-    "mergeCommit": "4ec8c09e46c06a026cf78bacd77e044ccdc9fa5d",
-    "parentCommit": "d52522be26ca5048ac05c0a9760f56fe4bcda414",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 288369,
-    "title": "Do not mark sessions which completed while visible in the UI as unread",
-    "author": "benibenj",
-    "commentCount": 0
-  },
+  "pr": 289039,
+  "prTitle": "Do not mark sessions which completed while visible in the UI as unread (fix #288369)",
+  "mergeCommit": "4ec8c09e46c06a026cf78bacd77e044ccdc9fa5d",
+  "parentCommit": "d52522be26ca5048ac05c0a9760f56fe4bcda414",
+  "fileCount": 1,
+  "issue": 288369,
+  "issueTitle": "Do not mark sessions which completed while visible in the UI as unread",
+  "issueAuthor": "benibenj",
+  "commentCount": 0,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/289039",
-  "generatedAt": "2026-02-07T21:24:14Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

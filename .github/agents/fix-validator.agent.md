@@ -1,7 +1,8 @@
 ---
 name: fix-validator
+model: Claude Opus 4.6 (copilot)
 description: Cross-check a proposed bug fix against the actual PR changes. Use this agent after bug-analyzer has proposed a fix to see how well it aligns with the real solution.
-argument-hint: Path to the analysis directory (e.g., "data/analysis/12345") containing the proposal and pr-diff.patch
+argument-hint: Path to the analysis directory (e.g., "data/analysis/12345") containing the proposal and actual_fix/pr-diff.patch
 tools: ['execute', 'read', 'agent', 'edit', 'search', 'web', 'github/*', 'todo']
 ---
 
@@ -15,16 +16,44 @@ Given:
 
 You must evaluate how well the proposal aligns with the real solution.
 
+## Directory Structure
+
+```
+data/analysis/<pr>/
+├── metadata.json      # PR-level info
+├── issue.md           # Bug issue description
+├── actual_fix/        # The real solution
+│   ├── pr-diff.patch  # READ THIS - actual changes
+│   ├── pr.md          # PR description
+│   └── changed-files.txt
+└── <model>-<date>/    # Experiment directory
+    ├── proposed-fix.md  # Bug-analyzer's proposal
+    └── validation.md    # YOUR OUTPUT goes here
+```
+
 ## Input
 
-You will receive a path to an analysis directory containing:
-- `issue.md` - The original bug issue
-- `pr.md` - The PR description
-- `pr-diff.patch` - The actual changes made in the PR
-- `proposal.md` - The fix proposal from bug-analyzer (if saved)
-- `metadata.json` - Structured metadata
+You will receive a path to an analysis directory (e.g., `data/analysis/12345`).
 
-If `proposal.md` doesn't exist, ask for the proposal to be provided in the conversation.
+**Actual fix files** in `actual_fix/` subdirectory:
+- `actual_fix/pr-diff.patch` - The actual changes made in the PR
+- `actual_fix/pr.md` - The PR description
+
+**Experiment files** in a `<model>-<date>/` subdirectory:
+- `proposed-fix.md` - The fix proposal from bug-analyzer
+
+### Finding the experiment directory
+
+If no specific experiment subdirectory is given, find the **most recent** one:
+1. List subdirectories in the analysis directory (e.g., `ls data/analysis/12345/`)
+2. Experiment directories are named `<model>-<date>` (e.g., `gpt-5.2-codex-2026-02-20`)
+3. Skip `actual_fix/` — that's the real solution, not an experiment
+4. Pick the one that sorts last alphabetically (most recent by date)
+5. Read `proposed-fix.md` from that subdirectory
+
+### Saving output
+
+Save your `validation.md` to the **same experiment subdirectory** where you found `proposed-fix.md`.
 
 ## Validation Process
 

@@ -1,5 +1,24 @@
 [
   {
+    "pr": 249498,
+    "prTitle": "mcp: support resource templates",
+    "prMergeCommit": "7e725c8ba323c872fdebc7eabec20d4f381019cf",
+    "issue": 250423,
+    "issueTitle": "MCP resource templates need better UI",
+    "issueAuthor": "jrieken",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
+    "fileCount": 6,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": []
+  },
+  {
     "pr": 281397,
     "prTitle": "Fix for agent session progress",
     "prMergeCommit": "431aebe28b612f70c046d12bdb41fe3dd307ebd5",
@@ -8,11 +27,17 @@
     "issueAuthor": "rebornix",
     "repo": "microsoft/vscode",
     "score": 2,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 2,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 281589,
@@ -23,41 +48,80 @@
     "issueAuthor": "osortega",
     "repo": "microsoft/vscode",
     "score": 3,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 3,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 281673,
     "prTitle": "Fix edge case for in progress session",
     "prMergeCommit": "6801a977175147578333faaffeab6a95af8c43b1",
     "issue": 281642,
-    "issueTitle": "Background agent session progress changes to worktree name when it's \"working...\"",
+    "issueTitle": "Background agent session progress changes to worktree name when it's \\\"working...\\\"",
     "issueAuthor": "rebornix",
     "repo": "microsoft/vscode",
     "score": 3,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 5,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 282092,
+    "prTitle": "Fix for cloud multi diff stats",
+    "prMergeCommit": "5fbb91b1657478e7429c3e67554c23fee865e121",
+    "issue": 281924,
+    "issueTitle": "Chat agent: cloud session does not show changes",
+    "issueAuthor": "bpasero",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 282245,
     "prTitle": "",
     "prMergeCommit": "",
-    "issue": null,
+    "issue": 0,
     "issueTitle": "",
     "issueAuthor": "",
     "repo": "microsoft/vscode",
     "score": 4,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 0,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 282325,
@@ -68,11 +132,17 @@
     "issueAuthor": "rebornix",
     "repo": "microsoft/vscode",
     "score": 3,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 286385,
@@ -83,11 +153,17 @@
     "issueAuthor": "SimonSiefke",
     "repo": "microsoft/vscode",
     "score": 4,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 286543,
@@ -98,11 +174,17 @@
     "issueAuthor": "dmitrivMS",
     "repo": "microsoft/vscode",
     "score": 5,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 288359,
@@ -113,11 +195,17 @@
     "issueAuthor": "bpasero",
     "repo": "microsoft/vscode",
     "score": 2,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 288437,
@@ -128,11 +216,17 @@
     "issueAuthor": "bpasero",
     "repo": "microsoft/vscode",
     "score": null,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 288472,
@@ -143,11 +237,17 @@
     "issueAuthor": "bpasero",
     "repo": "microsoft/vscode",
     "score": 1,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 288922,
@@ -158,11 +258,17 @@
     "issueAuthor": "ulugbekna",
     "repo": "microsoft/vscode",
     "score": 5,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 289039,
@@ -173,11 +279,17 @@
     "issueAuthor": "benibenj",
     "repo": "microsoft/vscode",
     "score": 1,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 289808,
@@ -188,11 +300,17 @@
     "issueAuthor": "cwebster-99",
     "repo": "microsoft/vscode",
     "score": 3,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 2,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 289880,
@@ -203,11 +321,17 @@
     "issueAuthor": "joaomoreno",
     "repo": "microsoft/vscode",
     "score": 4,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 289883,
@@ -218,11 +342,17 @@
     "issueAuthor": "bpasero",
     "repo": "microsoft/vscode",
     "score": 5,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 289885,
@@ -233,11 +363,17 @@
     "issueAuthor": "benibenj",
     "repo": "microsoft/vscode",
     "score": 5,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 290020,
@@ -248,26 +384,38 @@
     "issueAuthor": "TylerLeonhardt",
     "repo": "microsoft/vscode",
     "score": 4,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 290038,
-    "prTitle": "",
-    "prMergeCommit": "",
-    "issue": null,
-    "issueTitle": "",
-    "issueAuthor": "",
+    "prTitle": "Fixes for agent sessions welcome page logic for Insiders and prefill data",
+    "prMergeCommit": "e55c97262cbe55dcad1b8f01381056f164d7968c",
+    "issue": 289963,
+    "issueTitle": "Chat doesnt get passed when opening a workspace",
+    "issueAuthor": "cwebster-99",
     "repo": "microsoft/vscode",
     "score": 5,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
-    "fileCount": 0,
-    "proposalSummary": ""
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 290114,
@@ -278,11 +426,17 @@
     "issueAuthor": "bpasero",
     "repo": "microsoft/vscode",
     "score": 4,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 290497,
@@ -293,11 +447,17 @@
     "issueAuthor": "ntrogh",
     "repo": "microsoft/vscode",
     "score": 1,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 290564,
@@ -308,11 +468,17 @@
     "issueAuthor": "benibenj",
     "repo": "microsoft/vscode",
     "score": 2,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 2,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291199,
@@ -323,11 +489,17 @@
     "issueAuthor": "joshspicer",
     "repo": "microsoft/vscode",
     "score": null,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291200,
@@ -338,11 +510,17 @@
     "issueAuthor": "isidorn",
     "repo": "microsoft/vscode",
     "score": 1,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291207,
@@ -353,11 +531,17 @@
     "issueAuthor": "chrmarti",
     "repo": "microsoft/vscode",
     "score": 5,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291227,
@@ -368,11 +552,17 @@
     "issueAuthor": "jrieken",
     "repo": "microsoft/vscode",
     "score": null,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 2,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291243,
@@ -383,11 +573,17 @@
     "issueAuthor": "sbatten",
     "repo": "microsoft/vscode",
     "score": 4,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 3,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291262,
@@ -398,11 +594,17 @@
     "issueAuthor": "lramos15",
     "repo": "microsoft/vscode",
     "score": 4,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291529,
@@ -413,11 +615,17 @@
     "issueAuthor": "sbatten",
     "repo": "microsoft/vscode",
     "score": null,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 2,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291572,
@@ -428,11 +636,17 @@
     "issueAuthor": "ulugbekna",
     "repo": "microsoft/vscode",
     "score": 4,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 3,
-    "proposalSummary": "The welcome page implements a 2-column layout by applying fixed `nth-child` CSS transforms to the virtualized list rows and a negative bottom margin to compress the list height. When the session list "
+    "proposalSummary": "The welcome page implements a 2-column layout by applying fixed `nth-child` CSS transforms to the virtualized list rows and a negative bottom margin to compress the list height. When the session list ",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291683,
@@ -443,26 +657,38 @@
     "issueAuthor": "joaomoreno",
     "repo": "microsoft/vscode",
     "score": 5,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291805,
-    "prTitle": "Agent sessions - Session grouping doesn't seem to always account for \"yesterday\" sessions (fix #291589)",
+    "prTitle": "Agent sessions - Session grouping doesn't seem to always account for \\\"yesterday\\\" sessions (fix #291589)",
     "prMergeCommit": "dc1437b20d1a2087321d030461981bbc48d2607f",
     "issue": 291589,
-    "issueTitle": "Agent sessions - Session grouping doesn't seem to always account for \"yesterday\" sessions",
+    "issueTitle": "Agent sessions - Session grouping doesn't seem to always account for \\\"yesterday\\\" sessions",
     "issueAuthor": "lostintangent",
     "repo": "microsoft/vscode",
     "score": 2,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 5,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291911,
@@ -473,11 +699,17 @@
     "issueAuthor": "lramos15",
     "repo": "microsoft/vscode",
     "score": null,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 291919,
@@ -488,11 +720,17 @@
     "issueAuthor": "lramos15",
     "repo": "microsoft/vscode",
     "score": 3.5,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 292160,
@@ -503,11 +741,17 @@
     "issueAuthor": "cwebster-99",
     "repo": "microsoft/vscode",
     "score": 4,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 292341,
@@ -518,11 +762,17 @@
     "issueAuthor": "alexr00",
     "repo": "microsoft/vscode",
     "score": 1,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 4,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 292472,
@@ -533,11 +783,17 @@
     "issueAuthor": "connor4312",
     "repo": "microsoft/vscode",
     "score": 5,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   },
   {
     "pr": 292593,
@@ -548,10 +804,16 @@
     "issueAuthor": "alexr00",
     "repo": "microsoft/vscode",
     "score": 1,
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z",
+    "model": "claude-sonnet-4.5",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-sonnet-4.5-2026-02-21",
+    "timestamp": "",
     "fileCount": 1,
-    "proposalSummary": ""
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
   }
 ]

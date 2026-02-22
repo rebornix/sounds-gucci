@@ -8,6 +8,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // Set active tab from URL immediately to prevent flash
+        (function() {
+            var tab = new URLSearchParams(window.location.search).get('tab') || 'issue';
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.nav-btn').forEach(function(b) {
+                    b.classList.toggle('active', b.dataset.panel === tab);
+                });
+                document.querySelectorAll('.panel').forEach(function(p) {
+                    p.classList.toggle('active', p.id === 'panel-' + tab);
+                });
+            });
+        })();
+    </script>
 </head>
 <body>
     <main class="analysis-layout">
@@ -19,15 +33,17 @@
                 <span id="issue-link"></span>
                 <span id="score-badge"></span>
             </div>
+            <div id="experiment-selector" class="experiment-selector" style="display:none;"></div>
         </div>
         <nav class="analysis-nav">
-            <button class="nav-btn active" data-panel="issue">Issue</button>
+            <button class="nav-btn" data-panel="issue">Issue</button>
             <button class="nav-btn" data-panel="proposal">Proposed Fix</button>
             <button class="nav-btn" data-panel="actual">Actual Fix</button>
             <button class="nav-btn" data-panel="validation">Validation</button>
+            <button class="nav-btn" data-panel="trace">Trace</button>
         </nav>
 
-        <section id="panel-issue" class="panel active">
+        <section id="panel-issue" class="panel">
             <h2>Bug Issue</h2>
             <div id="issue-content" class="markdown-content">Loading...</div>
         </section>
@@ -47,6 +63,11 @@
         <section id="panel-validation" class="panel">
             <h2>Validation & Comparison</h2>
             <div id="validation-content" class="markdown-content">Loading...</div>
+        </section>
+
+        <section id="panel-trace" class="panel">
+            <h2>Agent Trace</h2>
+            <div id="trace-content" class="trace-timeline">Loading...</div>
         </section>
     </main>
 

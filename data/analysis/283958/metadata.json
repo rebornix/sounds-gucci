@@ -1,0 +1,15 @@
+{
+  "pr": 283958,
+  "prTitle": "Fix TypeError when accessing undefined character in terminal suggest trigger detection",
+  "mergeCommit": "88b7540ba1c539ea006bcc283a65655d39b19226",
+  "parentCommit": "8202cbb14c1dc04421e66d188be43025f1dd91f5",
+  "fileCount": 1,
+  "issue": 283295,
+  "issueTitle": "Cannot read properties of undefined (reading 'match')",
+  "issueAuthor": "app/vs-code-engineering",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 290497,
-    "title": "fix 'Filter agent sessions resets when selecting additional session state filter'",
-    "mergeCommit": "109e2ee9b061bcbcbabebb8bea86b9350326776e",
-    "parentCommit": "381de2d9802d6caac6d35a3c474a67aff8753739",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 290352,
-    "title": "Filter agent sessions resets when selecting additional session state filter",
-    "author": "ntrogh",
-    "commentCount": 1
-  },
+  "pr": 290497,
+  "prTitle": "fix 'Filter agent sessions resets when selecting additional session state filter'",
+  "mergeCommit": "109e2ee9b061bcbcbabebb8bea86b9350326776e",
+  "parentCommit": "381de2d9802d6caac6d35a3c474a67aff8753739",
+  "fileCount": 1,
+  "issue": 290352,
+  "issueTitle": "Filter agent sessions resets when selecting additional session state filter",
+  "issueAuthor": "ntrogh",
+  "commentCount": 1,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/290497",
-  "generatedAt": "2026-02-07T08:54:41Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

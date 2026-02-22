@@ -1,0 +1,13 @@
+{
+  "pr": 249498,
+  "prTitle": "mcp: support resource templates",
+  "mergeCommit": "7e725c8ba323c872fdebc7eabec20d4f381019cf",
+  "parentCommit": "8de6ad92ff16f1dac412be3de183f9c9fed23871",
+  "fileCount": 6,
+  "issue": 250423,
+  "issueTitle": "MCP resource templates need better UI",
+  "issueAuthor": "jrieken",
+  "commentCount": 4,
+  "repo": "microsoft/vscode",
+  "tags": []
+}

@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 289885,
-    "title": "Chat drag and drop target much smaller since sessions expanded (fix #289062)",
-    "mergeCommit": "4daeb8f993748295082ef89baef196b54c20adf8",
-    "parentCommit": "dfb16008e8bbec7b994c49c6865d4594fa5030ad",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 289062,
-    "title": "Chat drag and drop target much smaller since sessions expanded",
-    "author": "benibenj",
-    "commentCount": 1
-  },
+  "pr": 289885,
+  "prTitle": "Chat drag and drop target much smaller since sessions expanded (fix #289062)",
+  "mergeCommit": "4daeb8f993748295082ef89baef196b54c20adf8",
+  "parentCommit": "dfb16008e8bbec7b994c49c6865d4594fa5030ad",
+  "fileCount": 1,
+  "issue": 289062,
+  "issueTitle": "Chat drag and drop target much smaller since sessions expanded",
+  "issueAuthor": "benibenj",
+  "commentCount": 1,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/289885",
-  "generatedAt": "2026-02-07T18:49:03Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

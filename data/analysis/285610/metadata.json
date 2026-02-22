@@ -1,0 +1,15 @@
+{
+  "pr": 285610,
+  "prTitle": "Do not assume stdio fields to be defined when spawning a child process.",
+  "mergeCommit": "3cb01d979b2ff5cae28f33df264bcabc46d49d8c",
+  "parentCommit": "b87990a91ce45af766a41e960321d77d7438e710",
+  "fileCount": 2,
+  "issue": 145504,
+  "issueTitle": "Cannot read property 'end' of undefined",
+  "issueAuthor": "vscode-triage-bot",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "tags": [
+    "error-telemetry"
+  ]
+}

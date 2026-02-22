@@ -1,0 +1,1 @@
+src/vs/workbench/contrib/notebook/browser/contrib/troubleshoot/layout.ts

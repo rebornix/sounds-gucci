@@ -40,12 +40,16 @@ The script expects the following structure:
 
 ```
 data/analysis/
-├── 12345/                    # PR number
-│   ├── metadata.json         # Required
-│   ├── issue.md             
-│   ├── pr.md                
-│   ├── proposal.md           # Bug-analyzer output (optional)
-│   └── validation.md         # Fix-validator output (optional)
+├── 12345/                        # PR number
+│   ├── metadata.json             # PR-level metadata
+│   ├── issue.md                  # Bug issue description
+│   ├── actual_fix/               # Real solution
+│   │   ├── pr-diff.patch
+│   │   ├── pr.md
+│   │   └── changed-files.txt
+│   └── claude-opus-4.6-2026-02-21/  # Experiment results
+│       ├── proposed-fix.md
+│       └── validation.md
 ├── 12346/
 │   └── ...
 ```

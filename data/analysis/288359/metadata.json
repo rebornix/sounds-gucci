@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 288359,
-    "title": "Agent sessions: rendering bug when stacked sessions list is expanded and context is added (fix #288151)",
-    "mergeCommit": "5591cd2fa63b0d72c862f74c3ffe8c7129efac10",
-    "parentCommit": "0ddbb7e8f5ea9c361265338b37a8d5253c63b136",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 288151,
-    "title": "Agent sessions: rendering bug when stacked sessions list is expanded and context is added",
-    "author": "bpasero",
-    "commentCount": 0
-  },
+  "pr": 288359,
+  "prTitle": "Agent sessions: rendering bug when stacked sessions list is expanded and context is added (fix #288151)",
+  "mergeCommit": "5591cd2fa63b0d72c862f74c3ffe8c7129efac10",
+  "parentCommit": "0ddbb7e8f5ea9c361265338b37a8d5253c63b136",
+  "fileCount": 1,
+  "issue": 288151,
+  "issueTitle": "Agent sessions: rendering bug when stacked sessions list is expanded and context is added",
+  "issueAuthor": "bpasero",
+  "commentCount": 0,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/288359",
-  "generatedAt": "2026-02-07T21:38:47Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

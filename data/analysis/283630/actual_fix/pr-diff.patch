@@ -1,0 +1,13 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/chatEditing/chatEditingCheckpointTimelineImpl.ts b/src/vs/workbench/contrib/chat/browser/chatEditing/chatEditingCheckpointTimelineImpl.ts
+index 5af60fad8849b..e6dabbdb302b1 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatEditing/chatEditingCheckpointTimelineImpl.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatEditing/chatEditingCheckpointTimelineImpl.ts
+@@ -758,7 +758,7 @@ export class ChatEditingCheckpointTimelineImpl implements IChatEditingCheckpoint
+ 				end = findFirst(checkpoints, c => c.requestId !== startRequestId, startIndex + 1);
+ 			} else {
+ 				end = checkpoints.find(c => c.requestId === stopRequestId)
+-					|| findFirst(checkpoints, c => c.requestId !== startRequestId, startIndex)
++					|| findFirst(checkpoints, c => c.requestId !== startRequestId, startIndex + 1)
+ 					|| checkpoints[checkpoints.length - 1];
+ 			}
+ 

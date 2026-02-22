@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 281673,
-    "title": "Fix edge case for in progress session",
-    "mergeCommit": "6801a977175147578333faaffeab6a95af8c43b1",
-    "parentCommit": "16bb4a308a90e36f8597a0e344b9fa5a99247213",
-    "fileCount": 5
-  },
-  "issue": {
-    "number": 281642,
-    "title": "Background agent session progress changes to worktree name when it's \"working...\"",
-    "author": "rebornix",
-    "commentCount": 1
-  },
+  "pr": 281673,
+  "prTitle": "Fix edge case for in progress session",
+  "mergeCommit": "6801a977175147578333faaffeab6a95af8c43b1",
+  "parentCommit": "16bb4a308a90e36f8597a0e344b9fa5a99247213",
+  "fileCount": 5,
+  "issue": 281642,
+  "issueTitle": "Background agent session progress changes to worktree name when it's \"working...\"",
+  "issueAuthor": "rebornix",
+  "commentCount": 1,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/281673",
-  "generatedAt": "2026-02-03T00:00:00Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

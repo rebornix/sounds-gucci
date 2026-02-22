@@ -1,24 +1,15 @@
 {
-  "pr": {
-    "number": 291919,
-    "title": "release: targetted fix for agent status widget with multiple windows open",
-    "mergeCommit": "876b74756125becabec92ae8ca34f0767f84f056",
-    "parentCommit": "df6ff376e270fbfb56c38a93b7f72f823414c0e2",
-    "fileCount": 1
-  },
-  "issue": {
-    "number": 290863,
-    "title": "Clicking from unread to in progress toggles all filters off",
-    "author": "lramos15",
-    "commentCount": 8
-  },
+  "pr": 291919,
+  "prTitle": "release: targetted fix for agent status widget with multiple windows open",
+  "mergeCommit": "876b74756125becabec92ae8ca34f0767f84f056",
+  "parentCommit": "df6ff376e270fbfb56c38a93b7f72f823414c0e2",
+  "fileCount": 1,
+  "issue": 290863,
+  "issueTitle": "Clicking from unread to in progress toggles all filters off",
+  "issueAuthor": "lramos15",
+  "commentCount": 8,
   "repo": "microsoft/vscode",
-  "clonePath": "/Users/penlv/Code/Work/vscode2",
-  "outputDir": "data/analysis/291919",
-  "generatedAt": "2026-02-07T08:39:30Z",
-  "experiment": {
-    "model": "claude-opus-4.5",
-    "agentVersion": "1.0",
-    "timestamp": "2026-02-07T00:00:00Z"
-  }
+  "tags": [
+    "sessions"
+  ]
 }

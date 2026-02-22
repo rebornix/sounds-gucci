@@ -1,0 +1,13 @@
+diff --git a/src/vs/platform/log/common/log.ts b/src/vs/platform/log/common/log.ts
+index 3a3510079e4e9..cd78f436dea25 100644
+--- a/src/vs/platform/log/common/log.ts
++++ b/src/vs/platform/log/common/log.ts
+@@ -649,7 +649,7 @@ export abstract class AbstractLoggerService extends Disposable implements ILogge
+ 	}
+ 
+ 	protected toResource(idOrResource: string | URI): URI {
+-		return isString(idOrResource) ? joinPath(this.logsHome, `${idOrResource}.log`) : idOrResource;
++		return isString(idOrResource) ? joinPath(this.logsHome, `${idOrResource.replace(/[\\/:\*\?"<>\|]/g, '_')}.log`) : idOrResource;
+ 	}
+ 
+ 	setLogLevel(logLevel: LogLevel): void;
