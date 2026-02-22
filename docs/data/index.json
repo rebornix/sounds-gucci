@@ -993,6 +993,27 @@
     "issueAuthor": "app/vs-code-engineering",
     "repo": "microsoft/vscode",
     "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 286173,
+    "prTitle": "Fix race condition in terminal suggest widget initialization causing appendChild crash",
+    "prMergeCommit": "a9676225eb6c43be43f8debcac2826ee989cc145",
+    "issue": 283291,
+    "issueTitle": "Cannot read properties of undefined (reading 'appendChild')",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 4,
     "model": "gpt-5.3-codex",
     "agentVersion": "",
     "agentCommit": "",
@@ -1139,6 +1160,27 @@
     "issueTitle": "Uncaught TypeError: Cannot read properties of undefined (reading 'substring')",
     "issueAuthor": "app/vs-code-engineering",
     "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 286573,
+    "prTitle": "Fix error in rasterizeGlyph",
+    "prMergeCommit": "e78547593cf2a52bf8386e64d71f6fdc4588a79c",
+    "issue": 246658,
+    "issueTitle": "Uncaught TypeError: Cannot read properties of undefined (reading 'substring')",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
     "score": 5,
     "model": "gpt-5.3-codex",
     "agentVersion": "",
@@ -1147,6 +1189,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "`TokenMetadata.getBackground(tokenMetadata)` can return `0` (`ColorId.None`) for tokens that do not explicitly carry a background.",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 287189,
+    "prTitle": "fix undefined property error from getViewLineMinColumn",
+    "prMergeCommit": "aee9b1b3f6916f1e177d2945389cdbeb655e1654",
+    "issue": 284539,
+    "issueTitle": "[Unhandled Error] Cannot read properties of undefined (reading 'getViewLineMinColumn')",
+    "issueAuthor": "bryanchen-d",
+    "repo": "microsoft/vscode",
+    "score": 3,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
     "traceUrl": "",
     "tags": [
       "error-telemetry"
@@ -1307,6 +1370,27 @@
     "issueTitle": "Chat empty view exp is odd",
     "issueAuthor": "bpasero",
     "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 288472,
+    "prTitle": "Chat empty view exp is odd (fix #288400)",
+    "prMergeCommit": "998f544bc301ed5601871e38a5051a4bfa27608f",
+    "issue": 288400,
+    "issueTitle": "Chat empty view exp is odd",
+    "issueAuthor": "bpasero",
+    "repo": "microsoft/vscode",
     "score": 1,
     "model": "claude-sonnet-4.5",
     "agentVersion": "",
@@ -1349,6 +1433,27 @@
     "issueTitle": "Explicitly archiving all sessions from Sessions view context menu should not show dialog",
     "issueAuthor": "ulugbekna",
     "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 288922,
+    "prTitle": "Explicitly archiving all sessions from Sessions view context menu should not show dialog (fix #288910)",
+    "prMergeCommit": "7f460a4ad8472d53c28725e486954b0d1172efbf",
+    "issue": 288910,
+    "issueTitle": "Explicitly archiving all sessions from Sessions view context menu should not show dialog",
+    "issueAuthor": "ulugbekna",
+    "repo": "microsoft/vscode",
     "score": 5,
     "model": "claude-sonnet-4.5",
     "agentVersion": "",
@@ -1378,6 +1483,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "The section-level archive-all action (`agentSessionSection.archive`) has hardcoded confirmation flow with no persisted opt-out. Every invocation re-prompts, even though:",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 289039,
+    "prTitle": "Do not mark sessions which completed while visible in the UI as unread (fix #288369)",
+    "prMergeCommit": "4ec8c09e46c06a026cf78bacd77e044ccdc9fa5d",
+    "issue": 288369,
+    "issueTitle": "Do not mark sessions which completed while visible in the UI as unread",
+    "issueAuthor": "benibenj",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -1434,6 +1560,27 @@
     "issueAuthor": "cwebster-99",
     "repo": "microsoft/vscode",
     "score": 3,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 289808,
+    "prTitle": "Target picker fixes",
+    "prMergeCommit": "f8bd1cfbc94b253e95852185b71646f4ea42770f",
+    "issue": 289229,
+    "issueTitle": "Cannot switch targets after initiating chat from welcome page",
+    "issueAuthor": "cwebster-99",
+    "repo": "microsoft/vscode",
+    "score": 3,
     "model": "claude-sonnet-4.5",
     "agentVersion": "",
     "agentCommit": "",
@@ -1462,6 +1609,27 @@
     "timestamp": "",
     "fileCount": 2,
     "proposalSummary": "There is a likely bridge mismatch in the extension-host ↔ main-thread session-options path:",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 289880,
+    "prTitle": "VS Code asks me to confirm to quit while a Cloud session is running (fix #289726)",
+    "prMergeCommit": "b43a3a3df6c87a1cc49ca73985782b3c94026004",
+    "issue": 289726,
+    "issueTitle": "VS Code asks me to confirm to quit while a Cloud session is running",
+    "issueAuthor": "joaomoreno",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -2000,6 +2168,27 @@
     "issueTitle": "[Unhandled Error] [UriError]: Scheme contains illegal characters.",
     "issueAuthor": "bryanchen-d",
     "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 4,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 294001,
+    "prTitle": "Fix URI scheme error in LoggerChannelClient.deregisterLogger",
+    "prMergeCommit": "0c3d14a4802fd082e75ce6360d39c8f8f3c11992",
+    "issue": 293503,
+    "issueTitle": "[Unhandled Error] [UriError]: Scheme contains illegal characters.",
+    "issueAuthor": "bryanchen-d",
+    "repo": "microsoft/vscode",
     "score": 3,
     "model": "gpt-5.3-codex",
     "agentVersion": "",
@@ -2008,6 +2197,27 @@
     "timestamp": "",
     "fileCount": 4,
     "proposalSummary": "`ILoggerService.deregisterLogger` contract accepts `URI | string`, but the IPC implementation path effectively assumes URI-shaped data in the main process:",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 296709,
+    "prTitle": "Fix ViewModel issue where all lines were hidden",
+    "prMergeCommit": "9c99e8fb20933a838deb6a62a0a9e2ab1919290f",
+    "issue": 293365,
+    "issueTitle": "[Unhandled Error] Cannot read properties of undefined (reading 'getViewLineMinColumn')",
+    "issueAuthor": "alexr00",
+    "repo": "microsoft/vscode",
+    "score": 3,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 6,
+    "proposalSummary": "",
     "traceUrl": "",
     "tags": [
       "error-telemetry"
