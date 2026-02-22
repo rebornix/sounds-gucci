@@ -157,11 +157,12 @@ function renderDashboard() {
 }
 
 function getGlobalScoreMax() {
-    const experiments = [...new Set(analysisData.map(d => d.experimentId))];
+    const data = getFilteredData();
+    const experiments = [...new Set(data.map(d => d.experimentId))];
     let maxCount = 0;
     for (const exp of experiments) {
         const counts = [0, 0, 0, 0, 0];
-        analysisData.filter(d => d.experimentId === exp && d.score).forEach(d => {
+        data.filter(d => d.experimentId === exp && d.score).forEach(d => {
             const idx = Math.floor(d.score) - 1;
             if (idx >= 0 && idx < 5) counts[idx]++;
         });
@@ -171,12 +172,13 @@ function getGlobalScoreMax() {
 }
 
 function renderComparisonChart(maxY) {
-    const experiments = [...new Set(analysisData.map(d => d.experimentId))].sort();
+    const data = getFilteredData();
+    const experiments = [...new Set(data.map(d => d.experimentId))].sort();
     const colors = ['#58a6ff', '#3fb950', '#d29922', '#f778ba', '#db6d28'];
     
     const datasets = experiments.map((exp, i) => {
         const counts = [0, 0, 0, 0, 0];
-        analysisData.filter(d => d.experimentId === exp && d.score).forEach(d => {
+        data.filter(d => d.experimentId === exp && d.score).forEach(d => {
             const idx = Math.floor(d.score) - 1;
             if (idx >= 0 && idx < 5) counts[idx]++;
         });
