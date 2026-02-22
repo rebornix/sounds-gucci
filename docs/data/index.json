@@ -47,6 +47,27 @@
     "issueTitle": "ListError [NotebookCellList] Invalid index 50",
     "issueAuthor": "app/vs-code-engineering",
     "repo": "microsoft/vscode",
+    "score": 1,
+    "model": "gemini-3.1-pro",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gemini-3.1-pro-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "The root cause is that `notebookEditorWidget.ts` calls `this._list.getCellViewScrollTop(cell)` without verifying if the cell is actually present in the list view. Because the list view updates asynchr",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 255490,
+    "prTitle": "add layover to new cells correctly and dispose of listeners as cells are removed",
+    "prMergeCommit": "ce37a385e43c4cfa00f150801e0575f32db40bbc",
+    "issue": 251601,
+    "issueTitle": "ListError [NotebookCellList] Invalid index 50",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
     "score": 2,
     "model": "gpt-5.3-codex",
     "agentVersion": "",
