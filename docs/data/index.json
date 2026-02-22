@@ -19,6 +19,69 @@
     "tags": []
   },
   {
+    "pr": 255490,
+    "prTitle": "add layover to new cells correctly and dispose of listeners as cells are removed",
+    "prMergeCommit": "ce37a385e43c4cfa00f150801e0575f32db40bbc",
+    "issue": 251601,
+    "issueTitle": "ListError [NotebookCellList] Invalid index 50",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 2,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 280217,
+    "prTitle": "Fix illegal characters in Dynamic Auth Provider logger filename",
+    "prMergeCommit": "2d96f38ce6ffb7355ade0ad99ca2dcb927d298ae",
+    "issue": 269810,
+    "issueTitle": "`loggerIpc#deregisterLogger` fails with Scheme contains illegal characters",
+    "issueAuthor": "bpasero",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 281397,
+    "prTitle": "Fix for agent session progress",
+    "prMergeCommit": "431aebe28b612f70c046d12bdb41fe3dd307ebd5",
+    "issue": 281149,
+    "issueTitle": "Local Session shows no empty description/progress when the chat widget is streaming in text",
+    "issueAuthor": "rebornix",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 281397,
     "prTitle": "Fix for agent session progress",
     "prMergeCommit": "431aebe28b612f70c046d12bdb41fe3dd307ebd5",
@@ -33,6 +96,27 @@
     "experimentId": "claude-sonnet-4.5-2026-02-21",
     "timestamp": "",
     "fileCount": 2,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 281589,
+    "prTitle": "Various fixes for session progress",
+    "prMergeCommit": "87466737669c9645a336f7647d4b46ecf7d84bf7",
+    "issue": 275332,
+    "issueTitle": "Agent sessions single view: standardize the session item entries",
+    "issueAuthor": "osortega",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 3,
     "proposalSummary": "",
     "traceUrl": "",
     "tags": [
@@ -68,6 +152,27 @@
     "issueTitle": "Background agent session progress changes to worktree name when it's \\\"working...\\\"",
     "issueAuthor": "rebornix",
     "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 5,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 281673,
+    "prTitle": "Fix edge case for in progress session",
+    "prMergeCommit": "6801a977175147578333faaffeab6a95af8c43b1",
+    "issue": 281642,
+    "issueTitle": "Background agent session progress changes to worktree name when it's \\\"working...\\\"",
+    "issueAuthor": "rebornix",
+    "repo": "microsoft/vscode",
     "score": 3,
     "model": "claude-sonnet-4.5",
     "agentVersion": "",
@@ -89,6 +194,27 @@
     "issueTitle": "Chat agent: cloud session does not show changes",
     "issueAuthor": "bpasero",
     "repo": "microsoft/vscode",
+    "score": 3,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 282092,
+    "prTitle": "Fix for cloud multi diff stats",
+    "prMergeCommit": "5fbb91b1657478e7429c3e67554c23fee865e121",
+    "issue": 281924,
+    "issueTitle": "Chat agent: cloud session does not show changes",
+    "issueAuthor": "bpasero",
+    "repo": "microsoft/vscode",
     "score": 4,
     "model": "claude-sonnet-4.5",
     "agentVersion": "",
@@ -96,6 +222,48 @@
     "experimentId": "claude-sonnet-4.5-2026-02-21",
     "timestamp": "",
     "fileCount": 2,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 282221,
+    "prTitle": "Fix race condition causing \\\"Model is disposed!\\\" error in virtual document updates",
+    "prMergeCommit": "5639dca9912d7ab8896929b1a09f30f883ead43f",
+    "issue": 212713,
+    "issueTitle": "Model is disposed!",
+    "issueAuthor": "vscodenpa",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 282245,
+    "prTitle": "",
+    "prMergeCommit": "",
+    "issue": 0,
+    "issueTitle": "",
+    "issueAuthor": "",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 0,
     "proposalSummary": "",
     "traceUrl": "",
     "tags": [
@@ -142,6 +310,69 @@
     "traceUrl": "",
     "tags": [
       "sessions"
+    ]
+  },
+  {
+    "pr": 283630,
+    "prTitle": "fix: error in epoch bounds in edit timeline",
+    "prMergeCommit": "059761d01f46380f93c4b0be42f4422285cdac59",
+    "issue": 283304,
+    "issueTitle": "Cannot read properties of undefined (reading 'requestId')",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 283844,
+    "prTitle": "Remove non null assertion",
+    "prMergeCommit": "934a4f6b490505737f043f830e3993f76bc264ff",
+    "issue": 283302,
+    "issueTitle": "Cannot read properties of undefined (reading 'setAttribute')",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 283868,
+    "prTitle": "wait for xterm element vs assuming it's defined",
+    "prMergeCommit": "f4367f568f22aff90295edb026ab877eb0d61cc0",
+    "issue": 283287,
+    "issueTitle": "Cannot read properties of undefined (reading 'querySelector')",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "claude-opus-4.6",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "claude-opus-4.6-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
     ]
   },
   {
