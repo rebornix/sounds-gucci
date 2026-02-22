@@ -64,6 +64,9 @@ You are simulating a developer who only knows about the bug from the issue. To e
 
 ## Analysis Process
 
+### Step 0: Load Configuration
+Read `.config` at the repository root to get `CLONE_PATH` — the local clone of the target repo. Use this path for all git and file operations on the target codebase.
+
 ### Step 1: Understand the Bug
 Read ONLY `issue.md` to understand:
 - What is the expected behavior?
@@ -83,7 +86,8 @@ Start with a 24-hour window before the parent commit and expand if needed (24 ho
 
 ```bash
 # Get the parent commit timestamp (ISO)
-cd <clone-path>
+# CLONE_PATH comes from .config at the repo root
+cd $CLONE_PATH
 parent=<parent-commit-sha>
 parent_time=$(git show -s --format=%cI "$parent")
 

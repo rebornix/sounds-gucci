@@ -8,7 +8,16 @@ set -euo pipefail
 OUTPUT_DIR=""
 TAGS=""
 
-# Parse arguments
+# Load defaults from .config if it exists
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+CONFIG_FILE="$REPO_ROOT/.config"
+if [[ -f "$CONFIG_FILE" ]]; then
+  # shellcheck disable=SC1090
+  source "$CONFIG_FILE"
+fi
+
+# Parse arguments (override .config defaults)
 while [[ $# -gt 0 ]]; do
   case $1 in
     --pr) PR_NUM="$2"; shift 2 ;;
@@ -23,7 +32,8 @@ done
 
 # Validate required arguments
 if [[ -z "${PR_NUM:-}" || -z "${ISSUE_NUM:-}" || -z "${REPO:-}" || -z "${CLONE_PATH:-}" ]]; then
-  echo "Usage: $0 --pr <num> --issue <num> --repo <owner/repo> --clone-path <path> [--output-dir <path>]"
+  echo "Usage: $0 --pr <num> --issue <num> --repo <owner/repo> [--clone-path <path>] [--output-dir <path>]"
+  echo "  --clone-path defaults to CLONE_PATH from .config"
   exit 1
 fi
 
