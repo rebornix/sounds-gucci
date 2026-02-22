@@ -628,6 +628,27 @@
     ]
   },
   {
+    "pr": 282325,
+    "prTitle": "Fix for completing response if needed",
+    "prMergeCommit": "57f6d3a72c7d24b0719a5a60fd834e41b493c372",
+    "issue": 281630,
+    "issueTitle": "Duplicated file changes part for background session when `chat.checkpoints.showFileChanges` is turned on",
+    "issueAuthor": "rebornix",
+    "repo": "microsoft/vscode",
+    "score": 1,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`shouldShowFileChangesSummary()` uses `getChatSessionType(element.sessionResource)` to decide local vs non-local. That check is brittle for background/contributed sessions because the response renderi",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 283630,
     "prTitle": "fix: error in epoch bounds in edit timeline",
     "prMergeCommit": "059761d01f46380f93c4b0be42f4422285cdac59",
@@ -775,6 +796,27 @@
     ]
   },
   {
+    "pr": 283958,
+    "prTitle": "Fix TypeError when accessing undefined character in terminal suggest trigger detection",
+    "prMergeCommit": "88b7540ba1c539ea006bcc283a65655d39b19226",
+    "issue": 283295,
+    "issueTitle": "Cannot read properties of undefined (reading 'match')",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "The code indexes into a string with `cursorIndex - 1` and then calls `char.match(...)` without guarding for `undefined`.",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
     "pr": 284078,
     "prTitle": "Fix error in releasenotes editor",
     "prMergeCommit": "39cf2824f01fd67709286034d433743adb5885b3",
@@ -790,6 +832,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 284078,
+    "prTitle": "Fix error in releasenotes editor",
+    "prMergeCommit": "39cf2824f01fd67709286034d433743adb5885b3",
+    "issue": 283296,
+    "issueTitle": "this.O is not a function",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`ReleaseNotesManager` passes instance methods as event callbacks without binding `this`.",
     "traceUrl": "",
     "tags": [
       "error-telemetry"
@@ -817,6 +880,27 @@
     ]
   },
   {
+    "pr": 285608,
+    "prTitle": "Handle more cases in scmViewPane.getParent",
+    "prMergeCommit": "1eee6eb1488c56f9fc344909050b583ee604cf72",
+    "issue": 204995,
+    "issueTitle": "Unexpected call to getParent",
+    "issueAuthor": "vscodenpa",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`SCMTreeDataSource.getParent` is incomplete for the declared `TreeElement` union. It omits at least `ISCMRepository` (and likely `ISCMActionButton`), so when tree operations request those parents (for",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
     "pr": 285610,
     "prTitle": "Do not assume stdio fields to be defined when spawning a child process.",
     "prMergeCommit": "3cb01d979b2ff5cae28f33df264bcabc46d49d8c",
@@ -832,6 +916,27 @@
     "timestamp": "",
     "fileCount": 2,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
+    "pr": 285610,
+    "prTitle": "Do not assume stdio fields to be defined when spawning a child process.",
+    "prMergeCommit": "3cb01d979b2ff5cae28f33df264bcabc46d49d8c",
+    "issue": 145504,
+    "issueTitle": "Cannot read property 'end' of undefined",
+    "issueAuthor": "vscode-triage-bot",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "`Repository.checkIgnore` assumes spawned child stdio streams are always available (`child.stdin!`, `child.stdout!`, `child.stderr!`). In some runtime/spawn configurations, one or more stdio fields can",
     "traceUrl": "",
     "tags": [
       "error-telemetry"
@@ -859,6 +964,27 @@
     ]
   },
   {
+    "pr": 285970,
+    "prTitle": "Fix querySelector TypeError in terminal suggest when xterm element becomes undefined",
+    "prMergeCommit": "de56ab16ef93a6e348ddfabd4118d585d7746d7d",
+    "issue": 285923,
+    "issueTitle": "Cannot read properties of undefined (reading 'querySelector')",
+    "issueAuthor": "app/vs-code-engineering",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`_prepareAddonLayout` is invoked from multiple event paths (`onDidFocus`, target changes, config changes/load), and while it has an initial null-check for `xtermElement`, it still assumes the captured",
+    "traceUrl": "",
+    "tags": [
+      "error-telemetry"
+    ]
+  },
+  {
     "pr": 286385,
     "prTitle": "Memory leak related to diff editor (fix #286336)",
     "prMergeCommit": "0a29012f26a80170293ed80cf39977b188dda4f1",
@@ -901,6 +1027,27 @@
     ]
   },
   {
+    "pr": 286385,
+    "prTitle": "Memory leak related to diff editor (fix #286336)",
+    "prMergeCommit": "0a29012f26a80170293ed80cf39977b188dda4f1",
+    "issue": 286336,
+    "issueTitle": "Memory leak related to diff editor",
+    "issueAuthor": "SimonSiefke",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`EditorGutter.dispose()` in `src/vs/editor/browser/widget/diffEditor/utils/editorGutter.ts` does not dispose entries in `this.views`.",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 286543,
     "prTitle": "Disabling AI does not apply without restart when Copilot installed (fix #286498)",
     "prMergeCommit": "cdd00f23b3269f0788538509eb5d7e38f7898e74",
@@ -937,6 +1084,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 286543,
+    "prTitle": "Disabling AI does not apply without restart when Copilot installed (fix #286498)",
+    "prMergeCommit": "cdd00f23b3269f0788538509eb5d7e38f7898e74",
+    "issue": 286498,
+    "issueTitle": "Disabling AI does not apply without restart when Copilot installed",
+    "issueAuthor": "dmitrivMS",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`ChatContextKeys.enabled` (`_hasDefaultAgent`) is recomputed from **default agent data presence** rather than **activated default agent implementation presence** when an implementation is disposed.",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -985,6 +1153,27 @@
     ]
   },
   {
+    "pr": 288359,
+    "prTitle": "Agent sessions: rendering bug when stacked sessions list is expanded and context is added (fix #288151)",
+    "prMergeCommit": "5591cd2fa63b0d72c862f74c3ffe8c7129efac10",
+    "issue": 288151,
+    "issueTitle": "Agent sessions: rendering bug when stacked sessions list is expanded and context is added",
+    "issueAuthor": "bpasero",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`ChatViewPane.layoutSessionsControl()` computes stacked sessions height with a **fixed** chat reserve (`MIN_CHAT_WIDGET_HEIGHT = 120`).",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 288437,
     "prTitle": "Leak (fix #288398)",
     "prMergeCommit": "1b4cd523aac3670395dba12ae917e4e1fe67ddf7",
@@ -1021,6 +1210,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 288437,
+    "prTitle": "Leak (fix #288398)",
+    "prMergeCommit": "1b4cd523aac3670395dba12ae917e4e1fe67ddf7",
+    "issue": 288398,
+    "issueTitle": "Leak",
+    "issueAuthor": "bpasero",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-22",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`ChangeLanguageAction.run` creates `galleryAction` (`ShowLanguageExtensionsAction`, which extends `Action`/`Disposable`) and may insert it into quick-pick items. The method has multiple early returns ",
     "traceUrl": "",
     "tags": [
       "sessions"
