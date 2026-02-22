@@ -1,15 +1,14 @@
 {
   "pr": 282245,
-  "prTitle": "",
-  "mergeCommit": "",
-  "parentCommit": "",
-  "fileCount": 0,
-  "issue": 0,
-  "issueTitle": "",
-  "issueAuthor": "",
-  "commentCount": 0,
+  "prTitle": "Small fix for in progress check for overrides",
+  "mergeCommit": "38fbd7711c6cb70fa1e37ed575b1af81a903fb63",
+  "parentCommit": "ab41693fdd7e34d876bdcc2073f03e5fbd47aeb8",
+  "fileCount": 1,
+  "issue": 282175,
+  "issueTitle": "Review copilot PR feedback",
+  "issueAuthor": "bpasero",
+  "commentCount": 1,
   "repo": "microsoft/vscode",
-  "tags": [
-    "sessions"
-  ]
+  "clonePath": "/Users/penlv/Code/Work/vscode2",
+  "tags": ["sessions"]
 }

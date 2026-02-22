@@ -24,3 +24,12 @@ _Originally posted by @Copilot in https://github.com/microsoft/vscode/pull/28217
 
 ## Comments
 
+
+### @osortega (2025-12-09T16:20:12Z)
+
+The suggestion is not fully right, we need to override the description for all sessions that are in progress, even if the progress is undefined.
+This is because when the chat is in progress we need to prioritize the description from the model.
+
+Sent a PR to fix the issue
+
+---

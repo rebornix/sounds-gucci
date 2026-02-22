@@ -1,6 +1,6 @@
 ---
 name: fix-validator
-model: GPT-5.3-Codex (copilot)
+model: Gemini 3.1 Pro (Preview) (copilot)
 description: Cross-check a proposed bug fix against the actual PR changes. Use this agent after bug-analyzer has proposed a fix to see how well it aligns with the real solution.
 argument-hint: Path to the analysis directory (e.g., "data/analysis/12345") containing the proposal and actual_fix/pr-diff.patch
 tools: ['execute', 'read', 'agent', 'edit', 'search', 'web', 'github/*', 'todo']
