@@ -1720,6 +1720,27 @@
     ]
   },
   {
+    "pr": 289883,
+    "prTitle": "Agent sessions sash can hide the side-by-side when sized small (fix #289680)",
+    "prMergeCommit": "4af12255f5b9dd3679c5adfe4739908d5412ddb2",
+    "issue": 289680,
+    "issueTitle": "Agent sessions sash can hide the side-by-side when sized small",
+    "issueAuthor": "bpasero",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "The side-by-side sash handler updates width only; it does not implement a “collapse when dragged small enough” threshold.",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 289885,
     "prTitle": "Chat drag and drop target much smaller since sessions expanded (fix #289062)",
     "prMergeCommit": "4daeb8f993748295082ef89baef196b54c20adf8",
@@ -1756,6 +1777,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 289885,
+    "prTitle": "Chat drag and drop target much smaller since sessions expanded (fix #289062)",
+    "prMergeCommit": "4daeb8f993748295082ef89baef196b54c20adf8",
+    "issue": 289062,
+    "issueTitle": "Chat drag and drop target much smaller since sessions expanded",
+    "issueAuthor": "benibenj",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "The Chat view host (`ChatViewPane`) does not pass a broad drop-zone container to `ChatWidget`. As a result, drag-and-drop overlay registration falls back to the input part's local `container`, making ",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -1804,6 +1846,27 @@
     ]
   },
   {
+    "pr": 290020,
+    "prTitle": "Claude Agent integration: Archiving a Chat does not prompt me to decide if I want to keep/discard my changes from that chat (fix #289688)",
+    "prMergeCommit": "042b8f0ae7375cc67b2575a7d0cffaad501736c6",
+    "issue": 289688,
+    "issueTitle": "Claude Agent integration: Archiving a Chat does not prompt me to decide if I want to keep/discard my changes from that chat",
+    "issueAuthor": "TylerLeonhardt",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "Regression in archive flow for agent sessions:",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 290038,
     "prTitle": "Fixes for agent sessions welcome page logic for Insiders and prefill data",
     "prMergeCommit": "e55c97262cbe55dcad1b8f01381056f164d7968c",
@@ -1840,6 +1903,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 290038,
+    "prTitle": "Fixes for agent sessions welcome page logic for Insiders and prefill data",
+    "prMergeCommit": "e55c97262cbe55dcad1b8f01381056f164d7968c",
+    "issue": 289963,
+    "issueTitle": "Chat doesnt get passed when opening a workspace",
+    "issueAuthor": "cwebster-99",
+    "repo": "microsoft/vscode",
+    "score": 3,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "The transfer mechanism writes prefill data to application storage (`chat.welcomeViewPrefill`) in `handleWorkspaceSubmission`, but consumption is only implemented in `AgentSessionsWelcomePage.applyPref",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -1888,6 +1972,27 @@
     ]
   },
   {
+    "pr": 290114,
+    "prTitle": "Agents control: every chat interaction shows 1-progress, 1-unread (fix #289831)",
+    "prMergeCommit": "87e6108688849dc201fcd2b50e4e36cd62a6a53e",
+    "issue": 289831,
+    "issueTitle": "Agents control: every chat interaction shows 1 unread",
+    "issueAuthor": "bpasero",
+    "repo": "microsoft/vscode",
+    "score": 3,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "Unread counting in the title-bar status widget is too broad:",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 290497,
     "prTitle": "fix 'Filter agent sessions resets when selecting additional session state filter'",
     "prMergeCommit": "109e2ee9b061bcbcbabebb8bea86b9350326776e",
@@ -1924,6 +2029,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 290497,
+    "prTitle": "fix 'Filter agent sessions resets when selecting additional session state filter'",
+    "prMergeCommit": "109e2ee9b061bcbcbabebb8bea86b9350326776e",
+    "issue": 290352,
+    "issueTitle": "Filter agent sessions resets when selecting additional session state filter",
+    "issueAuthor": "ntrogh",
+    "repo": "microsoft/vscode",
+    "score": 2,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`agentTitleBarStatusWidget.ts` incorrectly identifies user-selected state combinations as the “in-progress badge filter” using only `states.length === 2`.",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -1972,6 +2098,27 @@
     ]
   },
   {
+    "pr": 290564,
+    "prTitle": "fix tabbing around agent status",
+    "prMergeCommit": "53db96894dd584e92b7a37ec781defa76420639e",
+    "issue": 289340,
+    "issueTitle": "Agent Status: Unable to Focus `Toggle Chat` using keyboard navigation",
+    "issueAuthor": "benibenj",
+    "repo": "microsoft/vscode",
+    "score": 3,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "The sparkle/primary control that maps to **Toggle Chat** is rendered through `DropdownWithPrimaryActionViewItem`, whose primary action is not guaranteed to be in tab order by default. In this context ",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 291199,
     "prTitle": "Running chat not marked as 'in-progress' if currently viewed (fix #290642)",
     "prMergeCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
@@ -2008,6 +2155,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 291199,
+    "prTitle": "Running chat not marked as 'in-progress' if currently viewed (fix #290642)",
+    "prMergeCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
+    "issue": 290642,
+    "issueTitle": "Running chat not marked as 'in-progress' if currently viewed",
+    "issueAuthor": "joshspicer",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`_getSessionStats()` excludes sessions that already have an open chat widget. As a result, a currently viewed in-progress session is treated as if it does not exist for the in-progress badge logic.",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -2056,6 +2224,27 @@
     ]
   },
   {
+    "pr": 291200,
+    "prTitle": "Chat progress badge not useful and just distracts me (fix #290793)",
+    "prMergeCommit": "a066abff0fe2962791823f757767d88f079a036c",
+    "issue": 290793,
+    "issueTitle": "Chat progress badge not useful and just distracts me",
+    "issueAuthor": "isidorn",
+    "repo": "microsoft/vscode",
+    "score": 2,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "In `agentTitleBarStatusWidget.ts`, `_renderStatusBadge(...)` renders the right-side active/needs-input section when `hasActiveSessions` is true:",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 291207,
     "prTitle": "Don't sort sessions by read/unread state (fix #290858)",
     "prMergeCommit": "555c71bd02142065b21f32c07921b7f072b6bcba",
@@ -2092,6 +2281,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 291207,
+    "prTitle": "Don't sort sessions by read/unread state (fix #290858)",
+    "prMergeCommit": "555c71bd02142065b21f32c07921b7f072b6bcba",
+    "issue": 290858,
+    "issueTitle": "Don't sort sessions by read/unread state",
+    "issueAuthor": "chrmarti",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`ChatViewPane` injects a custom comparator for stacked sessions:",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -2140,6 +2350,27 @@
     ]
   },
   {
+    "pr": 291227,
+    "prTitle": "Unread state seems flaky and random (fix #290346)",
+    "prMergeCommit": "761f19c25f6be7cf9cdf90c8d1bd632f8ba21459",
+    "issue": 290346,
+    "issueTitle": "Unread state seems flaky and random",
+    "issueAuthor": "jrieken",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "Unread state is computed from two sources that were introduced together and can preserve bad history:",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 291243,
     "prTitle": "Agent session mode breaks the tri-state toggle of the chat icon in the title bar (fix #291099)",
     "prMergeCommit": "e1cede2ffcb069f8021bddca87ca5666be937c8a",
@@ -2176,6 +2407,27 @@
     "timestamp": "",
     "fileCount": 3,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 291243,
+    "prTitle": "Agent session mode breaks the tri-state toggle of the chat icon in the title bar (fix #291099)",
+    "prMergeCommit": "e1cede2ffcb069f8021bddca87ca5666be937c8a",
+    "issue": 291099,
+    "issueTitle": "Agent session mode breaks the tri-state toggle of the chat icon in the title bar",
+    "issueAuthor": "sbatten",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 3,
+    "proposalSummary": "`ToggleChatAction` applies generic click-behavior handling, and for `AgentsControlClickBehavior.Focus` it never maximizes the auxiliary bar.",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -2218,6 +2470,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 291262,
+    "prTitle": "In stacked view filtering resets the more expansion making filtering hard to see (fix #290873)",
+    "prMergeCommit": "9961a3a8b0a359d52663daf2de3067a0f525733c",
+    "issue": 290873,
+    "issueTitle": "In stacked view filtering resets the more expansion making filtering hard to see",
+    "issueAuthor": "lramos15",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`src/vs/workbench/contrib/chat/browser/agentSessions/agentSessionsControl.ts` enforces collapsing of the **More** section on filter updates, with only one exception (find-open). There is no unread-fil",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -2260,6 +2533,27 @@
     "timestamp": "",
     "fileCount": 2,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 291529,
+    "prTitle": "In agent session window, layout falls over when opening editors (fix #291089)",
+    "prMergeCommit": "7a488d0f074748d65b5e017eea3662dc0aa17fbd",
+    "issue": 291089,
+    "issueTitle": "In agent session window, layout falls over when opening editors",
+    "issueAuthor": "sbatten",
+    "repo": "microsoft/vscode",
+    "score": 3,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 2,
+    "proposalSummary": "`showEditorIfHidden()` assumes that restoring the editor can always be done by toggling maximization state (panel or auxiliary bar). That assumption is false when panel alignment is non-center (`justi",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -2308,6 +2602,27 @@
     ]
   },
   {
+    "pr": 291572,
+    "prTitle": "Agents welcome view UI fixes",
+    "prMergeCommit": "16d4fc6d853bf4d5a82768ca4cc1d62f5284f431",
+    "issue": 290790,
+    "issueTitle": "Archiving a session results in 2 sessions being archiving",
+    "issueAuthor": "ulugbekna",
+    "repo": "microsoft/vscode",
+    "score": 3,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 3,
+    "proposalSummary": "The welcome page creates a 2-column grid by **post-transforming virtual list rows** using fixed `nth-child` CSS rules plus manual negative-margin compensation.",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 291683,
     "prTitle": "Chat Sessions: Toggling filter collapses More section (fix #291544)",
     "prMergeCommit": "90d24f7d3424df566adb7cc6a3d758ca7f169964",
@@ -2344,6 +2659,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 291683,
+    "prTitle": "Chat Sessions: Toggling filter collapses More section (fix #291544)",
+    "prMergeCommit": "90d24f7d3424df566adb7cc6a3d758ca7f169964",
+    "issue": 291544,
+    "issueTitle": "Chat Sessions: Toggling filter collapses More section",
+    "issueAuthor": "joaomoreno",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`AgentSessionsControl` reapplies section collapse policy for `More` on **every** filter change, even when the change is unrelated to unread/read filtering.",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -2386,6 +2722,27 @@
     "timestamp": "",
     "fileCount": 5,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 291805,
+    "prTitle": "Agent sessions - Session grouping doesn't seem to always account for \\\"yesterday\\\" sessions (fix #291589)",
+    "prMergeCommit": "dc1437b20d1a2087321d030461981bbc48d2607f",
+    "issue": 291589,
+    "issueTitle": "Agent sessions - Session grouping doesn't seem to always account for \\\"yesterday\\\" sessions",
+    "issueAuthor": "lostintangent",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 5,
+    "proposalSummary": "Two different notions of “day” are used:",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -2434,6 +2791,27 @@
     ]
   },
   {
+    "pr": 291911,
+    "prTitle": "targetted fix for agent status widget with multiple windows open",
+    "prMergeCommit": "2b17889bea76cae3a08203311262ad137632a22c",
+    "issue": 290863,
+    "issueTitle": "Clicking from unread to in progress toggles all filters off",
+    "issueAuthor": "lramos15",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`agentTitleBarStatusWidget.ts` stores temporary badge filters (unread / in-progress) in **profile-scoped** storage under:",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 291919,
     "prTitle": "release: targetted fix for agent status widget with multiple windows open",
     "prMergeCommit": "876b74756125becabec92ae8ca34f0767f84f056",
@@ -2476,6 +2854,27 @@
     ]
   },
   {
+    "pr": 291919,
+    "prTitle": "release: targetted fix for agent status widget with multiple windows open",
+    "prMergeCommit": "876b74756125becabec92ae8ca34f0767f84f056",
+    "issue": 290863,
+    "issueTitle": "Clicking from unread to in progress toggles all filters off",
+    "issueAuthor": "lramos15",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "Filter state is profile-scoped by design, but the title-bar widget’s temporary “previous filter” restore logic is not window-aware. With multiple windows:",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 292160,
     "prTitle": "Agents welcome view command fixes",
     "prMergeCommit": "d6ff40d9187f4f0a0d4139211742773111ad6816",
@@ -2512,6 +2911,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 292160,
+    "prTitle": "Agents welcome view command fixes",
+    "prMergeCommit": "d6ff40d9187f4f0a0d4139211742773111ad6816",
+    "issue": 291444,
+    "issueTitle": "Open recent is not actionable with no recent workspaces",
+    "issueAuthor": "cwebster-99",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`src/vs/workbench/contrib/welcomeAgentSessions/browser/agentSessionsWelcome.ts` hardcodes the first start entry as:",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -2560,6 +2980,27 @@
     ]
   },
   {
+    "pr": 292341,
+    "prTitle": "Chat Anonymous: can send a chat message with anonymous access (fix #292296)",
+    "prMergeCommit": "1951d880562601ebdb30c0a509d6b7bd37a05f09",
+    "issue": 292296,
+    "issueTitle": "Chat Anonymous: can send a chat message with anonymous access",
+    "issueAuthor": "alexr00",
+    "repo": "microsoft/vscode",
+    "score": 2,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 4,
+    "proposalSummary": "Most likely a **test synchronization/race issue**, not a core product regression:",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
     "pr": 292472,
     "prTitle": "Agent session list collapsed automatically without interaction (fix #291701)",
     "prMergeCommit": "8d864503e1d96ad37e2c4b001b330a75b03261cb",
@@ -2596,6 +3037,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 292472,
+    "prTitle": "Agent session list collapsed automatically without interaction (fix #291701)",
+    "prMergeCommit": "8d864503e1d96ad37e2c4b001b330a75b03261cb",
+    "issue": 291701,
+    "issueTitle": "Agent session list collapsed automatically without interaction",
+    "issueAuthor": "connor4312",
+    "repo": "microsoft/vscode",
+    "score": 5,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "`AgentSessionsControl` can trigger multiple asynchronous `updateChildren()` operations in close succession (filter changes, model changes, visibility changes). Because these updates are not serialized",
     "traceUrl": "",
     "tags": [
       "sessions"
@@ -2638,6 +3100,27 @@
     "timestamp": "",
     "fileCount": 1,
     "proposalSummary": "",
+    "traceUrl": "",
+    "tags": [
+      "sessions"
+    ]
+  },
+  {
+    "pr": 292593,
+    "prTitle": "can send a chat message with anonymous access (fix #292582)",
+    "prMergeCommit": "1adb77d0f4dbadb1077087395d4bf917cd0359cf",
+    "issue": 292582,
+    "issueTitle": "can send a chat message with anonymous access",
+    "issueAuthor": "alexr00",
+    "repo": "microsoft/vscode",
+    "score": 4,
+    "model": "gpt-5.3-codex",
+    "agentVersion": "",
+    "agentCommit": "",
+    "experimentId": "gpt-5.3-codex-2026-02-23",
+    "timestamp": "",
+    "fileCount": 1,
+    "proposalSummary": "The failure is caused by a **flaky smoke test assertion path** in `chatAnonymous.test.ts`, not by a confirmed product behavior break.",
     "traceUrl": "",
     "tags": [
       "sessions"

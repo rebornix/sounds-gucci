@@ -1,6 +1,6 @@
 ---
 name: bug-analyzer
-model: Claude Opus 4.6 (fast mode) (Preview) (copilot)
+model: GPT-5.3-Codex (copilot)
 description: Analyze a bug issue and propose a fix by examining git history. Use this agent after running setup-pr-analysis to analyze an issue and propose how to fix it.
 argument-hint: Path to the analysis directory (e.g., "data/analysis/12345") containing issue.md and metadata.json
 tools: ['execute', 'read', 'agent', 'edit', 'search', 'todo']

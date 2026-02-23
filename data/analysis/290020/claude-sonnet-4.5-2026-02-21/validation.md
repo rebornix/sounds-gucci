@@ -1,5 +1,7 @@
 # Fix Validation: PR #290020
 
+_Validation rerun: 2026-02-22_
+
 ## Actual Fix Summary
 The actual PR took a **complete rollback approach** to fix the issue. Instead of implementing a complex solution for handling multiple sessions with pending edits, it reverted the multi-session handling logic back to the original per-session confirmation dialog.
 
