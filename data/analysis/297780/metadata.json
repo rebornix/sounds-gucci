@@ -1,0 +1,13 @@
+{
+  "pr": 299628,
+  "prTitle": "mcp: fix concurrent request response collection race",
+  "mergeCommit": "57479c0e8adadf63699e58f55c21251e793caaf2",
+  "parentCommit": "",
+  "fileCount": 3,
+  "issue": 297780,
+  "issueTitle": "MCP Gateway performance needs improvement",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 22986500206,
+  "closedAt": "2026-03-06T22:52:46Z"
+}

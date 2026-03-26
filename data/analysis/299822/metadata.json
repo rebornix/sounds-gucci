@@ -1,0 +1,13 @@
+{
+  "pr": 300822,
+  "prTitle": "Bump xterm to 6.1.0-beta.191",
+  "mergeCommit": "7461493056abff00e1064663d9786dfefad56c31",
+  "parentCommit": "",
+  "fileCount": 6,
+  "issue": 299822,
+  "issueTitle": "Space character typed in Textual does not appear in VS Code integrated terminal",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23007229817,
+  "closedAt": "2026-03-11T17:40:58Z"
+}

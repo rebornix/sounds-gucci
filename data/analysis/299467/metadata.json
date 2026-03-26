@@ -1,0 +1,13 @@
+{
+  "pr": 4196,
+  "prTitle": "Fix copilot chat settings respect default overrides",
+  "mergeCommit": "b6bbe6ecb0b7340e111e9c752bf30cf1be38dcde",
+  "parentCommit": "",
+  "fileCount": 3,
+  "issue": 299467,
+  "issueTitle": "Copilot chat settings are not respecting default overrides",
+  "repo": "microsoft/vscode-copilot-chat",
+  "tags": [],
+  "workflowRunId": 22968265725,
+  "closedAt": "2026-03-06T11:06:29Z"
+}

@@ -1,0 +1,13 @@
+{
+  "pr": 292258,
+  "prTitle": "fix: wrap long docstrings in parameter hints widget",
+  "mergeCommit": "ebaff5819d79475761d59d2b39238280f2db3884",
+  "parentCommit": "",
+  "fileCount": 1,
+  "issue": 142888,
+  "issueTitle": "Long parameter hints are not wrapped",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23007294514,
+  "closedAt": "2026-03-11T21:02:14Z"
+}

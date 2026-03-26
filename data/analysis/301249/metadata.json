@@ -1,0 +1,13 @@
+{
+  "pr": 301523,
+  "prTitle": "resize question carousel ",
+  "mergeCommit": "5bf5b2ae5d859d7ec9ef4563cafc790a47ad3cc5",
+  "parentCommit": "",
+  "fileCount": 1,
+  "issue": 301249,
+  "issueTitle": "Chat questions don't scroll",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23060233575,
+  "closedAt": "2026-03-13T16:33:20Z"
+}

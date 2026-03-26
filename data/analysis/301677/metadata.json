@@ -1,0 +1,13 @@
+{
+  "pr": 301740,
+  "prTitle": "Reapply  #301598 with fixes",
+  "mergeCommit": "407dacdf362a4cf2ec142b35c04a7e298bc6a039",
+  "parentCommit": "",
+  "fileCount": 7,
+  "issue": 301677,
+  "issueTitle": "Do not block opening CLI sessions",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23084400808,
+  "closedAt": "2026-03-15T03:07:37Z"
+}

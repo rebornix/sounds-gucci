@@ -1,0 +1,13 @@
+{
+  "pr": 301289,
+  "prTitle": "fix: serialize concurrent marketplace repo clones via SequencerByKey",
+  "mergeCommit": "e7e6cbe3a9e189c4ed56922521fad0fb384bf741",
+  "parentCommit": "",
+  "fileCount": 2,
+  "issue": 301284,
+  "issueTitle": "Fatal: could not create work tree dir when adding new plugin marketplace",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23028443586,
+  "closedAt": "2026-03-13T01:09:33Z"
+}

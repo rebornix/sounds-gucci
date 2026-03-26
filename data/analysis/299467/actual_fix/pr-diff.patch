@@ -1,0 +1,62 @@
+diff --git a/src/extension/test/vscode-node/configurations.test.ts b/src/extension/test/vscode-node/configurations.test.ts
+index 59600be96b..bf5afc5db8 100644
+--- a/src/extension/test/vscode-node/configurations.test.ts
++++ b/src/extension/test/vscode-node/configurations.test.ts
+@@ -28,7 +28,7 @@ suite('Configuration Defaults', () => {
+ 		for (const setting of advancedSettings) {
+ 			const actual = testObject.getConfig<unknown>(setting);
+ 			const expected = testObject.getDefaultValue(setting);
+-			assert.strictEqual(actual, expected, `Default value for ${setting.fullyQualifiedId} did not match`);
++			assert.deepStrictEqual(actual, expected, `Default value for ${setting.fullyQualifiedId} did not match`);
+ 		}
+ 
+ 	});
+@@ -39,7 +39,7 @@ suite('Configuration Defaults', () => {
+ 		for (const setting of internalSettings) {
+ 			const actual = testObject.getConfig<unknown>(setting);
+ 			const expected = testObject.getDefaultValue(setting);
+-			assert.strictEqual(actual, expected, `Default value for ${setting.fullyQualifiedId} did not match`);
++			assert.deepStrictEqual(actual, expected, `Default value for ${setting.fullyQualifiedId} did not match`);
+ 		}
+ 	});
+ 
+diff --git a/src/platform/configuration/common/configurationService.ts b/src/platform/configuration/common/configurationService.ts
+index 7660e6dda9..3d2a0d20ca 100644
+--- a/src/platform/configuration/common/configurationService.ts
++++ b/src/platform/configuration/common/configurationService.ts
+@@ -221,7 +221,9 @@ export abstract class AbstractConfigurationService extends Disposable implements
+ 		if (ConfigValueValidators.isCustomTeamDefaultValue(key.defaultValue)) {
+ 			return this._isTeamMember ? key.defaultValue.teamDefaultValue : key.defaultValue.defaultValue;
+ 		}
+-		return key.defaultValue;
++
++		const override = this.getDefaultValueForConfig(key);
++		return override !== undefined ? override : key.defaultValue;
+ 	}
+ 
+ 	protected _setUserInfo(userInfo: { isInternal: boolean; isTeamMember: boolean; teamMemberUsername?: string }): void {
+@@ -318,6 +320,10 @@ export abstract class AbstractConfigurationService extends Disposable implements
+ 		return isConfigured;
+ 	}
+ 
++	protected getDefaultValueForConfig<T>(key: BaseConfig<T>): T | undefined {
++		return undefined;
++	}
++
+ }
+ 
+ export interface CustomTeamDefaultValue<T> {
+diff --git a/src/platform/configuration/vscode/configurationServiceImpl.ts b/src/platform/configuration/vscode/configurationServiceImpl.ts
+index 48ce0799d4..bf461e1c44 100644
+--- a/src/platform/configuration/vscode/configurationServiceImpl.ts
++++ b/src/platform/configuration/vscode/configurationServiceImpl.ts
+@@ -377,4 +377,9 @@ export class ConfigurationServiceImpl extends AbstractConfigurationService {
+ 			}
+ 		});
+ 	}
++
++	protected override getDefaultValueForConfig<T>(key: BaseConfig<T>): T | undefined {
++		const inspect = this.config.inspect<T>(key.id) ?? (key.oldId ? this.config.inspect<T>(key.oldId) : undefined);
++		return inspect?.defaultValue;
++	}
+ }

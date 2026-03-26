@@ -1,0 +1,13 @@
+{
+  "pr": 301497,
+  "prTitle": "Update title bar UI feature work and bug fixes",
+  "mergeCommit": "f8932104a7c9dafdd706e5146de3d03b522a5653",
+  "parentCommit": "",
+  "fileCount": 9,
+  "issue": 301226,
+  "issueTitle": "title bar update widget shows briefly even though setting is off",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23021141115,
+  "closedAt": "2026-03-13T14:44:56Z"
+}

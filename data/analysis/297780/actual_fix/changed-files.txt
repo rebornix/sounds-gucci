@@ -1,0 +1,3 @@
+src/vs/base/common/jsonRpcProtocol.ts
+src/vs/base/test/common/jsonRpcProtocol.test.ts
+src/vs/platform/mcp/node/mcpGatewaySession.ts

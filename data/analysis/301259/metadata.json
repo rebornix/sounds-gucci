@@ -1,0 +1,13 @@
+{
+  "pr": 301628,
+  "prTitle": "Misc debug panel UX fixes",
+  "mergeCommit": "9192689d931f11bf575c3b830dd8717bd9e078d0",
+  "parentCommit": "",
+  "fileCount": 12,
+  "issue": 301259,
+  "issueTitle": "Use number formatting for token counts in debug log",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23074433465,
+  "closedAt": "2026-03-14T00:22:09Z"
+}

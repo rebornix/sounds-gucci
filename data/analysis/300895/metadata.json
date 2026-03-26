@@ -1,0 +1,13 @@
+{
+  "pr": 300897,
+  "prTitle": "Support terminal creation on web worker extension host when there's remote authority",
+  "mergeCommit": "422d2969f3cf0bdfe2645288ed37de589847f199",
+  "parentCommit": "",
+  "fileCount": 1,
+  "issue": 300895,
+  "issueTitle": "Support terminal creation in web worker extension host when there's a remote authority",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23007211231,
+  "closedAt": "2026-03-12T00:55:32Z"
+}

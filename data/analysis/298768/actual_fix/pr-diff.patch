@@ -1,0 +1,2512 @@
+diff --git a/build/lib/stylelint/vscode-known-variables.json b/build/lib/stylelint/vscode-known-variables.json
+index 29a3d47d232b2..5b0fc9b6ad5b4 100644
+--- a/build/lib/stylelint/vscode-known-variables.json
++++ b/build/lib/stylelint/vscode-known-variables.json
+@@ -949,6 +949,7 @@
+ 		"--testMessageDecorationFontSize",
+ 		"--title-border-bottom-color",
+ 		"--title-wco-width",
++		"--update-progress",
+ 		"--reveal-button-size",
+ 		"--part-background",
+ 		"--part-border-color",
+diff --git a/src/vs/platform/update/common/update.config.contribution.ts b/src/vs/platform/update/common/update.config.contribution.ts
+index 93dd62df97ec6..76483ca546e46 100644
+--- a/src/vs/platform/update/common/update.config.contribution.ts
++++ b/src/vs/platform/update/common/update.config.contribution.ts
+@@ -89,6 +89,20 @@ configurationRegistry.registerConfiguration({
+ 				localize('actionable', "The status bar entry is shown when an action is required (e.g., download, install, or restart)."),
+ 				localize('detailed', "The status bar entry is shown for all update states including progress.")
+ 			]
++		},
++		'update.titleBar': {
++			type: 'string',
++			enum: ['none', 'actionable', 'detailed'],
++			default: 'none',
++			scope: ConfigurationScope.APPLICATION,
++			tags: ['experimental'],
++			experiment: { mode: 'startup' },
++			description: localize('titleBar', "Controls the experimental update title bar entry."),
++			enumDescriptions: [
++				localize('titleBarNone', "The title bar entry is never shown."),
++				localize('titleBarActionable', "The title bar entry is shown when an action is required (e.g., download, install, or restart)."),
++				localize('titleBarDetailed', "The title bar entry is shown for all update states including progress.")
++			]
+ 		}
+ 	}
+ });
+diff --git a/src/vs/platform/update/common/update.ts b/src/vs/platform/update/common/update.ts
+index b5c2b121c646f..bc90a03ad8c78 100644
+--- a/src/vs/platform/update/common/update.ts
++++ b/src/vs/platform/update/common/update.ts
+@@ -59,6 +59,7 @@ export const enum DisablementReason {
+ 	NotBuilt,
+ 	DisabledByEnvironment,
+ 	ManuallyDisabled,
++	Policy,
+ 	MissingConfiguration,
+ 	InvalidConfiguration,
+ 	RunningAsAdmin,
+@@ -66,7 +67,7 @@ export const enum DisablementReason {
+ 
+ export type Uninitialized = { type: StateType.Uninitialized };
+ export type Disabled = { type: StateType.Disabled; reason: DisablementReason };
+-export type Idle = { type: StateType.Idle; updateType: UpdateType; error?: string };
++export type Idle = { type: StateType.Idle; updateType: UpdateType; error?: string; notAvailable?: boolean };
+ export type CheckingForUpdates = { type: StateType.CheckingForUpdates; explicit: boolean };
+ export type AvailableForDownload = { type: StateType.AvailableForDownload; update: IUpdate; canInstall?: boolean };
+ export type Downloading = { type: StateType.Downloading; update?: IUpdate; explicit: boolean; overwrite: boolean; downloadedBytes?: number; totalBytes?: number; startTime?: number };
+@@ -80,7 +81,7 @@ export type State = Uninitialized | Disabled | Idle | CheckingForUpdates | Avail
+ export const State = {
+ 	Uninitialized: upcast<Uninitialized>({ type: StateType.Uninitialized }),
+ 	Disabled: (reason: DisablementReason): Disabled => ({ type: StateType.Disabled, reason }),
+-	Idle: (updateType: UpdateType, error?: string): Idle => ({ type: StateType.Idle, updateType, error }),
++	Idle: (updateType: UpdateType, error?: string, notAvailable?: boolean): Idle => ({ type: StateType.Idle, updateType, error, notAvailable }),
+ 	CheckingForUpdates: (explicit: boolean): CheckingForUpdates => ({ type: StateType.CheckingForUpdates, explicit }),
+ 	AvailableForDownload: (update: IUpdate, canInstall?: boolean): AvailableForDownload => ({ type: StateType.AvailableForDownload, update, canInstall }),
+ 	Downloading: (update: IUpdate | undefined, explicit: boolean, overwrite: boolean, downloadedBytes?: number, totalBytes?: number, startTime?: number): Downloading => ({ type: StateType.Downloading, update, explicit, overwrite, downloadedBytes, totalBytes, startTime }),
+diff --git a/src/vs/platform/update/electron-main/abstractUpdateService.ts b/src/vs/platform/update/electron-main/abstractUpdateService.ts
+index 06a42fe3485ea..c207a036712dd 100644
+--- a/src/vs/platform/update/electron-main/abstractUpdateService.ts
++++ b/src/vs/platform/update/electron-main/abstractUpdateService.ts
+@@ -142,11 +142,18 @@ export abstract class AbstractUpdateService implements IUpdateService {
+ 		}
+ 
+ 		const updateMode = this.configurationService.getValue<'none' | 'manual' | 'start' | 'default'>('update.mode');
++		const updateModeInspection = this.configurationService.inspect<'none' | 'manual' | 'start' | 'default'>('update.mode');
++		const policyDisablesUpdates = updateModeInspection.policyValue !== undefined && !this.getProductQuality(updateModeInspection.policyValue);
+ 		const quality = this.getProductQuality(updateMode);
+ 
+ 		if (!quality) {
+-			this.setState(State.Disabled(DisablementReason.ManuallyDisabled));
+-			this.logService.info('update#ctor - updates are disabled by user preference');
++			if (policyDisablesUpdates) {
++				this.setState(State.Disabled(DisablementReason.Policy));
++				this.logService.info('update#ctor - updates are disabled by policy');
++			} else {
++				this.setState(State.Disabled(DisablementReason.ManuallyDisabled));
++				this.logService.info('update#ctor - updates are disabled by user preference');
++			}
+ 			return;
+ 		}
+ 
+diff --git a/src/vs/platform/update/electron-main/updateService.darwin.ts b/src/vs/platform/update/electron-main/updateService.darwin.ts
+index 317ae6408bf85..a9e46ff937e58 100644
+--- a/src/vs/platform/update/electron-main/updateService.darwin.ts
++++ b/src/vs/platform/update/electron-main/updateService.darwin.ts
+@@ -172,7 +172,8 @@ export class DarwinUpdateService extends AbstractUpdateService implements IRelau
+ 			const update = await asJson<IUpdate>(context);
+ 			if (!update || !update.url || !update.version || !update.productVersion) {
+ 				this.logService.trace('update#checkForUpdateNoDownload - no update available');
+-				this.setState(State.Idle(UpdateType.Archive));
++				const notAvailable = this.state.type === StateType.CheckingForUpdates && this.state.explicit;
++				this.setState(State.Idle(UpdateType.Archive, undefined, notAvailable || undefined));
+ 			} else {
+ 				this.logService.trace('update#checkForUpdateNoDownload - update available', { version: update.version, productVersion: update.productVersion });
+ 				this.setState(State.AvailableForDownload(update, canInstall));
+@@ -211,7 +212,8 @@ export class DarwinUpdateService extends AbstractUpdateService implements IRelau
+ 			return;
+ 		}
+ 
+-		this.setState(State.Idle(UpdateType.Archive));
++		const notAvailable = this.state.explicit;
++		this.setState(State.Idle(UpdateType.Archive, undefined, notAvailable || undefined));
+ 	}
+ 
+ 	protected override async doDownloadUpdate(state: AvailableForDownload): Promise<void> {
+diff --git a/src/vs/platform/update/electron-main/updateService.linux.ts b/src/vs/platform/update/electron-main/updateService.linux.ts
+index 3ace29fed5aa9..4c6c0b7619126 100644
+--- a/src/vs/platform/update/electron-main/updateService.linux.ts
++++ b/src/vs/platform/update/electron-main/updateService.linux.ts
+@@ -48,7 +48,7 @@ export class LinuxUpdateService extends AbstractUpdateService {
+ 			.then<IUpdate | null>(asJson)
+ 			.then(update => {
+ 				if (!update || !update.url || !update.version || !update.productVersion) {
+-					this.setState(State.Idle(UpdateType.Archive));
++					this.setState(State.Idle(UpdateType.Archive, undefined, explicit || undefined));
+ 				} else {
+ 					this.setState(State.AvailableForDownload(update));
+ 				}
+diff --git a/src/vs/platform/update/electron-main/updateService.snap.ts b/src/vs/platform/update/electron-main/updateService.snap.ts
+index a68a25e577be2..ae2df6ac89dc5 100644
+--- a/src/vs/platform/update/electron-main/updateService.snap.ts
++++ b/src/vs/platform/update/electron-main/updateService.snap.ts
+@@ -176,7 +176,7 @@ export class SnapUpdateService extends AbstractUpdateService {
+ 			if (result) {
+ 				this.setState(State.Ready({ version: 'something' }, false, false));
+ 			} else {
+-				this.setState(State.Idle(UpdateType.Snap));
++				this.setState(State.Idle(UpdateType.Snap, undefined, undefined));
+ 			}
+ 		}, err => {
+ 			this.logService.error(err);
+diff --git a/src/vs/platform/update/electron-main/updateService.win32.ts b/src/vs/platform/update/electron-main/updateService.win32.ts
+index 7933d7f675be4..905928b8d2ee6 100644
+--- a/src/vs/platform/update/electron-main/updateService.win32.ts
++++ b/src/vs/platform/update/electron-main/updateService.win32.ts
+@@ -219,7 +219,7 @@ export class Win32UpdateService extends AbstractUpdateService implements IRelaun
+ 						this._overwrite = false;
+ 						this.setState(State.Ready(this.state.update, this.state.explicit, false));
+ 					} else {
+-						this.setState(State.Idle(updateType));
++						this.setState(State.Idle(updateType, undefined, explicit || undefined));
+ 					}
+ 					return Promise.resolve(null);
+ 				}
+diff --git a/src/vs/workbench/contrib/update/browser/media/updateStatusBarEntry.css b/src/vs/workbench/contrib/update/browser/media/updateStatusBarEntry.css
+index ee233981af0b6..c6bf5c799158f 100644
+--- a/src/vs/workbench/contrib/update/browser/media/updateStatusBarEntry.css
++++ b/src/vs/workbench/contrib/update/browser/media/updateStatusBarEntry.css
+@@ -7,136 +7,3 @@
+ 	color: var(--vscode-button-background);
+ 	font-size: 16px;
+ }
+-
+-.update-status-tooltip {
+-	display: flex;
+-	flex-direction: column;
+-	padding: 4px 0;
+-	min-width: 310px;
+-	max-width: 410px;
+-}
+-
+-/* Header with title and gear icon */
+-.update-status-tooltip .header {
+-	display: flex;
+-	justify-content: space-between;
+-	align-items: center;
+-	margin-bottom: 12px;
+-}
+-
+-.update-status-tooltip .header .title {
+-	font-weight: 600;
+-	font-size: var(--vscode-bodyFontSize);
+-	color: var(--vscode-foreground);
+-	margin-bottom: 0;
+-}
+-
+-.update-status-tooltip .header .monaco-action-bar {
+-	margin-left: auto;
+-}
+-
+-/* Product info section with logo */
+-.update-status-tooltip .product-info {
+-	display: flex;
+-	gap: 12px;
+-	margin-bottom: 16px;
+-}
+-
+-.update-status-tooltip .product-logo {
+-	width: 48px;
+-	height: 48px;
+-	border-radius: var(--vscode-cornerRadius-large);
+-	padding: 5px;
+-	flex-shrink: 0;
+-	background-image: url('../../../../browser/media/code-icon.svg');
+-	background-size: contain;
+-	background-position: center;
+-	background-repeat: no-repeat;
+-}
+-
+-.update-status-tooltip .product-details {
+-	display: flex;
+-	flex-direction: column;
+-	justify-content: center;
+-}
+-
+-.update-status-tooltip .product-name {
+-	font-weight: 600;
+-	color: var(--vscode-foreground);
+-	margin-bottom: 4px;
+-}
+-
+-.update-status-tooltip .product-version,
+-.update-status-tooltip .product-release-date {
+-	color: var(--vscode-descriptionForeground);
+-	font-size: var(--vscode-bodyFontSize-small);
+-}
+-
+-.update-status-tooltip .release-notes-link {
+-	color: var(--vscode-textLink-foreground);
+-	text-decoration: none;
+-	font-size: var(--vscode-bodyFontSize-small);
+-	cursor: pointer;
+-}
+-
+-.update-status-tooltip .release-notes-link:hover {
+-	color: var(--vscode-textLink-activeForeground);
+-	text-decoration: underline;
+-}
+-
+-/* What's Included section */
+-.update-status-tooltip .whats-included .section-title {
+-	font-weight: 600;
+-	color: var(--vscode-foreground);
+-	margin-bottom: 8px;
+-}
+-
+-.update-status-tooltip .whats-included ul {
+-	margin: 0;
+-	padding-left: 16px;
+-	color: var(--vscode-descriptionForeground);
+-	font-size: var(--vscode-bodyFontSize-small);
+-}
+-
+-.update-status-tooltip .whats-included li {
+-	margin-bottom: 2px;
+-}
+-
+-/* Progress bar */
+-.update-status-tooltip .progress-container {
+-	margin-bottom: 8px;
+-}
+-
+-.update-status-tooltip .progress-bar {
+-	width: 100%;
+-	height: 4px;
+-	background-color: color-mix(in srgb, var(--vscode-progressBar-background) 30%, transparent);
+-	border-radius: var(--vscode-cornerRadius-small);
+-	overflow: hidden;
+-}
+-
+-.update-status-tooltip .progress-bar .progress-fill {
+-	height: 100%;
+-	background-color: var(--vscode-progressBar-background);
+-	border-radius: var(--vscode-cornerRadius-small);
+-	transition: width 0.3s ease;
+-}
+-
+-.update-status-tooltip .progress-text {
+-	display: flex;
+-	justify-content: space-between;
+-	margin-top: 4px;
+-	font-size: var(--vscode-bodyFontSize-small);
+-	color: var(--vscode-descriptionForeground);
+-}
+-
+-.update-status-tooltip .progress-details {
+-	color: var(--vscode-descriptionForeground);
+-	margin-bottom: 4px;
+-}
+-
+-.update-status-tooltip .speed-info,
+-.update-status-tooltip .time-remaining {
+-	color: var(--vscode-descriptionForeground);
+-	font-size: var(--vscode-bodyFontSize-small);
+-}
+diff --git a/src/vs/workbench/contrib/update/browser/media/updateTitleBarEntry.css b/src/vs/workbench/contrib/update/browser/media/updateTitleBarEntry.css
+new file mode 100644
+index 0000000000000..eb3ac37b111bb
+--- /dev/null
++++ b/src/vs/workbench/contrib/update/browser/media/updateTitleBarEntry.css
+@@ -0,0 +1,90 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright (c) Microsoft Corporation. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++.monaco-action-bar .update-indicator {
++	display: flex;
++	align-items: center;
++	border-radius: var(--vscode-cornerRadius-medium);
++	white-space: nowrap;
++	padding: 0px 12px;
++	height: 24px;
++	background-color: transparent;
++	border: 1px solid transparent;
++}
++
++.monaco-action-bar .update-indicator:hover {
++	background-color: var(--vscode-toolbar-hoverBackground);
++}
++
++.monaco-action-bar .update-indicator .indicator-label {
++	font-size: var(--vscode-bodyFontSize-small);
++	position: relative;
++}
++
++/* Prominent state (action required) — primary button style */
++.monaco-action-bar .update-indicator.prominent {
++	background-color: var(--vscode-button-background);
++	color: var(--vscode-button-foreground);
++	border-color: var(--vscode-button-background);
++}
++
++.monaco-action-bar .update-indicator.prominent:hover {
++	background-color: var(--vscode-button-hoverBackground);
++	border-color: var(--vscode-button-hoverBackground);
++}
++
++/* Disabled state */
++.monaco-action-bar .update-indicator.update-disabled .indicator-label {
++	color: var(--vscode-disabledForeground);
++}
++
++/* Progress underline bar (shared base) */
++.monaco-action-bar .update-indicator.progress-indefinite .indicator-label::after,
++.monaco-action-bar .update-indicator.progress-percent .indicator-label::after {
++	content: '';
++	position: absolute;
++	left: 0;
++	bottom: 0;
++	height: 2px;
++	border-radius: 1px;
++}
++
++/* Progress: indefinite — animated shimmer underline */
++.monaco-action-bar .update-indicator.progress-indefinite .indicator-label::after {
++	width: 100%;
++	background: linear-gradient(
++		90deg,
++		transparent 0%,
++		var(--vscode-progressBar-background) 80%,
++		transparent 100%
++	);
++	background-size: 200% 100%;
++	animation: update-indicator-shimmer 1.5s ease-in-out infinite;
++}
++
++@keyframes update-indicator-shimmer {
++	0% { background-position: 100% 0; }
++	100% { background-position: -100% 0; }
++}
++
++/* Progress: percentage — left-to-right fill underline */
++.monaco-action-bar .update-indicator.progress-percent .indicator-label::after {
++	width: 100%;
++	background: linear-gradient(
++		90deg,
++		var(--vscode-progressBar-background) var(--update-progress, 0%),
++		color-mix(in srgb, var(--vscode-progressBar-background) 25%, transparent) var(--update-progress, 0%)
++	);
++	transition: background 0.3s ease;
++}
++
++/* Reduced motion */
++.monaco-workbench.monaco-reduce-motion .update-indicator.progress-indefinite .indicator-label::after {
++	animation: none;
++}
++
++.monaco-workbench.monaco-reduce-motion .update-indicator.progress-percent .indicator-label::after {
++	transition: none;
++}
+diff --git a/src/vs/workbench/contrib/update/browser/media/updateTooltip.css b/src/vs/workbench/contrib/update/browser/media/updateTooltip.css
+new file mode 100644
+index 0000000000000..ab714ea2e0ff3
+--- /dev/null
++++ b/src/vs/workbench/contrib/update/browser/media/updateTooltip.css
+@@ -0,0 +1,115 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright (c) Microsoft Corporation. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++.update-tooltip {
++	display: flex;
++	flex-direction: column;
++	gap: 12px;
++	padding: 6px 6px;
++	min-width: 310px;
++	max-width: 410px;
++	color: var(--vscode-descriptionForeground);
++	font-size: var(--vscode-bodyFontSize-small);
++}
++
++/* Header */
++.update-tooltip .header {
++	display: flex;
++	justify-content: space-between;
++	align-items: center;
++}
++
++.update-tooltip .header .title {
++	font-weight: 600;
++	font-size: var(--vscode-bodyFontSize);
++	color: var(--vscode-foreground);
++}
++
++/* Product info */
++.update-tooltip .product-info {
++	display: flex;
++	gap: 12px;
++}
++
++.update-tooltip .product-logo {
++	width: 48px;
++	height: 48px;
++	border-radius: var(--vscode-cornerRadius-large);
++	padding: 5px;
++	flex-shrink: 0;
++	background: url('../../../../browser/media/code-icon.svg') center / contain no-repeat;
++}
++
++.update-tooltip .product-details {
++	display: flex;
++	flex-direction: column;
++	justify-content: center;
++}
++
++.update-tooltip .product-name {
++	font-weight: 600;
++	color: var(--vscode-foreground);
++	margin-bottom: 4px;
++}
++
++.update-tooltip .release-notes-link {
++	color: var(--vscode-textLink-foreground);
++	text-decoration: none;
++}
++
++.update-tooltip .release-notes-link:hover {
++	color: var(--vscode-textLink-activeForeground);
++	text-decoration: underline;
++}
++
++/* Progress bar */
++.update-tooltip .progress-bar {
++	height: 4px;
++	background-color: color-mix(in srgb, var(--vscode-progressBar-background) 30%, transparent);
++	border-radius: var(--vscode-cornerRadius-small);
++	overflow: hidden;
++}
++
++.update-tooltip .progress-fill {
++	height: 100%;
++	background-color: var(--vscode-progressBar-background);
++	border-radius: var(--vscode-cornerRadius-small);
++	transition: width 0.3s ease;
++}
++
++.monaco-workbench.monaco-reduce-motion .update-tooltip .progress-fill {
++	transition: none;
++}
++
++.update-tooltip .progress-text,
++.update-tooltip .download-stats {
++	display: flex;
++	justify-content: space-between;
++}
++
++.update-tooltip .progress-text {
++	margin-top: 4px;
++}
++
++.update-tooltip .state-message {
++	display: flex;
++	align-items: flex-start;
++	font-size: var(--vscode-bodyFontSize);
++	gap: 4px;
++}
++
++.update-tooltip .state-message-icon.codicon[class*='codicon-'] {
++	font-size: 16px;
++	flex-shrink: 0;
++	margin-top: 2px;
++}
++
++.update-tooltip .state-message-icon.codicon.codicon-warning {
++	color: var(--vscode-editorWarning-foreground);
++}
++
++.update-tooltip .state-message-icon.codicon.codicon-error {
++	color: var(--vscode-editorError-foreground);
++}
+diff --git a/src/vs/workbench/contrib/update/browser/update.contribution.ts b/src/vs/workbench/contrib/update/browser/update.contribution.ts
+index 35a6855e8f9e4..4f19831828be3 100644
+--- a/src/vs/workbench/contrib/update/browser/update.contribution.ts
++++ b/src/vs/workbench/contrib/update/browser/update.contribution.ts
+@@ -10,7 +10,8 @@ import { IWorkbenchContributionsRegistry, Extensions as WorkbenchExtensions } fr
+ import { Categories } from '../../../../platform/action/common/actionCommonCategories.js';
+ import { MenuId, registerAction2, Action2 } from '../../../../platform/actions/common/actions.js';
+ import { ProductContribution, UpdateContribution, CONTEXT_UPDATE_STATE, SwitchProductQualityContribution, showReleaseNotesInEditor, DefaultAccountUpdateContribution } from './update.js';
+-import { UpdateStatusBarEntryContribution } from './updateStatusBarEntry.js';
++import { UpdateStatusBarContribution } from './updateStatusBarEntry.js';
++import { UpdateTitleBarContribution } from './updateTitleBarEntry.js';
+ import { LifecyclePhase } from '../../../services/lifecycle/common/lifecycle.js';
+ import product from '../../../../platform/product/common/product.js';
+ import { IUpdateService, StateType } from '../../../../platform/update/common/update.js';
+@@ -30,7 +31,8 @@ workbench.registerWorkbenchContribution(ProductContribution, LifecyclePhase.Rest
+ workbench.registerWorkbenchContribution(UpdateContribution, LifecyclePhase.Restored);
+ workbench.registerWorkbenchContribution(SwitchProductQualityContribution, LifecyclePhase.Restored);
+ workbench.registerWorkbenchContribution(DefaultAccountUpdateContribution, LifecyclePhase.Eventually);
+-workbench.registerWorkbenchContribution(UpdateStatusBarEntryContribution, LifecyclePhase.Restored);
++workbench.registerWorkbenchContribution(UpdateStatusBarContribution, LifecyclePhase.Restored);
++workbench.registerWorkbenchContribution(UpdateTitleBarContribution, LifecyclePhase.Restored);
+ 
+ // Release notes
+ 
+diff --git a/src/vs/workbench/contrib/update/browser/update.ts b/src/vs/workbench/contrib/update/browser/update.ts
+index 68b982cf45282..aca3bb3ce278b 100644
+--- a/src/vs/workbench/contrib/update/browser/update.ts
++++ b/src/vs/workbench/contrib/update/browser/update.ts
+@@ -32,6 +32,7 @@ import { Event } from '../../../../base/common/event.js';
+ import { toAction } from '../../../../base/common/actions.js';
+ import { IDefaultAccountService } from '../../../../platform/defaultAccount/common/defaultAccount.js';
+ import { getInternalOrg } from '../../../../platform/assignment/common/assignment.js';
++import { IVersion, preprocessError, tryParseVersion } from '../common/updateUtils.js';
+ 
+ export const CONTEXT_UPDATE_STATE = new RawContextKey<string>('updateState', StateType.Uninitialized);
+ export const MAJOR_MINOR_UPDATE_AVAILABLE = new RawContextKey<boolean>('majorMinorUpdateAvailable', false);
+@@ -146,26 +147,6 @@ export function appendUpdateMenuItems(menuId: MenuId, group: string): void {
+ 	});
+ }
+ 
+-interface IVersion {
+-	major: number;
+-	minor: number;
+-	patch: number;
+-}
+-
+-function parseVersion(version: string): IVersion | undefined {
+-	const match = /([0-9]+)\.([0-9]+)\.([0-9]+)/.exec(version);
+-
+-	if (!match) {
+-		return undefined;
+-	}
+-
+-	return {
+-		major: parseInt(match[1]),
+-		minor: parseInt(match[2]),
+-		patch: parseInt(match[3])
+-	};
+-}
+-
+ function isMajorMinorUpdate(before: IVersion, after: IVersion): boolean {
+ 	return before.major < after.major || before.minor < after.minor;
+ }
+@@ -193,8 +174,12 @@ export class ProductContribution implements IWorkbenchContribution {
+ 				return;
+ 			}
+ 
+-			const lastVersion = parseVersion(storageService.get(ProductContribution.KEY, StorageScope.APPLICATION, ''));
+-			const currentVersion = parseVersion(productService.version);
++			if (configurationService.getValue<string>('update.titleBar') !== 'none') {
++				return;
++			}
++
++			const lastVersion = tryParseVersion(storageService.get(ProductContribution.KEY, StorageScope.APPLICATION, ''));
++			const currentVersion = tryParseVersion(productService.version);
+ 			const shouldShowReleaseNotes = configurationService.getValue<boolean>('update.showReleaseNotes');
+ 			const releaseNotesUrl = productService.releaseNotesUrl;
+ 
+@@ -229,6 +214,7 @@ export class UpdateContribution extends Disposable implements IWorkbenchContribu
+ 	private overwriteNotificationHandle: INotificationHandle | undefined;
+ 	private updateStateContextKey: IContextKey<string>;
+ 	private majorMinorUpdateAvailableContextKey: IContextKey<boolean>;
++	private titleBarEnabled: boolean;
+ 
+ 	constructor(
+ 		@IStorageService private readonly storageService: IStorageService,
+@@ -268,6 +254,14 @@ export class UpdateContribution extends Disposable implements IWorkbenchContribu
+ 			this.storageService.remove('update/updateNotificationTime', StorageScope.APPLICATION);
+ 		}
+ 
++		this.titleBarEnabled = this.configurationService.getValue<string>('update.titleBar') !== 'none';
++		this._register(this.configurationService.onDidChangeConfiguration(e => {
++			if (e.affectsConfiguration('update.titleBar')) {
++				this.titleBarEnabled = this.configurationService.getValue<string>('update.titleBar') !== 'none';
++				this.onUpdateStateChange(this.updateService.state);
++			}
++		}));
++
+ 		this.registerGlobalActivityActions();
+ 	}
+ 
+@@ -276,7 +270,7 @@ export class UpdateContribution extends Disposable implements IWorkbenchContribu
+ 
+ 		switch (state.type) {
+ 			case StateType.Disabled:
+-				if (state.reason === DisablementReason.RunningAsAdmin) {
++				if (!this.titleBarEnabled && state.reason === DisablementReason.RunningAsAdmin) {
+ 					this.notificationService.notify({
+ 						severity: Severity.Info,
+ 						message: nls.localize('update service disabled', "Updates are disabled because you are running the user-scope installation of {0} as Administrator.", this.productService.nameLong),
+@@ -317,8 +311,8 @@ export class UpdateContribution extends Disposable implements IWorkbenchContribu
+ 			case StateType.Ready: {
+ 				const productVersion = state.update.productVersion;
+ 				if (productVersion) {
+-					const currentVersion = parseVersion(this.productService.version);
+-					const nextVersion = parseVersion(productVersion);
++					const currentVersion = tryParseVersion(this.productService.version);
++					const nextVersion = tryParseVersion(productVersion);
+ 					this.majorMinorUpdateAvailableContextKey.set(Boolean(currentVersion && nextVersion && isMajorMinorUpdate(currentVersion, nextVersion)));
+ 				}
+ 				this.onUpdateReady(state);
+@@ -328,14 +322,16 @@ export class UpdateContribution extends Disposable implements IWorkbenchContribu
+ 
+ 		let badge: IBadge | undefined = undefined;
+ 
+-		if (state.type === StateType.AvailableForDownload || state.type === StateType.Downloaded || state.type === StateType.Ready) {
+-			badge = new NumberBadge(1, () => nls.localize('updateIsReady', "New {0} update available.", this.productService.nameShort));
+-		} else if (state.type === StateType.CheckingForUpdates) {
+-			badge = new ProgressBadge(() => nls.localize('checkingForUpdates', "Checking for {0} updates...", this.productService.nameShort));
+-		} else if (state.type === StateType.Downloading || state.type === StateType.Overwriting) {
+-			badge = new ProgressBadge(() => nls.localize('downloading', "Downloading {0} update...", this.productService.nameShort));
+-		} else if (state.type === StateType.Updating) {
+-			badge = new ProgressBadge(() => nls.localize('updating', "Updating {0}...", this.productService.nameShort));
++		if (!this.titleBarEnabled) {
++			if (state.type === StateType.AvailableForDownload || state.type === StateType.Downloaded || state.type === StateType.Ready) {
++				badge = new NumberBadge(1, () => nls.localize('updateIsReady', "New {0} update available.", this.productService.nameShort));
++			} else if (state.type === StateType.CheckingForUpdates) {
++				badge = new ProgressBadge(() => nls.localize('checkingForUpdates', "Checking for {0} updates...", this.productService.nameShort));
++			} else if (state.type === StateType.Downloading || state.type === StateType.Overwriting) {
++				badge = new ProgressBadge(() => nls.localize('downloading', "Downloading {0} update...", this.productService.nameShort));
++			} else if (state.type === StateType.Updating) {
++				badge = new ProgressBadge(() => nls.localize('updating', "Updating {0}...", this.productService.nameShort));
++			}
+ 		}
+ 
+ 		this.badgeDisposable.clear();
+@@ -348,25 +344,34 @@ export class UpdateContribution extends Disposable implements IWorkbenchContribu
+ 	}
+ 
+ 	private onError(error: string): void {
+-		if (/The request timed out|The network connection was lost/i.test(error)) {
++		if (this.titleBarEnabled) {
+ 			return;
+ 		}
+ 
+-		error = error.replace(/See https:\/\/github\.com\/Squirrel\/Squirrel\.Mac\/issues\/182 for more information/, 'This might mean the application was put on quarantine by macOS. See [this link](https://github.com/microsoft/vscode/issues/7426#issuecomment-425093469) for more information');
+-
+-		this.notificationService.notify({
+-			severity: Severity.Error,
+-			message: error,
+-			source: nls.localize('update service', "Update Service"),
+-		});
++		const processedError = preprocessError(error);
++		if (processedError) {
++			this.notificationService.notify({
++				severity: Severity.Error,
++				message: processedError,
++				source: nls.localize('update service', "Update Service"),
++			});
++		}
+ 	}
+ 
+ 	private onUpdateNotAvailable(): void {
++		if (this.titleBarEnabled) {
++			return;
++		}
++
+ 		this.dialogService.info(nls.localize('noUpdatesAvailable', "There are currently no updates available."));
+ 	}
+ 
+ 	// linux
+ 	private onUpdateAvailable(update: IUpdate): void {
++		if (this.titleBarEnabled) {
++			return;
++		}
++
+ 		if (!this.shouldShowNotification()) {
+ 			return;
+ 		}
+@@ -397,6 +402,10 @@ export class UpdateContribution extends Disposable implements IWorkbenchContribu
+ 
+ 	// windows fast updates
+ 	private onUpdateDownloaded(update: IUpdate): void {
++		if (this.titleBarEnabled) {
++			return;
++		}
++
+ 		if (isMacintosh) {
+ 			return;
+ 		}
+@@ -434,6 +443,12 @@ export class UpdateContribution extends Disposable implements IWorkbenchContribu
+ 
+ 	// windows and mac
+ 	private onUpdateReady(state: Ready): void {
++		if (this.titleBarEnabled) {
++			this.overwriteNotificationHandle?.progress.done();
++			this.overwriteNotificationHandle = undefined;
++			return;
++		}
++
+ 		if (state.overwrite && this.overwriteNotificationHandle) {
+ 			const handle = this.overwriteNotificationHandle;
+ 			this.overwriteNotificationHandle = undefined;
+@@ -485,6 +500,10 @@ export class UpdateContribution extends Disposable implements IWorkbenchContribu
+ 
+ 	// macOS overwrite update - overwriting
+ 	private onUpdateOverwriting(state: Overwriting): void {
++		if (this.titleBarEnabled) {
++			return;
++		}
++
+ 		if (!state.explicit) {
+ 			return;
+ 		}
+diff --git a/src/vs/workbench/contrib/update/browser/updateStatusBarEntry.ts b/src/vs/workbench/contrib/update/browser/updateStatusBarEntry.ts
+index baf84977f90a6..4ed3e130eea28 100644
+--- a/src/vs/workbench/contrib/update/browser/updateStatusBarEntry.ts
++++ b/src/vs/workbench/contrib/update/browser/updateStatusBarEntry.ts
+@@ -3,39 +3,33 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+ 
+-import * as dom from '../../../../base/browser/dom.js';
+-import { ActionBar } from '../../../../base/browser/ui/actionbar/actionbar.js';
+-import { toAction } from '../../../../base/common/actions.js';
+-import { CancellationToken } from '../../../../base/common/cancellation.js';
+-import { Codicon } from '../../../../base/common/codicons.js';
+-import { Disposable, DisposableStore, MutableDisposable } from '../../../../base/common/lifecycle.js';
++import { Disposable, MutableDisposable } from '../../../../base/common/lifecycle.js';
+ import { isWeb } from '../../../../base/common/platform.js';
+-import { ThemeIcon } from '../../../../base/common/themables.js';
+-import * as nls from '../../../../nls.js';
+-import { ICommandService } from '../../../../platform/commands/common/commands.js';
++import { Command } from '../../../../editor/common/languages.js';
++import { localize } from '../../../../nls.js';
+ import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
+-import { IHoverService, nativeHoverDelegate } from '../../../../platform/hover/browser/hover.js';
+-import { IProductService } from '../../../../platform/product/common/productService.js';
+-import { Downloading, IUpdate, IUpdateService, Overwriting, StateType, State as UpdateState, Updating } from '../../../../platform/update/common/update.js';
++import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
++import { Downloading, IUpdateService, StateType, State as UpdateState, Updating } from '../../../../platform/update/common/update.js';
+ import { IWorkbenchContribution } from '../../../common/contributions.js';
+-import { IStatusbarEntry, IStatusbarEntryAccessor, IStatusbarService, ShowTooltipCommand, StatusbarAlignment, TooltipContent } from '../../../services/statusbar/browser/statusbar.js';
++import { IStatusbarEntry, IStatusbarEntryAccessor, IStatusbarService, ShowTooltipCommand, StatusbarAlignment } from '../../../services/statusbar/browser/statusbar.js';
++import { computeProgressPercent, formatBytes } from '../common/updateUtils.js';
+ import './media/updateStatusBarEntry.css';
++import { UpdateTooltip } from './updateTooltip.js';
+ 
+ /**
+  * Displays update status and actions in the status bar.
+  */
+-export class UpdateStatusBarEntryContribution extends Disposable implements IWorkbenchContribution {
+-	private static readonly NAME = nls.localize('updateStatus', "Update Status");
+-	private readonly statusBarEntryAccessor = this._register(new MutableDisposable<IStatusbarEntryAccessor>());
++export class UpdateStatusBarContribution extends Disposable implements IWorkbenchContribution {
++	private static readonly actionableStates = [StateType.AvailableForDownload, StateType.Downloaded, StateType.Ready];
++	private readonly accessor = this._register(new MutableDisposable<IStatusbarEntryAccessor>());
++	private readonly tooltip!: UpdateTooltip;
+ 	private lastStateType: StateType | undefined;
+ 
+ 	constructor(
+-		@IUpdateService private readonly updateService: IUpdateService,
++		@IConfigurationService private readonly configurationService: IConfigurationService,
++		@IInstantiationService instantiationService: IInstantiationService,
+ 		@IStatusbarService private readonly statusbarService: IStatusbarService,
+-		@IProductService private readonly productService: IProductService,
+-		@ICommandService private readonly commandService: ICommandService,
+-		@IHoverService private readonly hoverService: IHoverService,
+-		@IConfigurationService private readonly configurationService: IConfigurationService
++		@IUpdateService updateService: IUpdateService,
+ 	) {
+ 		super();
+ 
+@@ -43,126 +37,112 @@ export class UpdateStatusBarEntryContribution extends Disposable implements IWor
+ 			return; // Electron only
+ 		}
+ 
+-		this._register(this.updateService.onStateChange(state => this.onUpdateStateChange(state)));
++		this.tooltip = this._register(instantiationService.createInstance(UpdateTooltip));
++
++		this._register(updateService.onStateChange(this.onStateChange.bind(this)));
+ 		this._register(this.configurationService.onDidChangeConfiguration(e => {
+-			if (e.affectsConfiguration('update.statusBar')) {
+-				this.onUpdateStateChange(this.updateService.state);
++			if (e.affectsConfiguration('update.statusBar') || e.affectsConfiguration('update.titleBar')) {
++				this.onStateChange(updateService.state);
+ 			}
+ 		}));
+-		this.onUpdateStateChange(this.updateService.state);
++
++		this.onStateChange(updateService.state);
+ 	}
+ 
+-	private onUpdateStateChange(state: UpdateState) {
+-		if (this.lastStateType !== state.type) {
+-			this.statusBarEntryAccessor.clear();
+-			this.lastStateType = state.type;
++	private onStateChange(state: UpdateState) {
++		const titleBarMode = this.configurationService.getValue<string>('update.titleBar');
++		if (titleBarMode !== 'none') {
++			this.accessor.clear();
++			return;
+ 		}
+ 
+-		const statusBarMode = this.configurationService.getValue<string>('update.statusBar');
+-
+-		if (statusBarMode === 'hidden') {
+-			this.statusBarEntryAccessor.clear();
++		const mode = this.configurationService.getValue<string>('update.statusBar');
++		if (mode === 'hidden' || mode === 'actionable' && !UpdateStatusBarContribution.actionableStates.includes(state.type)) {
++			this.accessor.clear();
+ 			return;
+ 		}
+ 
+-		const actionRequiredStates = [
+-			StateType.AvailableForDownload,
+-			StateType.Downloaded,
+-			StateType.Ready
+-		];
+-
+-		// In 'actionable' mode, only show for states that require user action
+-		if (statusBarMode === 'actionable' && !actionRequiredStates.includes(state.type)) {
+-			this.statusBarEntryAccessor.clear();
+-			return;
++		if (this.lastStateType !== state.type) {
++			this.accessor.clear();
++			this.lastStateType = state.type;
+ 		}
+ 
+ 		switch (state.type) {
+-			case StateType.Uninitialized:
+-			case StateType.Idle:
+-			case StateType.Disabled:
+-				this.statusBarEntryAccessor.clear();
+-				break;
+-
+ 			case StateType.CheckingForUpdates:
+-				this.updateStatusBarEntry({
+-					name: UpdateStatusBarEntryContribution.NAME,
+-					text: nls.localize('updateStatus.checkingForUpdates', "$(sync~spin) Checking for updates..."),
+-					ariaLabel: nls.localize('updateStatus.checkingForUpdatesAria', "Checking for updates"),
+-					tooltip: this.getCheckingTooltip(),
+-					command: ShowTooltipCommand,
+-				});
++				this.updateEntry(
++					localize('updateStatus.checkingForUpdates', "$(loading~spin) Checking for updates..."),
++					localize('updateStatus.checkingForUpdatesAria', "Checking for updates"),
++					ShowTooltipCommand,
++				);
+ 				break;
+ 
+ 			case StateType.AvailableForDownload:
+-				this.updateStatusBarEntry({
+-					name: UpdateStatusBarEntryContribution.NAME,
+-					text: nls.localize('updateStatus.updateAvailableStatus', "$(circle-filled) Update available, click to download."),
+-					ariaLabel: nls.localize('updateStatus.updateAvailableAria', "Update available, click to download."),
+-					tooltip: this.getAvailableTooltip(state.update),
+-					command: 'update.downloadNow'
+-				});
++				this.updateEntry(
++					localize('updateStatus.updateAvailableStatus', "$(circle-filled) Update available, click to download."),
++					localize('updateStatus.updateAvailableAria', "Update available, click to download."),
++					'update.downloadNow'
++				);
+ 				break;
+ 
+ 			case StateType.Downloading:
+-				this.updateStatusBarEntry({
+-					name: UpdateStatusBarEntryContribution.NAME,
+-					text: this.getDownloadingText(state),
+-					ariaLabel: nls.localize('updateStatus.downloadingUpdateAria', "Downloading update"),
+-					tooltip: this.getDownloadingTooltip(state),
+-					command: ShowTooltipCommand
+-				});
++				this.updateEntry(
++					this.getDownloadingText(state),
++					localize('updateStatus.downloadingUpdateAria', "Downloading update"),
++					ShowTooltipCommand
++				);
+ 				break;
+ 
+ 			case StateType.Downloaded:
+-				this.updateStatusBarEntry({
+-					name: UpdateStatusBarEntryContribution.NAME,
+-					text: nls.localize('updateStatus.updateReadyStatus', "$(circle-filled) Update downloaded, click to install."),
+-					ariaLabel: nls.localize('updateStatus.updateReadyAria', "Update downloaded, click to install."),
+-					tooltip: this.getReadyToInstallTooltip(state.update),
+-					command: 'update.install'
+-				});
++				this.updateEntry(
++					localize('updateStatus.updateReadyStatus', "$(circle-filled) Update downloaded, click to install."),
++					localize('updateStatus.updateReadyAria', "Update downloaded, click to install."),
++					'update.install'
++				);
+ 				break;
+ 
+ 			case StateType.Updating:
+-				this.updateStatusBarEntry({
+-					name: UpdateStatusBarEntryContribution.NAME,
+-					text: this.getUpdatingText(state),
+-					ariaLabel: this.getUpdatingText(state),
+-					tooltip: this.getUpdatingTooltip(state),
+-					command: ShowTooltipCommand
+-				});
++				this.updateEntry(
++					this.getUpdatingText(state),
++					undefined,
++					ShowTooltipCommand
++				);
+ 				break;
+ 
+-			case StateType.Ready: {
+-
+-				this.updateStatusBarEntry({
+-					name: UpdateStatusBarEntryContribution.NAME,
+-					text: nls.localize('updateStatus.restartToUpdateStatus', "$(circle-filled) Update is ready, click to restart."),
+-					ariaLabel: nls.localize('updateStatus.restartToUpdateAria', "Update is ready, click to restart."),
+-					tooltip: this.getRestartToUpdateTooltip(state.update),
+-					command: 'update.restart'
+-				});
++			case StateType.Ready:
++				this.updateEntry(
++					localize('updateStatus.restartToUpdateStatus', "$(circle-filled) Update is ready, click to restart."),
++					localize('updateStatus.restartToUpdateAria', "Update is ready, click to restart."),
++					'update.restart'
++				);
+ 				break;
+-			}
+ 
+ 			case StateType.Overwriting:
+-				this.updateStatusBarEntry({
+-					name: UpdateStatusBarEntryContribution.NAME,
+-					text: nls.localize('updateStatus.downloadingNewerUpdateStatus', "$(sync~spin) Downloading update..."),
+-					ariaLabel: nls.localize('updateStatus.downloadingNewerUpdateAria', "Downloading a newer update"),
+-					tooltip: this.getOverwritingTooltip(state),
+-					command: ShowTooltipCommand
+-				});
++				this.updateEntry(
++					localize('updateStatus.downloadingNewerUpdateStatus', "$(loading~spin) Downloading update..."),
++					localize('updateStatus.downloadingNewerUpdateAria', "Downloading a newer update"),
++					ShowTooltipCommand
++				);
++				break;
++
++			default:
++				this.accessor.clear();
+ 				break;
+ 		}
+ 	}
+ 
+-	private updateStatusBarEntry(entry: IStatusbarEntry) {
+-		if (this.statusBarEntryAccessor.value) {
+-			this.statusBarEntryAccessor.value.update(entry);
++	private updateEntry(text: string, ariaLabel: string | undefined, command: string | Command) {
++		const entry: IStatusbarEntry = {
++			text,
++			ariaLabel: ariaLabel ?? text,
++			name: localize('updateStatus', "Update Status"),
++			tooltip: this.tooltip?.domNode,
++			command
++		};
++
++		if (this.accessor.value) {
++			this.accessor.value.update(entry);
+ 		} else {
+-			this.statusBarEntryAccessor.value = this.statusbarService.addEntry(
++			this.accessor.value = this.statusbarService.addEntry(
+ 				entry,
+ 				'status.update',
+ 				StatusbarAlignment.LEFT,
+@@ -171,401 +151,24 @@ export class UpdateStatusBarEntryContribution extends Disposable implements IWor
+ 		}
+ 	}
+ 
+-	private getCheckingTooltip(): TooltipContent {
+-		return {
+-			element: (token: CancellationToken) => {
+-				const store = this.createTooltipDisposableStore(token);
+-				const container = dom.$('.update-status-tooltip');
+-
+-				this.appendHeader(container, nls.localize('updateStatus.checkingForUpdatesTitle', "Checking for Updates"), store);
+-				this.appendProductInfo(container);
+-
+-				const message = dom.append(container, dom.$('.progress-details'));
+-				message.textContent = nls.localize('updateStatus.checkingPleaseWait', "Checking for updates, please wait...");
+-
+-				return container;
+-			}
+-		};
+-	}
+-
+-	private getAvailableTooltip(update: IUpdate): TooltipContent {
+-		return {
+-			element: (token: CancellationToken) => {
+-				const store = this.createTooltipDisposableStore(token);
+-				const container = dom.$('.update-status-tooltip');
+-
+-				this.appendHeader(container, nls.localize('updateStatus.updateAvailableTitle', "Update Available"), store);
+-				this.appendProductInfo(container, update);
+-				this.appendWhatsIncluded(container);
+-
+-				return container;
+-			}
+-		};
+-	}
+-
+ 	private getDownloadingText({ downloadedBytes, totalBytes }: Downloading): string {
+ 		if (downloadedBytes !== undefined && totalBytes !== undefined && totalBytes > 0) {
+-			return nls.localize('updateStatus.downloadUpdateProgressStatus', "$(sync~spin) Downloading update: {0} / {1} • {2}%",
++			const percent = computeProgressPercent(downloadedBytes, totalBytes) ?? 0;
++			return localize('updateStatus.downloadUpdateProgressStatus', "$(loading~spin) Downloading update: {0} / {1} • {2}%",
+ 				formatBytes(downloadedBytes),
+ 				formatBytes(totalBytes),
+-				getProgressPercent(downloadedBytes, totalBytes) ?? 0);
++				percent);
+ 		} else {
+-			return nls.localize('updateStatus.downloadUpdateStatus', "$(sync~spin) Downloading update...");
++			return localize('updateStatus.downloadUpdateStatus', "$(loading~spin) Downloading update...");
+ 		}
+ 	}
+ 
+-	private getDownloadingTooltip(state: Downloading): TooltipContent {
+-		return {
+-			element: (token: CancellationToken) => {
+-				const store = this.createTooltipDisposableStore(token);
+-				const container = dom.$('.update-status-tooltip');
+-
+-				this.appendHeader(container, nls.localize('updateStatus.downloadingUpdateTitle', "Downloading Update"), store);
+-				this.appendProductInfo(container, state.update);
+-
+-				const { downloadedBytes, totalBytes } = state;
+-				if (downloadedBytes !== undefined && totalBytes !== undefined && totalBytes > 0) {
+-					const percentage = getProgressPercent(downloadedBytes, totalBytes) ?? 0;
+-
+-					const progressContainer = dom.append(container, dom.$('.progress-container'));
+-					const progressBar = dom.append(progressContainer, dom.$('.progress-bar'));
+-					const progressFill = dom.append(progressBar, dom.$('.progress-fill'));
+-					progressFill.style.width = `${percentage}%`;
+-
+-					const progressText = dom.append(progressContainer, dom.$('.progress-text'));
+-					const percentageSpan = dom.append(progressText, dom.$('span'));
+-					percentageSpan.textContent = `${percentage}%`;
+-
+-					const sizeSpan = dom.append(progressText, dom.$('span'));
+-					sizeSpan.textContent = `${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}`;
+-
+-					const speed = computeDownloadSpeed(state);
+-					if (speed !== undefined && speed > 0) {
+-						const speedInfo = dom.append(container, dom.$('.speed-info'));
+-						speedInfo.textContent = nls.localize('updateStatus.downloadSpeed', '{0}/s', formatBytes(speed));
+-					}
+-
+-					const timeRemaining = computeDownloadTimeRemaining(state);
+-					if (timeRemaining !== undefined && timeRemaining > 0) {
+-						const timeRemainingNode = dom.append(container, dom.$('.time-remaining'));
+-						timeRemainingNode.textContent = `~${formatTimeRemaining(timeRemaining)} ${nls.localize('updateStatus.timeRemaining', "remaining")}`;
+-					}
+-				} else {
+-					const message = dom.append(container, dom.$('.progress-details'));
+-					message.textContent = nls.localize('updateStatus.downloadingPleaseWait', "Downloading, please wait...");
+-				}
+-
+-				return container;
+-			}
+-		};
+-	}
+-
+-	private getReadyToInstallTooltip(update: IUpdate): TooltipContent {
+-		return {
+-			element: (token: CancellationToken) => {
+-				const store = this.createTooltipDisposableStore(token);
+-				const container = dom.$('.update-status-tooltip');
+-
+-				this.appendHeader(container, nls.localize('updateStatus.updateReadyTitle', "Update is Ready to Install"), store);
+-				this.appendProductInfo(container, update);
+-				this.appendWhatsIncluded(container);
+-
+-				return container;
+-			}
+-		};
+-	}
+-
+-	private getRestartToUpdateTooltip(update: IUpdate): TooltipContent {
+-		return {
+-			element: (token: CancellationToken) => {
+-				const store = this.createTooltipDisposableStore(token);
+-				const container = dom.$('.update-status-tooltip');
+-
+-				this.appendHeader(container, nls.localize('updateStatus.updateInstalledTitle', "Update Installed"), store);
+-				this.appendProductInfo(container, update);
+-				this.appendWhatsIncluded(container);
+-
+-				return container;
+-			}
+-		};
+-	}
+-
+ 	private getUpdatingText({ currentProgress, maxProgress }: Updating): string {
+-		const percentage = getProgressPercent(currentProgress, maxProgress);
++		const percentage = computeProgressPercent(currentProgress, maxProgress);
+ 		if (percentage !== undefined) {
+-			return nls.localize('updateStatus.installingUpdateProgressStatus', "$(sync~spin) Installing update: {0}%", percentage);
++			return localize('updateStatus.installingUpdateProgressStatus', "$(loading~spin) Installing update: {0}%", percentage);
+ 		} else {
+-			return nls.localize('updateStatus.installingUpdateStatus', "$(sync~spin) Installing update...");
++			return localize('updateStatus.installingUpdateStatus', "$(loading~spin) Installing update...");
+ 		}
+ 	}
+-
+-	private getUpdatingTooltip(state: Updating): TooltipContent {
+-		return {
+-			element: (token: CancellationToken) => {
+-				const store = this.createTooltipDisposableStore(token);
+-				const container = dom.$('.update-status-tooltip');
+-
+-				this.appendHeader(container, nls.localize('updateStatus.installingUpdateTitle', "Installing Update"), store);
+-				this.appendProductInfo(container, state.update);
+-
+-				const { currentProgress, maxProgress } = state;
+-				const percentage = getProgressPercent(currentProgress, maxProgress);
+-				if (percentage !== undefined) {
+-					const progressContainer = dom.append(container, dom.$('.progress-container'));
+-					const progressBar = dom.append(progressContainer, dom.$('.progress-bar'));
+-					const progressFill = dom.append(progressBar, dom.$('.progress-fill'));
+-					progressFill.style.width = `${percentage}%`;
+-
+-					const progressText = dom.append(progressContainer, dom.$('.progress-text'));
+-					const percentageSpan = dom.append(progressText, dom.$('span'));
+-					percentageSpan.textContent = `${percentage}%`;
+-				} else {
+-					const message = dom.append(container, dom.$('.progress-details'));
+-					message.textContent = nls.localize('updateStatus.installingPleaseWait', "Installing update, please wait...");
+-				}
+-
+-				return container;
+-			}
+-		};
+-	}
+-
+-	private getOverwritingTooltip(state: Overwriting): TooltipContent {
+-		return {
+-			element: (token: CancellationToken) => {
+-				const store = this.createTooltipDisposableStore(token);
+-				const container = dom.$('.update-status-tooltip');
+-
+-				this.appendHeader(container, nls.localize('updateStatus.downloadingNewerUpdateTitle', "Downloading Newer Update"), store);
+-				this.appendProductInfo(container, state.update);
+-
+-				const message = dom.append(container, dom.$('.progress-details'));
+-				message.textContent = nls.localize('updateStatus.downloadingNewerPleaseWait', "A newer update was released. Downloading, please wait...");
+-
+-				return container;
+-			}
+-		};
+-	}
+-
+-	private createTooltipDisposableStore(token: CancellationToken): DisposableStore {
+-		const store = new DisposableStore();
+-		store.add(token.onCancellationRequested(() => store.dispose()));
+-		return store;
+-	}
+-
+-	private runCommandAndClose(command: string, ...args: unknown[]): void {
+-		this.commandService.executeCommand(command, ...args);
+-		this.hoverService.hideHover(true);
+-	}
+-
+-	private appendHeader(container: HTMLElement, title: string, store: DisposableStore) {
+-		const header = dom.append(container, dom.$('.header'));
+-		const text = dom.append(header, dom.$('.title'));
+-		text.textContent = title;
+-
+-		const actionBar = store.add(new ActionBar(header, { hoverDelegate: nativeHoverDelegate }));
+-		actionBar.push([toAction({
+-			id: 'update.openSettings',
+-			label: nls.localize('updateStatus.settingsTooltip', "Update Settings"),
+-			class: ThemeIcon.asClassName(Codicon.gear),
+-			run: () => this.runCommandAndClose('workbench.action.openSettings', '@id:update*'),
+-		})], { icon: true, label: false });
+-	}
+-
+-	private appendProductInfo(container: HTMLElement, update?: IUpdate) {
+-		const productInfo = dom.append(container, dom.$('.product-info'));
+-
+-		const logoContainer = dom.append(productInfo, dom.$('.product-logo'));
+-		logoContainer.setAttribute('role', 'img');
+-		logoContainer.setAttribute('aria-label', this.productService.nameLong);
+-
+-		const details = dom.append(productInfo, dom.$('.product-details'));
+-
+-		const productName = dom.append(details, dom.$('.product-name'));
+-		productName.textContent = this.productService.nameLong;
+-
+-		const productVersion = this.productService.version;
+-		if (productVersion) {
+-			const currentVersion = dom.append(details, dom.$('.product-version'));
+-			const currentCommitId = this.productService.commit?.substring(0, 7);
+-			currentVersion.textContent = currentCommitId
+-				? nls.localize('updateStatus.currentVersionLabelWithCommit', "Current Version: {0} ({1})", productVersion, currentCommitId)
+-				: nls.localize('updateStatus.currentVersionLabel', "Current Version: {0}", productVersion);
+-		}
+-
+-		const version = update?.productVersion;
+-		if (version) {
+-			const latestVersion = dom.append(details, dom.$('.product-version'));
+-			const updateCommitId = update.version?.substring(0, 7);
+-			latestVersion.textContent = updateCommitId
+-				? nls.localize('updateStatus.latestVersionLabelWithCommit', "Latest Version: {0} ({1})", version, updateCommitId)
+-				: nls.localize('updateStatus.latestVersionLabel', "Latest Version: {0}", version);
+-		}
+-
+-		const releaseDate = update?.timestamp ?? tryParseDate(this.productService.date);
+-		if (typeof releaseDate === 'number' && releaseDate > 0) {
+-			const releaseDateNode = dom.append(details, dom.$('.product-release-date'));
+-			releaseDateNode.textContent = nls.localize('updateStatus.releasedLabel', "Released {0}", formatDate(releaseDate));
+-		}
+-
+-		const releaseNotesVersion = version ?? productVersion;
+-		if (releaseNotesVersion) {
+-			const link = dom.append(details, dom.$('a.release-notes-link')) as HTMLAnchorElement;
+-			link.textContent = nls.localize('updateStatus.releaseNotesLink', "Release Notes");
+-			link.href = '#';
+-			link.addEventListener('click', (e) => {
+-				e.preventDefault();
+-				this.runCommandAndClose('update.showCurrentReleaseNotes', releaseNotesVersion);
+-			});
+-		}
+-	}
+-
+-	private appendWhatsIncluded(container: HTMLElement) {
+-		/*
+-		const whatsIncluded = dom.append(container, dom.$('.whats-included'));
+-
+-		const sectionTitle = dom.append(whatsIncluded, dom.$('.section-title'));
+-		sectionTitle.textContent = nls.localize('updateStatus.whatsIncludedTitle', "What's Included");
+-
+-		const list = dom.append(whatsIncluded, dom.$('ul'));
+-
+-		const items = [
+-			nls.localize('updateStatus.featureItem', "New features and functionality"),
+-			nls.localize('updateStatus.bugFixesItem', "Bug fixes and improvements"),
+-			nls.localize('updateStatus.securityItem', "Security fixes and enhancements")
+-		];
+-
+-		for (const item of items) {
+-			const li = dom.append(list, dom.$('li'));
+-			li.textContent = item;
+-		}
+-		*/
+-	}
+-}
+-
+-/**
+- * Returns the progress percentage based on the current and maximum progress values.
+- */
+-export function getProgressPercent(current: number | undefined, max: number | undefined): number | undefined {
+-	if (current === undefined || max === undefined || max <= 0) {
+-		return undefined;
+-	} else {
+-		return Math.max(Math.min(Math.round((current / max) * 100), 100), 0);
+-	}
+-}
+-
+-/**
+- * Tries to parse a date string and returns the timestamp or undefined if parsing fails.
+- */
+-export function tryParseDate(date: string | undefined): number | undefined {
+-	if (date === undefined) {
+-		return undefined;
+-	}
+-	const parsed = Date.parse(date);
+-	return isNaN(parsed) ? undefined : parsed;
+-}
+-
+-/**
+- * Formats a timestamp as a localized date string.
+- */
+-export function formatDate(timestamp: number): string {
+-	return new Date(timestamp).toLocaleDateString(undefined, {
+-		year: 'numeric',
+-		month: 'short',
+-		day: 'numeric'
+-	});
+-}
+-
+-/**
+- * Computes an estimate of remaining download time in seconds.
+- */
+-export function computeDownloadTimeRemaining(state: Downloading): number | undefined {
+-	const { downloadedBytes, totalBytes, startTime } = state;
+-	if (downloadedBytes === undefined || totalBytes === undefined || startTime === undefined) {
+-		return undefined;
+-	}
+-
+-	const elapsedMs = Date.now() - startTime;
+-	if (downloadedBytes <= 0 || totalBytes <= 0 || elapsedMs <= 0) {
+-		return undefined;
+-	}
+-
+-	const remainingBytes = totalBytes - downloadedBytes;
+-	if (remainingBytes <= 0) {
+-		return 0;
+-	}
+-
+-	const bytesPerMs = downloadedBytes / elapsedMs;
+-	if (bytesPerMs <= 0) {
+-		return undefined;
+-	}
+-
+-	const remainingMs = remainingBytes / bytesPerMs;
+-	return Math.ceil(remainingMs / 1000);
+-}
+-
+-/**
+- * Formats the time remaining as a human-readable string.
+- */
+-export function formatTimeRemaining(seconds: number): string {
+-	const hours = seconds / 3600;
+-	if (hours >= 1) {
+-		const formattedHours = formatDecimal(hours);
+-		return formattedHours === '1'
+-			? nls.localize('timeRemainingHour', "{0} hour", formattedHours)
+-			: nls.localize('timeRemainingHours', "{0} hours", formattedHours);
+-	}
+-
+-	const minutes = Math.floor(seconds / 60);
+-	if (minutes >= 1) {
+-		return nls.localize('timeRemainingMinutes', "{0} min", minutes);
+-	}
+-
+-	return nls.localize('timeRemainingSeconds', "{0}s", seconds);
+-}
+-
+-/**
+- * Formats a byte count as a human-readable string.
+- */
+-export function formatBytes(bytes: number): string {
+-	if (bytes < 1024) {
+-		return nls.localize('bytes', "{0} B", bytes);
+-	}
+-
+-	const kb = bytes / 1024;
+-	if (kb < 1024) {
+-		return nls.localize('kilobytes', "{0} KB", formatDecimal(kb));
+-	}
+-
+-	const mb = kb / 1024;
+-	if (mb < 1024) {
+-		return nls.localize('megabytes', "{0} MB", formatDecimal(mb));
+-	}
+-
+-	const gb = mb / 1024;
+-	return nls.localize('gigabytes', "{0} GB", formatDecimal(gb));
+-}
+-
+-/**
+- * Formats a number to 1 decimal place, omitting ".0" for whole numbers.
+- */
+-function formatDecimal(value: number): string {
+-	const rounded = Math.round(value * 10) / 10;
+-	return rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(1);
+-}
+-
+-/**
+- * Computes the current download speed in bytes per second.
+- */
+-export function computeDownloadSpeed(state: Downloading): number | undefined {
+-	const { downloadedBytes, startTime } = state;
+-	if (downloadedBytes === undefined || startTime === undefined) {
+-		return undefined;
+-	}
+-
+-	const elapsedMs = Date.now() - startTime;
+-	if (elapsedMs <= 0 || downloadedBytes <= 0) {
+-		return undefined;
+-	}
+-
+-	return (downloadedBytes / elapsedMs) * 1000;
+ }
+diff --git a/src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts b/src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts
+new file mode 100644
+index 0000000000000..93be7e3617078
+--- /dev/null
++++ b/src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts
+@@ -0,0 +1,267 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright (c) Microsoft Corporation. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++import * as dom from '../../../../base/browser/dom.js';
++import { BaseActionViewItem, IBaseActionViewItemOptions } from '../../../../base/browser/ui/actionbar/actionViewItems.js';
++import { IManagedHoverContent } from '../../../../base/browser/ui/hover/hover.js';
++import { IAction } from '../../../../base/common/actions.js';
++import { Disposable } from '../../../../base/common/lifecycle.js';
++import { isWeb } from '../../../../base/common/platform.js';
++import { localize } from '../../../../nls.js';
++import { IActionViewItemService } from '../../../../platform/actions/browser/actionViewItemService.js';
++import { Action2, MenuId, registerAction2 } from '../../../../platform/actions/common/actions.js';
++import { ICommandService } from '../../../../platform/commands/common/commands.js';
++import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
++import { IContextKeyService, RawContextKey } from '../../../../platform/contextkey/common/contextkey.js';
++import { IHoverService } from '../../../../platform/hover/browser/hover.js';
++import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
++import { IProductService } from '../../../../platform/product/common/productService.js';
++import { IStorageService, StorageScope, StorageTarget } from '../../../../platform/storage/common/storage.js';
++import { DisablementReason, IUpdateService, State, StateType } from '../../../../platform/update/common/update.js';
++import { IWorkbenchContribution } from '../../../common/contributions.js';
++import { computeProgressPercent, tryParseVersion } from '../common/updateUtils.js';
++import './media/updateTitleBarEntry.css';
++import { UpdateTooltip } from './updateTooltip.js';
++
++const UPDATE_TITLE_BAR_ACTION_ID = 'workbench.actions.updateIndicator';
++const UPDATE_TITLE_BAR_CONTEXT = new RawContextKey<boolean>('updateTitleBar', false);
++const LAST_KNOWN_VERSION_KEY = 'updateTitleBar/lastKnownVersion';
++const ACTIONABLE_STATES: readonly StateType[] = [StateType.AvailableForDownload, StateType.Downloaded, StateType.Ready];
++
++registerAction2(class UpdateIndicatorTitleBarAction extends Action2 {
++	constructor() {
++		super({
++			id: UPDATE_TITLE_BAR_ACTION_ID,
++			title: localize('updateIndicatorTitleBarAction', 'Update'),
++			f1: false,
++			menu: [{
++				id: MenuId.CommandCenter,
++				order: 10003,
++				when: UPDATE_TITLE_BAR_CONTEXT,
++			}]
++		});
++	}
++
++	override async run() { }
++});
++
++/**
++ * Displays update status and actions in the title bar.
++ */
++export class UpdateTitleBarContribution extends Disposable implements IWorkbenchContribution {
++	constructor(
++		@IActionViewItemService actionViewItemService: IActionViewItemService,
++		@IConfigurationService configurationService: IConfigurationService,
++		@IContextKeyService contextKeyService: IContextKeyService,
++		@IInstantiationService instantiationService: IInstantiationService,
++		@IProductService private readonly productService: IProductService,
++		@IStorageService private readonly storageService: IStorageService,
++		@IUpdateService updateService: IUpdateService,
++	) {
++		super();
++
++		if (isWeb) {
++			return; // Electron only
++		}
++
++		const context = UPDATE_TITLE_BAR_CONTEXT.bindTo(contextKeyService);
++
++		const updateContext = () => {
++			const mode = configurationService.getValue<string>('update.titleBar');
++			const state = updateService.state.type;
++			context.set(mode === 'detailed' || mode === 'actionable' && ACTIONABLE_STATES.includes(state));
++		};
++
++		let entry: UpdateTitleBarEntry | undefined;
++		let showTooltipOnRender = false;
++
++		this._register(actionViewItemService.register(
++			MenuId.CommandCenter,
++			UPDATE_TITLE_BAR_ACTION_ID,
++			(action, options) => {
++				entry = instantiationService.createInstance(UpdateTitleBarEntry, action, options, updateContext, showTooltipOnRender);
++				showTooltipOnRender = false;
++				return entry;
++			}
++		));
++
++		const onStateChange = () => {
++			if (this.shouldShowTooltip(updateService.state)) {
++				if (context.get()) {
++					entry?.showTooltip();
++				} else {
++					context.set(true);
++					showTooltipOnRender = true;
++				}
++			} else {
++				updateContext();
++			}
++		};
++
++		this._register(updateService.onStateChange(onStateChange));
++		this._register(configurationService.onDidChangeConfiguration(e => {
++			if (e.affectsConfiguration('update.titleBar')) {
++				updateContext();
++			}
++		}));
++
++		onStateChange();
++	}
++
++	private shouldShowTooltip(state: State): boolean {
++		switch (state.type) {
++			case StateType.Disabled:
++				return state.reason === DisablementReason.InvalidConfiguration || state.reason === DisablementReason.RunningAsAdmin;
++			case StateType.Idle:
++				return !!state.error || state.notAvailable || this.isMajorMinorVersionChange();
++			case StateType.AvailableForDownload:
++			case StateType.Downloaded:
++			case StateType.Ready:
++				return true;
++			default:
++				return false;
++		}
++	}
++
++	private isMajorMinorVersionChange(): boolean {
++		const currentVersion = this.productService.version;
++		const lastKnownVersion = this.storageService.get(LAST_KNOWN_VERSION_KEY, StorageScope.APPLICATION);
++		this.storageService.store(LAST_KNOWN_VERSION_KEY, currentVersion, StorageScope.APPLICATION, StorageTarget.MACHINE);
++		if (!lastKnownVersion) {
++			return false;
++		}
++
++		const current = tryParseVersion(currentVersion);
++		const last = tryParseVersion(lastKnownVersion);
++		if (!current || !last) {
++			return false;
++		}
++
++		return current.major !== last.major || current.minor !== last.minor;
++	}
++}
++
++/**
++ * Custom action view item for the update indicator in the title bar.
++ */
++export class UpdateTitleBarEntry extends BaseActionViewItem {
++	private content: HTMLElement | undefined;
++	private readonly tooltip: UpdateTooltip;
++
++	constructor(
++		action: IAction,
++		options: IBaseActionViewItemOptions,
++		private readonly onDisposeTooltip: () => void,
++		private showTooltipOnRender: boolean,
++		@ICommandService private readonly commandService: ICommandService,
++		@IHoverService private readonly hoverService: IHoverService,
++		@IInstantiationService instantiationService: IInstantiationService,
++		@IUpdateService private readonly updateService: IUpdateService,
++	) {
++		super(undefined, action, options);
++
++		this.action.run = () => this.runAction();
++		this.tooltip = this._register(instantiationService.createInstance(UpdateTooltip));
++
++		this._register(this.updateService.onStateChange(state => this.updateContent(state)));
++	}
++
++	public override render(container: HTMLElement) {
++		super.render(container);
++
++		this.content = dom.append(container, dom.$('.update-indicator'));
++		this.updateTooltip();
++		this.updateContent(this.updateService.state);
++
++		if (this.showTooltipOnRender) {
++			this.showTooltipOnRender = false;
++			dom.scheduleAtNextAnimationFrame(dom.getWindow(container), () => this.showTooltip());
++		}
++	}
++
++	protected override getHoverContents(): IManagedHoverContent {
++		return this.tooltip.domNode;
++	}
++
++	private runAction() {
++		switch (this.updateService.state.type) {
++			case StateType.AvailableForDownload:
++				this.commandService.executeCommand('update.downloadNow');
++				break;
++			case StateType.Downloaded:
++				this.commandService.executeCommand('update.install');
++				break;
++			case StateType.Ready:
++				this.commandService.executeCommand('update.restart');
++				break;
++			default:
++				this.showTooltip();
++				break;
++		}
++	}
++
++	public showTooltip() {
++		if (!this.content?.isConnected) {
++			return;
++		}
++
++		this.hoverService.showInstantHover({
++			content: this.tooltip.domNode,
++			target: {
++				targetElements: [this.content],
++				dispose: () => this.onDisposeTooltip(),
++			},
++			persistence: { sticky: true },
++			appearance: { showPointer: true },
++		}, true);
++	}
++
++	private updateContent(state: State) {
++		if (!this.content) {
++			return;
++		}
++
++		dom.clearNode(this.content);
++		this.content.classList.remove('prominent', 'progress-indefinite', 'progress-percent', 'update-disabled');
++		this.content.style.removeProperty('--update-progress');
++
++		const label = dom.append(this.content, dom.$('.indicator-label'));
++		label.textContent = localize('updateIndicator.update', "Update");
++
++		switch (state.type) {
++			case StateType.Disabled:
++				this.content.classList.add('update-disabled');
++				break;
++
++			case StateType.CheckingForUpdates:
++			case StateType.Overwriting:
++				this.renderProgressState(this.content);
++				break;
++
++			case StateType.AvailableForDownload:
++			case StateType.Downloaded:
++			case StateType.Ready:
++				this.content.classList.add('prominent');
++				break;
++
++			case StateType.Downloading:
++				this.renderProgressState(this.content, computeProgressPercent(state.downloadedBytes, state.totalBytes));
++				break;
++
++			case StateType.Updating:
++				this.renderProgressState(this.content, computeProgressPercent(state.currentProgress, state.maxProgress));
++				break;
++		}
++	}
++
++	private renderProgressState(content: HTMLElement, percentage?: number) {
++		if (percentage !== undefined) {
++			content.classList.add('progress-percent');
++			content.style.setProperty('--update-progress', `${percentage}%`);
++		} else {
++			content.classList.add('progress-indefinite');
++		}
++	}
++}
+diff --git a/src/vs/workbench/contrib/update/browser/updateTooltip.ts b/src/vs/workbench/contrib/update/browser/updateTooltip.ts
+new file mode 100644
+index 0000000000000..ee3c452c3be6d
+--- /dev/null
++++ b/src/vs/workbench/contrib/update/browser/updateTooltip.ts
+@@ -0,0 +1,378 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright (c) Microsoft Corporation. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++import * as dom from '../../../../base/browser/dom.js';
++import { ActionBar } from '../../../../base/browser/ui/actionbar/actionbar.js';
++import { toAction } from '../../../../base/common/actions.js';
++import { Codicon } from '../../../../base/common/codicons.js';
++import { Disposable } from '../../../../base/common/lifecycle.js';
++import { ThemeIcon } from '../../../../base/common/themables.js';
++import { localize } from '../../../../nls.js';
++import { ICommandService } from '../../../../platform/commands/common/commands.js';
++import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
++import { IHoverService, nativeHoverDelegate } from '../../../../platform/hover/browser/hover.js';
++import { IMeteredConnectionService } from '../../../../platform/meteredConnection/common/meteredConnection.js';
++import { IProductService } from '../../../../platform/product/common/productService.js';
++import { AvailableForDownload, Disabled, DisablementReason, Downloaded, Downloading, Idle, IUpdate, IUpdateService, Overwriting, Ready, State, StateType, Updating } from '../../../../platform/update/common/update.js';
++import { computeDownloadSpeed, computeDownloadTimeRemaining, computeProgressPercent, formatBytes, formatDate, formatTimeRemaining, tryParseDate } from '../common/updateUtils.js';
++import './media/updateTooltip.css';
++
++/**
++ * A stateful tooltip control for the update status.
++ */
++export class UpdateTooltip extends Disposable {
++	public readonly domNode: HTMLElement;
++
++	// Header section
++	private readonly titleNode: HTMLElement;
++
++	// Product info section
++	private readonly productNameNode: HTMLElement;
++	private readonly currentVersionNode: HTMLElement;
++	private readonly latestVersionNode: HTMLElement;
++	private readonly releaseDateNode: HTMLElement;
++	private readonly releaseNotesLink: HTMLAnchorElement;
++
++	// Progress section
++	private readonly progressContainer: HTMLElement;
++	private readonly progressFill: HTMLElement;
++	private readonly progressPercentNode: HTMLElement;
++	private readonly progressSizeNode: HTMLElement;
++
++	// Extra download info
++	private readonly downloadStatsContainer: HTMLElement;
++	private readonly timeRemainingNode: HTMLElement;
++	private readonly speedInfoNode: HTMLElement;
++
++	// State-specific message
++	private readonly messageNode: HTMLElement;
++
++	private releaseNotesVersion: string | undefined;
++
++	constructor(
++		@ICommandService private readonly commandService: ICommandService,
++		@IConfigurationService private readonly configurationService: IConfigurationService,
++		@IHoverService private readonly hoverService: IHoverService,
++		@IMeteredConnectionService private readonly meteredConnectionService: IMeteredConnectionService,
++		@IProductService private readonly productService: IProductService,
++		@IUpdateService updateService: IUpdateService,
++	) {
++		super();
++
++		this.domNode = dom.$('.update-tooltip');
++
++		// Header section
++		const header = dom.append(this.domNode, dom.$('.header'));
++		this.titleNode = dom.append(header, dom.$('.title'));
++
++		const actionBar = this._register(new ActionBar(header, { hoverDelegate: nativeHoverDelegate }));
++		actionBar.push(toAction({
++			id: 'update.openSettings',
++			label: localize('updateTooltip.settingsTooltip', "Update Settings"),
++			class: ThemeIcon.asClassName(Codicon.gear),
++			run: () => this.runCommandAndClose('workbench.action.openSettings', '@id:update*'),
++		}), { icon: true, label: false });
++
++		// Product info section
++		const productInfo = dom.append(this.domNode, dom.$('.product-info'));
++
++		const logoContainer = dom.append(productInfo, dom.$('.product-logo'));
++		logoContainer.setAttribute('role', 'img');
++		logoContainer.setAttribute('aria-label', this.productService.nameLong);
++
++		const details = dom.append(productInfo, dom.$('.product-details'));
++
++		this.productNameNode = dom.append(details, dom.$('.product-name'));
++		this.productNameNode.textContent = this.productService.nameLong;
++
++		this.currentVersionNode = dom.append(details, dom.$('.product-version'));
++		this.latestVersionNode = dom.append(details, dom.$('.product-version'));
++		this.releaseDateNode = dom.append(details, dom.$('.product-release-date'));
++
++		this.releaseNotesLink = dom.append(details, dom.$('a.release-notes-link')) as HTMLAnchorElement;
++		this.releaseNotesLink.textContent = localize('updateTooltip.releaseNotesLink', "Release Notes");
++		this.releaseNotesLink.href = '#';
++		this._register(dom.addDisposableListener(this.releaseNotesLink, 'click', (e) => {
++			e.preventDefault();
++			if (this.releaseNotesVersion) {
++				this.runCommandAndClose('update.showCurrentReleaseNotes', this.releaseNotesVersion);
++			}
++		}));
++
++		// Progress section
++		this.progressContainer = dom.append(this.domNode, dom.$('.progress-container'));
++		const progressBar = dom.append(this.progressContainer, dom.$('.progress-bar'));
++		this.progressFill = dom.append(progressBar, dom.$('.progress-fill'));
++
++		const progressText = dom.append(this.progressContainer, dom.$('.progress-text'));
++		this.progressPercentNode = dom.append(progressText, dom.$('span'));
++		this.progressSizeNode = dom.append(progressText, dom.$('span'));
++
++		// Extra download stats
++		this.downloadStatsContainer = dom.append(this.progressContainer, dom.$('.download-stats'));
++		this.timeRemainingNode = dom.append(this.downloadStatsContainer, dom.$('.time-remaining'));
++		this.speedInfoNode = dom.append(this.downloadStatsContainer, dom.$('.speed-info'));
++
++		// State-specific message
++		this.messageNode = dom.append(this.domNode, dom.$('.state-message'));
++
++		// Populate static product info
++		this.updateCurrentVersion();
++
++		// Subscribe to state changes
++		this._register(updateService.onStateChange(state => this.onStateChange(state)));
++		this.onStateChange(updateService.state);
++	}
++
++	private updateCurrentVersion() {
++		const productVersion = this.productService.version;
++		if (productVersion) {
++			const currentCommitId = this.productService.commit?.substring(0, 7);
++			this.currentVersionNode.textContent = currentCommitId
++				? localize('updateTooltip.currentVersionLabelWithCommit', "Current Version: {0} ({1})", productVersion, currentCommitId)
++				: localize('updateTooltip.currentVersionLabel', "Current Version: {0}", productVersion);
++			this.currentVersionNode.style.display = '';
++		} else {
++			this.currentVersionNode.style.display = 'none';
++		}
++	}
++
++	private onStateChange(state: State) {
++		this.progressContainer.style.display = 'none';
++		this.speedInfoNode.textContent = '';
++		this.timeRemainingNode.textContent = '';
++		this.messageNode.style.display = 'none';
++
++		switch (state.type) {
++			case StateType.Uninitialized:
++				this.renderUninitialized();
++				break;
++			case StateType.Disabled:
++				this.renderDisabled(state);
++				break;
++			case StateType.Idle:
++				this.renderIdle(state);
++				break;
++			case StateType.CheckingForUpdates:
++				this.renderCheckingForUpdates();
++				break;
++			case StateType.AvailableForDownload:
++				this.renderAvailableForDownload(state);
++				break;
++			case StateType.Downloading:
++				this.renderDownloading(state);
++				break;
++			case StateType.Downloaded:
++				this.renderDownloaded(state);
++				break;
++			case StateType.Updating:
++				this.renderUpdating(state);
++				break;
++			case StateType.Ready:
++				this.renderReady(state);
++				break;
++			case StateType.Overwriting:
++				this.renderOverwriting(state);
++				break;
++		}
++	}
++
++	private renderUninitialized() {
++		this.renderTitleAndInfo(localize('updateTooltip.initializingTitle', "Initializing"));
++		this.showMessage(localize('updateTooltip.initializingMessage', "Initializing update service..."));
++	}
++
++	private renderDisabled({ reason }: Disabled) {
++		this.renderTitleAndInfo(localize('updateTooltip.updatesDisabledTitle', "Updates Disabled"));
++		switch (reason) {
++			case DisablementReason.NotBuilt:
++				this.showMessage(
++					localize('updateTooltip.disabledNotBuilt', "Updates are not available for this build."),
++					Codicon.info);
++				break;
++			case DisablementReason.DisabledByEnvironment:
++				this.showMessage(
++					localize('updateTooltip.disabledByEnvironment', "Updates are disabled by the --disable-updates command line flag."),
++					Codicon.warning);
++				break;
++			case DisablementReason.ManuallyDisabled:
++				this.showMessage(
++					localize('updateTooltip.disabledManually', "Updates are manually disabled. Change the \"update.mode\" setting to enable."),
++					Codicon.warning);
++				break;
++			case DisablementReason.Policy:
++				this.showMessage(
++					localize('updateTooltip.disabledByPolicy', "Updates are disabled by organization policy."),
++					Codicon.info);
++				break;
++			case DisablementReason.MissingConfiguration:
++				this.showMessage(
++					localize('updateTooltip.disabledMissingConfig', "Updates are disabled because no update URL is configured."),
++					Codicon.info);
++				break;
++			case DisablementReason.InvalidConfiguration:
++				this.showMessage(
++					localize('updateTooltip.disabledInvalidConfig', "Updates are disabled because the update URL is invalid."),
++					Codicon.error);
++				break;
++			case DisablementReason.RunningAsAdmin:
++				this.showMessage(
++					localize(
++						'updateTooltip.disabledRunningAsAdmin',
++						"Updates are not available when running a user install of {0} as administrator.",
++						this.productService.nameShort),
++					Codicon.warning);
++				break;
++			default:
++				this.showMessage(localize('updateTooltip.disabledGeneric', "Updates are disabled."), Codicon.warning);
++				break;
++		}
++	}
++
++	private renderIdle({ error, notAvailable }: Idle) {
++		if (error) {
++			this.renderTitleAndInfo(localize('updateTooltip.updateErrorTitle', "Update Error"));
++			this.showMessage(error, Codicon.error);
++			return;
++		}
++
++		if (notAvailable) {
++			this.renderTitleAndInfo(localize('updateTooltip.noUpdateAvailableTitle', "No Update Available"));
++			this.showMessage(localize('updateTooltip.noUpdateAvailableMessage', "There are no updates currently available."), Codicon.info);
++			return;
++		}
++
++		this.renderTitleAndInfo(localize('updateTooltip.upToDateTitle', "Up to Date"));
++		switch (this.configurationService.getValue<string>('update.mode')) {
++			case 'none':
++				this.showMessage(localize('updateTooltip.autoUpdateNone', "Automatic updates are disabled."), Codicon.warning);
++				break;
++			case 'manual':
++				this.showMessage(localize('updateTooltip.autoUpdateManual', "Automatic updates will be checked but not installed automatically."));
++				break;
++			case 'start':
++				this.showMessage(localize('updateTooltip.autoUpdateStart', "Updates will be applied on restart."));
++				break;
++			case 'default':
++				if (this.meteredConnectionService.isConnectionMetered) {
++					this.showMessage(
++						localize('updateTooltip.meteredConnectionMessage', "Automatic updates are paused because the network connection is metered."),
++						Codicon.radioTower);
++				} else {
++					this.showMessage(
++						localize('updateTooltip.autoUpdateDefault', "Automatic updates are enabled. Happy Coding!"),
++						Codicon.smiley);
++				}
++				break;
++		}
++	}
++
++	private renderCheckingForUpdates() {
++		this.renderTitleAndInfo(localize('updateTooltip.checkingForUpdatesTitle', "Checking for Updates"));
++		this.showMessage(localize('updateTooltip.checkingPleaseWait', "Checking for updates, please wait..."));
++	}
++
++	private renderAvailableForDownload({ update }: AvailableForDownload) {
++		this.renderTitleAndInfo(localize('updateTooltip.updateAvailableTitle', "Update Available"), update);
++	}
++
++	private renderDownloading(state: Downloading) {
++		this.renderTitleAndInfo(localize('updateTooltip.downloadingUpdateTitle', "Downloading Update"), state.update);
++
++		const { downloadedBytes, totalBytes } = state;
++		if (downloadedBytes !== undefined && totalBytes !== undefined && totalBytes > 0) {
++			const percentage = computeProgressPercent(downloadedBytes, totalBytes) ?? 0;
++			this.progressFill.style.width = `${percentage}%`;
++			this.progressPercentNode.textContent = `${percentage}%`;
++			this.progressSizeNode.textContent = `${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}`;
++			this.progressContainer.style.display = '';
++
++			const speed = computeDownloadSpeed(state);
++			if (speed !== undefined && speed > 0) {
++				this.speedInfoNode.textContent = localize('updateTooltip.downloadSpeed', '{0}/s', formatBytes(speed));
++			}
++
++			const timeRemaining = computeDownloadTimeRemaining(state);
++			if (timeRemaining !== undefined && timeRemaining > 0) {
++				this.timeRemainingNode.textContent = `~${formatTimeRemaining(timeRemaining)} ${localize('updateTooltip.timeRemaining', "remaining")}`;
++			}
++
++			this.downloadStatsContainer.style.display = '';
++		} else {
++			this.showMessage(localize('updateTooltip.downloadingPleaseWait', "Downloading update, please wait..."));
++		}
++	}
++
++	private renderDownloaded({ update }: Downloaded) {
++		this.renderTitleAndInfo(localize('updateTooltip.updateReadyTitle', "Update is Ready to Install"), update);
++	}
++
++	private renderUpdating({ update, currentProgress, maxProgress }: Updating) {
++		this.renderTitleAndInfo(localize('updateTooltip.installingUpdateTitle', "Installing Update"), update);
++
++		const percentage = computeProgressPercent(currentProgress, maxProgress);
++		if (percentage !== undefined) {
++			this.progressFill.style.width = `${percentage}%`;
++			this.progressPercentNode.textContent = `${percentage}%`;
++			this.progressSizeNode.textContent = '';
++			this.progressContainer.style.display = '';
++		} else {
++			this.showMessage(localize('updateTooltip.installingPleaseWait', "Installing update, please wait..."));
++		}
++	}
++
++	private renderReady({ update }: Ready) {
++		this.renderTitleAndInfo(localize('updateTooltip.updateInstalledTitle', "Update Installed"), update);
++	}
++
++	private renderOverwriting({ update }: Overwriting) {
++		this.renderTitleAndInfo(localize('updateTooltip.downloadingNewerUpdateTitle', "Downloading Newer Update"), update);
++		this.showMessage(localize('updateTooltip.downloadingNewerPleaseWait', "A newer update was released. Downloading, please wait..."));
++	}
++
++	private renderTitleAndInfo(title: string, update?: IUpdate) {
++		this.titleNode.textContent = title;
++
++		// Latest version
++		const version = update?.productVersion;
++		if (version) {
++			const updateCommitId = update.version?.substring(0, 7);
++			this.latestVersionNode.textContent = updateCommitId
++				? localize('updateTooltip.latestVersionLabelWithCommit', "Latest Version: {0} ({1})", version, updateCommitId)
++				: localize('updateTooltip.latestVersionLabel', "Latest Version: {0}", version);
++			this.latestVersionNode.style.display = '';
++		} else {
++			this.latestVersionNode.style.display = 'none';
++		}
++
++		// Release date
++		const releaseDate = update?.timestamp ?? tryParseDate(this.productService.date);
++		if (typeof releaseDate === 'number' && releaseDate > 0) {
++			this.releaseDateNode.textContent = localize('updateTooltip.releasedLabel', "Released {0}", formatDate(releaseDate));
++			this.releaseDateNode.style.display = '';
++		} else {
++			this.releaseDateNode.style.display = 'none';
++		}
++
++		// Release notes link
++		this.releaseNotesVersion = version ?? this.productService.version;
++		this.releaseNotesLink.style.display = this.releaseNotesVersion ? '' : 'none';
++	}
++
++	private showMessage(message: string, icon?: ThemeIcon) {
++		dom.clearNode(this.messageNode);
++		if (icon) {
++			const iconNode = dom.append(this.messageNode, dom.$('.state-message-icon'));
++			iconNode.classList.add(...ThemeIcon.asClassNameArray(icon));
++		}
++		dom.append(this.messageNode, document.createTextNode(message));
++		this.messageNode.style.display = '';
++	}
++
++	private runCommandAndClose(command: string, ...args: unknown[]) {
++		this.commandService.executeCommand(command, ...args);
++		this.hoverService.hideHover(true);
++	}
++}
+diff --git a/src/vs/workbench/contrib/update/common/updateUtils.ts b/src/vs/workbench/contrib/update/common/updateUtils.ts
+new file mode 100644
+index 0000000000000..3060873d29e19
+--- /dev/null
++++ b/src/vs/workbench/contrib/update/common/updateUtils.ts
+@@ -0,0 +1,218 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright (c) Microsoft Corporation. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++import { localize } from '../../../../nls.js';
++import { Downloading } from '../../../../platform/update/common/update.js';
++
++/**
++ * Returns the progress percentage based on the current and maximum progress values.
++ */
++export function computeProgressPercent(current: number | undefined, max: number | undefined): number | undefined {
++	if (current === undefined || max === undefined || max <= 0) {
++		return undefined;
++	}
++
++	return Math.max(Math.min(Math.round((current / max) * 100), 100), 0);
++}
++
++/**
++ * Computes an estimate of remaining download time in seconds.
++ */
++export function computeDownloadTimeRemaining(state: Downloading): number | undefined {
++	const { downloadedBytes, totalBytes, startTime } = state;
++	if (downloadedBytes === undefined || totalBytes === undefined || startTime === undefined) {
++		return undefined;
++	}
++
++	const elapsedMs = Date.now() - startTime;
++	if (downloadedBytes <= 0 || totalBytes <= 0 || elapsedMs <= 0) {
++		return undefined;
++	}
++
++	const remainingBytes = totalBytes - downloadedBytes;
++	if (remainingBytes <= 0) {
++		return 0;
++	}
++
++	const bytesPerMs = downloadedBytes / elapsedMs;
++	if (bytesPerMs <= 0) {
++		return undefined;
++	}
++
++	const remainingMs = remainingBytes / bytesPerMs;
++	return Math.ceil(remainingMs / 1000);
++}
++
++/**
++ * Computes the current download speed in bytes per second.
++ */
++export function computeDownloadSpeed(state: Downloading): number | undefined {
++	const { downloadedBytes, startTime } = state;
++	if (downloadedBytes === undefined || startTime === undefined) {
++		return undefined;
++	}
++
++	const elapsedMs = Date.now() - startTime;
++	if (elapsedMs <= 0 || downloadedBytes <= 0) {
++		return undefined;
++	}
++
++	return (downloadedBytes / elapsedMs) * 1000;
++}
++
++/**
++ * Computes the version to use for fetching update info.
++ * - If the minor version differs: returns `{major}.{minor}` (e.g., 1.108.2 -> 1.109.5 => 1.109)
++ * - If the same minor: returns the target version as-is (e.g., 1.109.2 -> 1.109.5 => 1.109.5)
++ */
++export function computeUpdateInfoVersion(currentVersion: string, targetVersion: string): string | undefined {
++	const current = tryParseVersion(currentVersion);
++	const target = tryParseVersion(targetVersion);
++	if (!current || !target) {
++		return undefined;
++	}
++
++	if (current.minor !== target.minor || current.major !== target.major) {
++		return `${target.major}.${target.minor}`;
++	}
++
++	return `${target.major}.${target.minor}.${target.patch}`;
++}
++
++/**
++ * Computes the URL to fetch update info from.
++ * Follows the release notes URL pattern but with `_update` suffix.
++ */
++export function getUpdateInfoUrl(version: string): string {
++	const versionLabel = version.replace(/\./g, '_').replace(/_0$/, '');
++	return `https://code.visualstudio.com/raw/v${versionLabel}_update.md`;
++}
++
++/**
++ * Formats the time remaining as a human-readable string.
++ */
++export function formatTimeRemaining(seconds: number): string {
++	const hours = seconds / 3600;
++	if (hours >= 1) {
++		const formattedHours = formatDecimal(hours);
++		if (formattedHours === '1') {
++			return localize('update.timeRemainingHour', "{0} hour", formattedHours);
++		} else {
++			return localize('update.timeRemainingHours', "{0} hours", formattedHours);
++		}
++	}
++
++	const minutes = Math.floor(seconds / 60);
++	if (minutes >= 1) {
++		return localize('update.timeRemainingMinutes', "{0} min", minutes);
++	}
++
++	return localize('update.timeRemainingSeconds', "{0}s", seconds);
++}
++
++/**
++ * Formats a byte count as a human-readable string.
++ */
++export function formatBytes(bytes: number): string {
++	if (bytes < 1024) {
++		return localize('update.bytes', "{0} B", bytes);
++	}
++
++	const kb = bytes / 1024;
++	if (kb < 1024) {
++		return localize('update.kilobytes', "{0} KB", formatDecimal(kb));
++	}
++
++	const mb = kb / 1024;
++	if (mb < 1024) {
++		return localize('update.megabytes', "{0} MB", formatDecimal(mb));
++	}
++
++	const gb = mb / 1024;
++	return localize('update.gigabytes', "{0} GB", formatDecimal(gb));
++}
++
++/**
++ * Tries to parse a date string and returns the timestamp or undefined if parsing fails.
++ */
++export function tryParseDate(date: string | undefined): number | undefined {
++	if (date === undefined) {
++		return undefined;
++	}
++
++	try {
++		const parsed = Date.parse(date);
++		return isNaN(parsed) ? undefined : parsed;
++	} catch {
++		return undefined;
++	}
++}
++
++/**
++ * Formats a timestamp as a localized date string.
++ */
++export function formatDate(timestamp: number): string {
++	return new Date(timestamp).toLocaleDateString(undefined, {
++		year: 'numeric',
++		month: 'short',
++		day: 'numeric'
++	});
++}
++
++/**
++ * Formats a number to 1 decimal place, omitting ".0" for whole numbers.
++ */
++export function formatDecimal(value: number): string {
++	const rounded = Math.round(value * 10) / 10;
++	return rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(1);
++}
++
++export interface IVersion {
++	major: number;
++	minor: number;
++	patch: number;
++}
++
++/**
++ * Parses a version string in the format "major.minor.patch" and returns an object with the components.
++ */
++export function tryParseVersion(version: string | undefined): IVersion | undefined {
++	if (version === undefined) {
++		return undefined;
++	}
++
++	const match = /^(\d{1,10})\.(\d{1,10})\.(\d{1,10})/.exec(version);
++	if (!match) {
++		return undefined;
++	}
++
++	try {
++		return {
++			major: parseInt(match[1]),
++			minor: parseInt(match[2]),
++			patch: parseInt(match[3])
++		};
++	} catch {
++		return undefined;
++	}
++}
++
++/**
++ * Processes an error message and returns a user-friendly version of it, or undefined if the error should be ignored.
++ */
++export function preprocessError(error?: string): string | undefined {
++	if (!error) {
++		return undefined;
++	}
++
++	if (/The request timed out|The network connection was lost/i.test(error)) {
++		return undefined;
++	}
++
++	return error.replace(
++		/See https:\/\/github\.com\/Squirrel\/Squirrel\.Mac\/issues\/182 for more information/,
++		'This might mean the application was put on quarantine by macOS. See [this link](https://github.com/microsoft/vscode/issues/7426#issuecomment-425093469) for more information'
++	);
++}
+diff --git a/src/vs/workbench/contrib/update/test/browser/updateStatusBarEntry.test.ts b/src/vs/workbench/contrib/update/test/common/updateUtils.test.ts
+similarity index 56%
+rename from src/vs/workbench/contrib/update/test/browser/updateStatusBarEntry.test.ts
+rename to src/vs/workbench/contrib/update/test/common/updateUtils.test.ts
+index aa8c2a4693f0b..cfeb6123415a7 100644
+--- a/src/vs/workbench/contrib/update/test/browser/updateStatusBarEntry.test.ts
++++ b/src/vs/workbench/contrib/update/test/common/updateUtils.test.ts
+@@ -7,9 +7,9 @@ import assert from 'assert';
+ import * as sinon from 'sinon';
+ import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../../base/test/common/utils.js';
+ import { Downloading, StateType } from '../../../../../platform/update/common/update.js';
+-import { computeDownloadSpeed, computeDownloadTimeRemaining, formatBytes, formatDate, formatTimeRemaining, getProgressPercent, tryParseDate } from '../../browser/updateStatusBarEntry.js';
++import { computeDownloadSpeed, computeDownloadTimeRemaining, computeProgressPercent, computeUpdateInfoVersion, formatBytes, formatDate, formatTimeRemaining, getUpdateInfoUrl, tryParseDate } from '../../common/updateUtils.js';
+ 
+-suite('UpdateStatusBarEntry', () => {
++suite('UpdateUtils', () => {
+ 	ensureNoDisposablesAreLeakedInTestSuite();
+ 
+ 	let clock: sinon.SinonFakeTimers;
+@@ -22,30 +22,30 @@ suite('UpdateStatusBarEntry', () => {
+ 		clock.restore();
+ 	});
+ 
+-	function createDownloadingState(downloadedBytes?: number, totalBytes?: number, startTime?: number): Downloading {
++	function DownloadingState(downloadedBytes?: number, totalBytes?: number, startTime?: number): Downloading {
+ 		return { type: StateType.Downloading, explicit: true, overwrite: false, downloadedBytes, totalBytes, startTime };
+ 	}
+ 
+-	suite('getProgressPercent', () => {
++	suite('computeProgressPercent', () => {
+ 		test('handles invalid values', () => {
+-			assert.strictEqual(getProgressPercent(undefined, 100), undefined);
+-			assert.strictEqual(getProgressPercent(50, undefined), undefined);
+-			assert.strictEqual(getProgressPercent(undefined, undefined), undefined);
+-			assert.strictEqual(getProgressPercent(50, 0), undefined);
+-			assert.strictEqual(getProgressPercent(50, -10), undefined);
++			assert.strictEqual(computeProgressPercent(undefined, 100), undefined);
++			assert.strictEqual(computeProgressPercent(50, undefined), undefined);
++			assert.strictEqual(computeProgressPercent(undefined, undefined), undefined);
++			assert.strictEqual(computeProgressPercent(50, 0), undefined);
++			assert.strictEqual(computeProgressPercent(50, -10), undefined);
+ 		});
+ 
+ 		test('computes correct percentage', () => {
+-			assert.strictEqual(getProgressPercent(0, 100), 0);
+-			assert.strictEqual(getProgressPercent(50, 100), 50);
+-			assert.strictEqual(getProgressPercent(100, 100), 100);
+-			assert.strictEqual(getProgressPercent(1, 3), 33);
+-			assert.strictEqual(getProgressPercent(2, 3), 67);
++			assert.strictEqual(computeProgressPercent(0, 100), 0);
++			assert.strictEqual(computeProgressPercent(50, 100), 50);
++			assert.strictEqual(computeProgressPercent(100, 100), 100);
++			assert.strictEqual(computeProgressPercent(1, 3), 33);
++			assert.strictEqual(computeProgressPercent(2, 3), 67);
+ 		});
+ 
+ 		test('clamps to 0-100 range', () => {
+-			assert.strictEqual(getProgressPercent(-10, 100), 0);
+-			assert.strictEqual(getProgressPercent(200, 100), 100);
++			assert.strictEqual(computeProgressPercent(-10, 100), 0);
++			assert.strictEqual(computeProgressPercent(200, 100), 100);
+ 		});
+ 	});
+ 
+@@ -54,42 +54,110 @@ suite('UpdateStatusBarEntry', () => {
+ 			const now = Date.now();
+ 
+ 			// Missing parameters
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState()), undefined);
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(500, undefined, now)), undefined);
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(undefined, 1000, now)), undefined);
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(500, 1000, undefined)), undefined);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState()), undefined);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(500, undefined, now)), undefined);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(undefined, 1000, now)), undefined);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(500, 1000, undefined)), undefined);
+ 
+ 			// Zero or negative values
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(0, 1000, now - 1000)), undefined);
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(500, 0, now - 1000)), undefined);
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(500, 1000, now + 1000)), undefined);
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(-100, 1000, now - 1000)), undefined);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(0, 1000, now - 1000)), undefined);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(500, 0, now - 1000)), undefined);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(500, 1000, now + 1000)), undefined);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(-100, 1000, now - 1000)), undefined);
+ 		});
+ 
+ 		test('returns 0 when download is complete or over-downloaded', () => {
+ 			const now = Date.now();
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(1000, 1000, now - 1000)), 0);
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(1500, 1000, now - 1000)), 0);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(1000, 1000, now - 1000)), 0);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(1500, 1000, now - 1000)), 0);
+ 		});
+ 
+ 		test('computes correct time remaining', () => {
+ 			const now = Date.now();
+ 
+ 			// Simple case: Downloaded 500 bytes of 1000 in 1000ms => 1s remaining
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(500, 1000, now - 1000)), 1);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(500, 1000, now - 1000)), 1);
+ 
+ 			// 10 seconds remaining: Downloaded 100MB of 200MB in 10s
+ 			const downloadedBytes = 100 * 1024 * 1024;
+ 			const totalBytes = 200 * 1024 * 1024;
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(downloadedBytes, totalBytes, now - 10000)), 10);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(downloadedBytes, totalBytes, now - 10000)), 10);
+ 
+ 			// Rounds up: 900 of 1000 bytes in 900ms => 100ms remaining => rounds to 1s
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(900, 1000, now - 900)), 1);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(900, 1000, now - 900)), 1);
+ 
+ 			// Realistic scenario: 50MB of 100MB in 50s => 50s remaining
+ 			const downloaded50MB = 50 * 1024 * 1024;
+ 			const total100MB = 100 * 1024 * 1024;
+-			assert.strictEqual(computeDownloadTimeRemaining(createDownloadingState(downloaded50MB, total100MB, now - 50000)), 50);
++			assert.strictEqual(computeDownloadTimeRemaining(DownloadingState(downloaded50MB, total100MB, now - 50000)), 50);
++		});
++	});
++
++
++	suite('computeDownloadSpeed', () => {
++		test('returns undefined for invalid or incomplete input', () => {
++			const now = Date.now();
++			assert.strictEqual(computeDownloadSpeed(DownloadingState(undefined, 1000, now - 1000)), undefined);
++			assert.strictEqual(computeDownloadSpeed(DownloadingState(500, 1000, undefined)), undefined);
++			assert.strictEqual(computeDownloadSpeed(DownloadingState(undefined, undefined, undefined)), undefined);
++		});
++
++		test('returns undefined for zero or negative elapsed time', () => {
++			const now = Date.now();
++			assert.strictEqual(computeDownloadSpeed(DownloadingState(500, 1000, now + 1000)), undefined);
++		});
++
++		test('returns undefined for zero downloaded bytes', () => {
++			const now = Date.now();
++			assert.strictEqual(computeDownloadSpeed(DownloadingState(0, 1000, now - 1000)), undefined);
++		});
++
++		test('computes correct download speed in bytes per second', () => {
++			const now = Date.now();
++
++			// 1000 bytes in 1 second = 1000 B/s
++			const speed1 = computeDownloadSpeed(DownloadingState(1000, 2000, now - 1000));
++			assert.ok(speed1 !== undefined);
++			assert.ok(Math.abs(speed1 - 1000) < 50); // Allow small timing variance
++
++			// 10 MB in 10 seconds = 1 MB/s = 1048576 B/s
++			const tenMB = 10 * 1024 * 1024;
++			const speed2 = computeDownloadSpeed(DownloadingState(tenMB, tenMB * 2, now - 10000));
++			assert.ok(speed2 !== undefined);
++			const expectedSpeed = 1024 * 1024; // 1 MB/s
++			assert.ok(Math.abs(speed2 - expectedSpeed) < expectedSpeed * 0.01); // Within 1%
++		});
++	});
++
++	suite('computeUpdateInfoVersion', () => {
++		test('returns minor .0 version when minor differs', () => {
++			assert.strictEqual(computeUpdateInfoVersion('1.108.2', '1.109.5'), '1.109');
++			assert.strictEqual(computeUpdateInfoVersion('1.108.0', '1.109.0'), '1.109');
++			assert.strictEqual(computeUpdateInfoVersion('1.107.3', '1.110.1'), '1.110');
++		});
++
++		test('returns target version as-is when same minor', () => {
++			assert.strictEqual(computeUpdateInfoVersion('1.109.2', '1.109.5'), '1.109.5');
++			assert.strictEqual(computeUpdateInfoVersion('1.109.0', '1.109.3'), '1.109.3');
++		});
++
++		test('returns minor .0 version when major differs', () => {
++			assert.strictEqual(computeUpdateInfoVersion('1.109.2', '2.0.1'), '2.0');
++		});
++
++		test('returns undefined for invalid versions', () => {
++			assert.strictEqual(computeUpdateInfoVersion('invalid', '1.109.5'), undefined);
++			assert.strictEqual(computeUpdateInfoVersion('1.109.2', 'invalid'), undefined);
++		});
++	});
++
++	suite('getUpdateInfoUrl', () => {
++		test('constructs correct URL for .0 versions', () => {
++			assert.strictEqual(getUpdateInfoUrl('1.109.0'), 'https://code.visualstudio.com/raw/v1_109_update.md');
++		});
++
++		test('constructs correct URL for patch versions', () => {
++			assert.strictEqual(getUpdateInfoUrl('1.109.5'), 'https://code.visualstudio.com/raw/v1_109_5_update.md');
+ 		});
+ 	});
+ 
+@@ -177,39 +245,4 @@ suite('UpdateStatusBarEntry', () => {
+ 			assert.ok(result.includes('2024'));
+ 		});
+ 	});
+-
+-	suite('computeDownloadSpeed', () => {
+-		test('returns undefined for invalid or incomplete input', () => {
+-			const now = Date.now();
+-			assert.strictEqual(computeDownloadSpeed(createDownloadingState(undefined, 1000, now - 1000)), undefined);
+-			assert.strictEqual(computeDownloadSpeed(createDownloadingState(500, 1000, undefined)), undefined);
+-			assert.strictEqual(computeDownloadSpeed(createDownloadingState(undefined, undefined, undefined)), undefined);
+-		});
+-
+-		test('returns undefined for zero or negative elapsed time', () => {
+-			const now = Date.now();
+-			assert.strictEqual(computeDownloadSpeed(createDownloadingState(500, 1000, now + 1000)), undefined);
+-		});
+-
+-		test('returns undefined for zero downloaded bytes', () => {
+-			const now = Date.now();
+-			assert.strictEqual(computeDownloadSpeed(createDownloadingState(0, 1000, now - 1000)), undefined);
+-		});
+-
+-		test('computes correct download speed in bytes per second', () => {
+-			const now = Date.now();
+-
+-			// 1000 bytes in 1 second = 1000 B/s
+-			const speed1 = computeDownloadSpeed(createDownloadingState(1000, 2000, now - 1000));
+-			assert.ok(speed1 !== undefined);
+-			assert.ok(Math.abs(speed1 - 1000) < 50); // Allow small timing variance
+-
+-			// 10 MB in 10 seconds = 1 MB/s = 1048576 B/s
+-			const tenMB = 10 * 1024 * 1024;
+-			const speed2 = computeDownloadSpeed(createDownloadingState(tenMB, tenMB * 2, now - 10000));
+-			assert.ok(speed2 !== undefined);
+-			const expectedSpeed = 1024 * 1024; // 1 MB/s
+-			assert.ok(Math.abs(speed2 - expectedSpeed) < expectedSpeed * 0.01); // Within 1%
+-		});
+-	});
+ });

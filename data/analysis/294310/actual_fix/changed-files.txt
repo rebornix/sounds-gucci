@@ -1,0 +1,4 @@
+src/extension/chatSessions/claude/common/toolPermissionHandlers/exitPlanModeHandler.ts
+src/extension/chatSessions/claude/node/test/claudeToolPermissionService.spec.ts
+src/extension/chatSessions/vscode-node/folderRepositoryManagerImpl.ts
+src/extension/tools/common/toolNames.ts

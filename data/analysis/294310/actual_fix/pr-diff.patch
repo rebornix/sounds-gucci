@@ -1,0 +1,249 @@
+diff --git a/src/extension/chatSessions/claude/common/toolPermissionHandlers/exitPlanModeHandler.ts b/src/extension/chatSessions/claude/common/toolPermissionHandlers/exitPlanModeHandler.ts
+index ec792a56b5..214419c5e9 100644
+--- a/src/extension/chatSessions/claude/common/toolPermissionHandlers/exitPlanModeHandler.ts
++++ b/src/extension/chatSessions/claude/common/toolPermissionHandlers/exitPlanModeHandler.ts
+@@ -4,24 +4,65 @@
+  *--------------------------------------------------------------------------------------------*/
+ 
+ import * as l10n from '@vscode/l10n';
+-import { IClaudeToolConfirmationParams, IClaudeToolPermissionHandler } from '../claudeToolPermission';
++import { ILogService } from '../../../../../platform/log/common/logService';
++import { CancellationToken } from '../../../../../util/vs/base/common/cancellation';
++import { LanguageModelTextPart } from '../../../../../vscodeTypes';
++import { ToolName } from '../../../../tools/common/toolNames';
++import { IToolsService } from '../../../../tools/common/toolsService';
++import { ClaudeToolPermissionContext, ClaudeToolPermissionResult, IClaudeToolPermissionHandler } from '../claudeToolPermission';
+ import { registerToolPermissionHandler } from '../claudeToolPermissionRegistry';
+ import { ClaudeToolNames, ExitPlanModeInput } from '../claudeTools';
+ 
++const ApproveButton = l10n.t('Approve');
++const DenyButton = l10n.t('Deny');
++
+ /**
+  * Handler for the ExitPlanMode tool.
+- * Shows a confirmation dialog with Claude's plan before proceeding.
++ * Shows a confirmation dialog with Claude's plan and Approve/Deny buttons.
+  */
+ export class ExitPlanModeToolHandler implements IClaudeToolPermissionHandler<ClaudeToolNames.ExitPlanMode> {
+ 	public readonly toolNames = [ClaudeToolNames.ExitPlanMode] as const;
+ 
+-	public getConfirmationParams(
++	constructor(
++		@IToolsService private readonly toolsService: IToolsService,
++		@ILogService private readonly logService: ILogService
++	) { }
++
++	public async handle(
+ 		_toolName: ClaudeToolNames.ExitPlanMode,
+-		input: ExitPlanModeInput
+-	): IClaudeToolConfirmationParams {
++		input: ExitPlanModeInput,
++		{ toolInvocationToken }: ClaudeToolPermissionContext
++	): Promise<ClaudeToolPermissionResult> {
++		try {
++			const result = await this.toolsService.invokeTool(ToolName.CoreConfirmationToolWithOptions, {
++				input: {
++					title: l10n.t('Ready to code?'),
++					message: l10n.t("Here is Claude's plan:\n\n{0}", input.plan ?? ''),
++					// Use buttons instead of a simple confirmation because we do not want
++					// auto-approve options for this tool.
++					buttons: [ApproveButton, DenyButton]
++				},
++				toolInvocationToken
++			}, CancellationToken.None);
++
++			const firstResultPart = result.content.at(0);
++			if (firstResultPart instanceof LanguageModelTextPart && firstResultPart.value === ApproveButton) {
++				return {
++					behavior: 'allow',
++					updatedInput: input
++				};
++			}
++		} catch (e) {
++			this.logService.warn(`[ExitPlanMode] Failed to invoke confirmation tool: ${e?.message ?? e}`);
++			return {
++				behavior: 'deny',
++				message: 'Failed to show plan confirmation'
++			};
++		}
++
+ 		return {
+-			title: l10n.t('Ready to code?'),
+-			message: l10n.t("Here is Claude's plan:\n\n{0}", input.plan ?? '')
++			behavior: 'deny',
++			message: 'The user declined the plan, maybe ask why?'
+ 		};
+ 	}
+ }
+diff --git a/src/extension/chatSessions/claude/node/test/claudeToolPermissionService.spec.ts b/src/extension/chatSessions/claude/node/test/claudeToolPermissionService.spec.ts
+index a20d7302b7..cc87f3f08a 100644
+--- a/src/extension/chatSessions/claude/node/test/claudeToolPermissionService.spec.ts
++++ b/src/extension/chatSessions/claude/node/test/claudeToolPermissionService.spec.ts
+@@ -36,12 +36,17 @@ class MockToolsService implements IToolsService {
+ 	readonly copilotTools = new Map<ToolName, ICopilotTool<unknown>>();
+ 
+ 	private _confirmationResult: 'yes' | 'no' = 'yes';
++	private _optionsConfirmationResult: string | undefined;
+ 	private _invokeToolCalls: Array<{ name: string; input: unknown }> = [];
+ 
+ 	setConfirmationResult(result: 'yes' | 'no'): void {
+ 		this._confirmationResult = result;
+ 	}
+ 
++	setOptionsConfirmationResult(result: string | undefined): void {
++		this._optionsConfirmationResult = result;
++	}
++
+ 	get invokeToolCalls(): ReadonlyArray<{ name: string; input: unknown }> {
+ 		return this._invokeToolCalls;
+ 	}
+@@ -68,6 +73,14 @@ class MockToolsService implements IToolsService {
+ 			};
+ 		}
+ 
++		if (name === ToolName.CoreConfirmationToolWithOptions) {
++			return {
++				content: this._optionsConfirmationResult !== undefined
++					? [new LanguageModelTextPart(this._optionsConfirmationResult)]
++					: []
++			};
++		}
++
+ 		return { content: [] };
+ 	}
+ 
+@@ -261,6 +274,93 @@ describe('ClaudeToolPermissionService', () => {
+ 			});
+ 		});
+ 
++		describe('ExitPlanMode handler', () => {
++			const exitPlanModeInput = { plan: 'Step 1: Do something\nStep 2: Do another thing' };
++
++			it('allows when user clicks Approve', async () => {
++				mockToolsService.setOptionsConfirmationResult('Approve');
++				const context = createMockContext();
++
++				const result = await service.canUseTool(ClaudeToolNames.ExitPlanMode, exitPlanModeInput, context);
++
++				expect(result.behavior).toBe('allow');
++				if (result.behavior === 'allow') {
++					expect(result.updatedInput).toEqual(exitPlanModeInput);
++				}
++			});
++
++			it('invokes CoreConfirmationToolWithOptions with Approve and Deny buttons', async () => {
++				mockToolsService.setOptionsConfirmationResult('Approve');
++				const context = createMockContext();
++
++				await service.canUseTool(ClaudeToolNames.ExitPlanMode, exitPlanModeInput, context);
++
++				expect(mockToolsService.invokeToolCalls.length).toBe(1);
++				expect(mockToolsService.invokeToolCalls[0].name).toBe(ToolName.CoreConfirmationToolWithOptions);
++				const input = mockToolsService.invokeToolCalls[0].input as { title: string; message: string; buttons: string[] };
++				expect(input.buttons).toEqual(['Approve', 'Deny']);
++				expect(input.message).toContain('Step 1: Do something');
++			});
++
++			it('denies when user clicks Deny', async () => {
++				mockToolsService.setOptionsConfirmationResult('Deny');
++				const context = createMockContext();
++
++				const result = await service.canUseTool(ClaudeToolNames.ExitPlanMode, exitPlanModeInput, context);
++
++				expect(result.behavior).toBe('deny');
++				if (result.behavior === 'deny') {
++					expect(result.message).toContain('declined');
++				}
++			});
++
++			it('denies when dialog returns empty content', async () => {
++				mockToolsService.setOptionsConfirmationResult(undefined);
++				const context = createMockContext();
++
++				const result = await service.canUseTool(ClaudeToolNames.ExitPlanMode, exitPlanModeInput, context);
++
++				expect(result.behavior).toBe('deny');
++				if (result.behavior === 'deny') {
++					expect(result.message).toContain('declined');
++				}
++			});
++
++			it('denies with distinct message when tool invocation throws', async () => {
++				const failingService = new class extends MockToolsService {
++					override async invokeTool(name: string): Promise<vscode.LanguageModelToolResult2> {
++						if (name === ToolName.CoreConfirmationToolWithOptions) {
++							throw new Error('Tool unavailable');
++						}
++						return { content: [] };
++					}
++				}();
++
++				const serviceCollection = store.add(createExtensionUnitTestingServices());
++				serviceCollection.set(IToolsService, failingService);
++				const accessor = serviceCollection.createTestingAccessor();
++				const newService = accessor.get(IInstantiationService).createInstance(ClaudeToolPermissionService);
++
++				const result = await newService.canUseTool(ClaudeToolNames.ExitPlanMode, exitPlanModeInput, createMockContext());
++
++				expect(result.behavior).toBe('deny');
++				if (result.behavior === 'deny') {
++					expect(result.message).toBe('Failed to show plan confirmation');
++				}
++			});
++
++			it('handles missing plan gracefully', async () => {
++				mockToolsService.setOptionsConfirmationResult('Approve');
++				const context = createMockContext();
++
++				const result = await service.canUseTool(ClaudeToolNames.ExitPlanMode, {}, context);
++
++				expect(result.behavior).toBe('allow');
++				const input = mockToolsService.invokeToolCalls[0].input as { message: string };
++				expect(input.message).toContain('');
++			});
++		});
++
+ 		describe('error handling', () => {
+ 			it('denies when confirmation tool throws', async () => {
+ 				// Create a mock that throws
+diff --git a/src/extension/chatSessions/vscode-node/folderRepositoryManagerImpl.ts b/src/extension/chatSessions/vscode-node/folderRepositoryManagerImpl.ts
+index 84550acc17..b2817e9686 100644
+--- a/src/extension/chatSessions/vscode-node/folderRepositoryManagerImpl.ts
++++ b/src/extension/chatSessions/vscode-node/folderRepositoryManagerImpl.ts
+@@ -28,6 +28,7 @@ import {
+ import { isUntitledSessionId } from '../common/utils';
+ import { isWelcomeView } from '../copilotcli/node/copilotCli';
+ import { ICopilotCLISessionService } from '../copilotcli/node/copilotcliSessionService';
++import { ToolName } from '../../tools/common/toolNames';
+ 
+ /**
+  * Message shown when user needs to trust a folder to continue.
+@@ -470,7 +471,7 @@ export abstract class FolderRepositoryManager extends Disposable implements IFol
+ 			message,
+ 			buttons
+ 		};
+-		const result = await this.toolsService.invokeTool('vscode_get_confirmation_with_options', { input, toolInvocationToken }, token);
++		const result = await this.toolsService.invokeTool(ToolName.CoreConfirmationToolWithOptions, { input, toolInvocationToken }, token);
+ 
+ 		const firstResultPart = result.content.at(0);
+ 		const selection = firstResultPart instanceof LanguageModelTextPart ? firstResultPart.value : undefined;
+diff --git a/src/extension/tools/common/toolNames.ts b/src/extension/tools/common/toolNames.ts
+index 514931f8f0..cd4bbee029 100644
+--- a/src/extension/tools/common/toolNames.ts
++++ b/src/extension/tools/common/toolNames.ts
+@@ -63,6 +63,7 @@ export enum ToolName {
+ 	EditFilesPlaceholder = 'edit_files',
+ 	CoreRunSubagent = 'runSubagent',
+ 	CoreConfirmationTool = 'vscode_get_confirmation',
++	CoreConfirmationToolWithOptions = 'vscode_get_confirmation_with_options',
+ 	CoreTerminalConfirmationTool = 'vscode_get_terminal_confirmation',
+ 	SearchSubagent = 'search_subagent',
+ 	CoreAskQuestions = 'vscode_askQuestions',
+@@ -212,6 +213,7 @@ export const toolCategories: Record<ToolName, ToolCategory> = {
+ 	// Other tools - categorize appropriately
+ 	[ToolName.ToolReplay]: ToolCategory.RedundantButSpecific,
+ 	[ToolName.CoreConfirmationTool]: ToolCategory.VSCodeInteraction,
++	[ToolName.CoreConfirmationToolWithOptions]: ToolCategory.VSCodeInteraction,
+ 	[ToolName.CoreTerminalConfirmationTool]: ToolCategory.VSCodeInteraction,
+ 	[ToolName.CoreAskQuestions]: ToolCategory.VSCodeInteraction,
+ 	[ToolName.SwitchAgent]: ToolCategory.VSCodeInteraction,

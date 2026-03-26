@@ -1,0 +1,2 @@
+src/extension/chatSessions/vscode-node/copilotCLIChatSessionsContribution.ts
+src/extension/chatSessions/vscode-node/test/copilotCLIChatSessionParticipant.spec.ts

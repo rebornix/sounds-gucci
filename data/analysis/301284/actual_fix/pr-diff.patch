@@ -1,0 +1,115 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/agentPluginRepositoryService.ts b/src/vs/workbench/contrib/chat/browser/agentPluginRepositoryService.ts
+index 329c531cad5b2..92d569bc9bef6 100644
+--- a/src/vs/workbench/contrib/chat/browser/agentPluginRepositoryService.ts
++++ b/src/vs/workbench/contrib/chat/browser/agentPluginRepositoryService.ts
+@@ -4,6 +4,7 @@
+  *--------------------------------------------------------------------------------------------*/
+ 
+ import { Action } from '../../../../base/common/actions.js';
++import { SequencerByKey } from '../../../../base/common/async.js';
+ import { Lazy } from '../../../../base/common/lazy.js';
+ import { revive } from '../../../../base/common/marshalling.js';
+ import { dirname, isEqual, isEqualOrParent, joinPath } from '../../../../base/common/resources.js';
+@@ -38,6 +39,7 @@ export class AgentPluginRepositoryService implements IAgentPluginRepositoryServi
+ 	private readonly _cacheRoot: URI;
+ 	private readonly _marketplaceIndex = new Lazy<Map<string, IMarketplaceIndexEntry>>(() => this._loadMarketplaceIndex());
+ 	private readonly _pluginSources: ReadonlyMap<PluginSourceKind, IPluginSource>;
++	private readonly _cloneSequencer = new SequencerByKey<string>();
+ 
+ 	constructor(
+ 		@ICommandService private readonly _commandService: ICommandService,
+@@ -90,21 +92,23 @@ export class AgentPluginRepositoryService implements IAgentPluginRepositoryServi
+ 
+ 	async ensureRepository(marketplace: IMarketplaceReference, options?: IEnsureRepositoryOptions): Promise<URI> {
+ 		const repoDir = this.getRepositoryUri(marketplace, options?.marketplaceType);
+-		const repoExists = await this._fileService.exists(repoDir);
+-		if (repoExists) {
+-			this._updateMarketplaceIndex(marketplace, repoDir, options?.marketplaceType);
+-			return repoDir;
+-		}
++		return this._cloneSequencer.queue(repoDir.fsPath, async () => {
++			const repoExists = await this._fileService.exists(repoDir);
++			if (repoExists) {
++				this._updateMarketplaceIndex(marketplace, repoDir, options?.marketplaceType);
++				return repoDir;
++			}
+ 
+-		if (marketplace.kind === MarketplaceReferenceKind.LocalFileUri) {
+-			throw new Error(`Local marketplace repository does not exist: ${repoDir.fsPath}`);
+-		}
++			if (marketplace.kind === MarketplaceReferenceKind.LocalFileUri) {
++				throw new Error(`Local marketplace repository does not exist: ${repoDir.fsPath}`);
++			}
+ 
+-		const progressTitle = options?.progressTitle ?? localize('preparingMarketplace', "Preparing plugin marketplace '{0}'...", marketplace.displayLabel);
+-		const failureLabel = options?.failureLabel ?? marketplace.displayLabel;
+-		await this._cloneRepository(repoDir, marketplace.cloneUrl, progressTitle, failureLabel);
+-		this._updateMarketplaceIndex(marketplace, repoDir, options?.marketplaceType);
+-		return repoDir;
++			const progressTitle = options?.progressTitle ?? localize('preparingMarketplace', "Preparing plugin marketplace '{0}'...", marketplace.displayLabel);
++			const failureLabel = options?.failureLabel ?? marketplace.displayLabel;
++			await this._cloneRepository(repoDir, marketplace.cloneUrl, progressTitle, failureLabel);
++			this._updateMarketplaceIndex(marketplace, repoDir, options?.marketplaceType);
++			return repoDir;
++		});
+ 	}
+ 
+ 	async pullRepository(marketplace: IMarketplaceReference, options?: IPullRepositoryOptions): Promise<boolean> {
+diff --git a/src/vs/workbench/contrib/chat/test/browser/plugins/agentPluginRepositoryService.test.ts b/src/vs/workbench/contrib/chat/test/browser/plugins/agentPluginRepositoryService.test.ts
+index 6fe9944953ed0..91dbe03786d0e 100644
+--- a/src/vs/workbench/contrib/chat/test/browser/plugins/agentPluginRepositoryService.test.ts
++++ b/src/vs/workbench/contrib/chat/test/browser/plugins/agentPluginRepositoryService.test.ts
+@@ -110,6 +110,53 @@ suite('AgentPluginRepositoryService', () => {
+ 		assert.strictEqual(uri.path, '/cache/agentPlugins/github.com/microsoft/vscode');
+ 	});
+ 
++	test('concurrent ensureRepository calls for the same marketplace clone only once', async () => {
++		let cloneCount = 0;
++		const instantiationService = store.add(new TestInstantiationService());
++
++		// Track whether the repo exists (set to true after the first clone completes)
++		let repoExists = false;
++		const fileService = {
++			exists: async (_resource: URI) => repoExists,
++			createFolder: async () => undefined,
++		} as unknown as IFileService;
++
++		const progressService = {
++			withProgress: async (_options: unknown, callback: (...args: unknown[]) => Promise<unknown>) => callback(),
++		} as unknown as IProgressService;
++
++		instantiationService.stub(ICommandService, {
++			executeCommand: async (id: string) => {
++				if (id === '_git.cloneRepository') {
++					cloneCount++;
++					// Simulate async clone by yielding, then mark repo as existing
++					await new Promise<void>(r => setTimeout(r, 0));
++					repoExists = true;
++				}
++				return undefined;
++			},
++		} as unknown as ICommandService);
++		instantiationService.stub(IEnvironmentService, { cacheHome: URI.file('/cache') } as unknown as IEnvironmentService);
++		instantiationService.stub(IFileService, fileService);
++		instantiationService.stub(ILogService, new NullLogService());
++		instantiationService.stub(INotificationService, { notify: () => undefined } as unknown as INotificationService);
++		instantiationService.stub(IProgressService, progressService);
++		instantiationService.stub(IStorageService, store.add(new InMemoryStorageService()));
++
++		const service = instantiationService.createInstance(AgentPluginRepositoryService);
++		const plugin = createPlugin('microsoft/vscode', 'plugins/myPlugin');
++
++		// Fire two concurrent ensureRepository calls for the same marketplace
++		const [uri1, uri2] = await Promise.all([
++			service.ensureRepository(plugin.marketplaceReference, { marketplaceType: plugin.marketplaceType }),
++			service.ensureRepository(plugin.marketplaceReference, { marketplaceType: plugin.marketplaceType }),
++		]);
++
++		assert.strictEqual(cloneCount, 1);
++		assert.strictEqual(uri1.path, '/cache/agentPlugins/github.com/microsoft/vscode');
++		assert.strictEqual(uri2.path, '/cache/agentPlugins/github.com/microsoft/vscode');
++	});
++
+ 	test('builds install URI from source inside repository root', () => {
+ 		const service = createService();
+ 		const plugin = createPlugin('microsoft/vscode', 'plugins/myPlugin');

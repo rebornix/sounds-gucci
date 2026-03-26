@@ -1,0 +1,12 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/chatQuestionCarouselPart.ts b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/chatQuestionCarouselPart.ts
+index c3d240b5a30d8..704052557be9c 100644
+--- a/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/chatQuestionCarouselPart.ts
++++ b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/chatQuestionCarouselPart.ts
+@@ -669,6 +669,7 @@ export class ChatQuestionCarouselPart extends Disposable implements IChatContent
+ 		const inputResizeObserver = questionRenderStore.add(new dom.DisposableResizeObserver(() => scheduleLayoutInputScrollable()));
+ 		questionRenderStore.add(inputResizeObserver.observe(inputScrollableNode));
+ 		questionRenderStore.add(inputResizeObserver.observe(inputContainer));
++		questionRenderStore.add(dom.addDisposableListener(dom.getWindow(this.domNode), dom.EventType.RESIZE, () => scheduleLayoutInputScrollable()));
+ 		scheduleLayoutInputScrollable();
+ 		questionRenderStore.add(dom.runAtThisOrScheduleAtNextAnimationFrame(dom.getWindow(this.domNode), () => {
+ 			inputContainer.scrollTop = 0;

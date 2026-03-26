@@ -1,0 +1,14 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/media/chatQuestionCarousel.css b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/media/chatQuestionCarousel.css
+index 62d2a0a03b7c1..45e5b303c2eaf 100644
+--- a/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/media/chatQuestionCarousel.css
++++ b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/media/chatQuestionCarousel.css
+@@ -391,6 +391,9 @@
+ 	padding: 8px 16px 0;
+ 	font-size: var(--vscode-chat-font-size-body-s);
+ 	color: var(--vscode-descriptionForeground);
++	max-height: min(220px, 25vh);
++	overflow-y: auto;
++	overscroll-behavior: contain;
+ 
+ 	.rendered-markdown p {
+ 		margin: 0;

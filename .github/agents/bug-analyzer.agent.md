@@ -16,6 +16,7 @@ You are a bug analysis expert. Your task is to analyze a bug issue and propose a
 2. Read the model name from the `.model` file at the repo root: `cat .model`
 3. Create the directory: `mkdir -p data/analysis/<pr>/<model>-<date>/`
    - Example: `mkdir -p data/analysis/281397/gpt-5.3-codex-2026-02-21/`
+   - For a **single consolidated run** per slug (e.g. after merging dated dirs), the folder may be exactly `data/analysis/<pr>/<slug>/` such as `composer-2/` — see `scripts/merge-composer2-experiments.py`.
 4. **Save ALL output as `proposed-fix.md` inside this experiment directory**
 
 ## Directory Structure
@@ -29,7 +30,7 @@ data/analysis/<pr>/
 │   ├── pr-diff.patch
 │   ├── pr.md
 │   └── changed-files.txt
-└── <model>-<date>/    # Your experiment directory (created by you)
+└── <model>-<date>/    # Your experiment directory (or `<slug>/` e.g. composer-2/)
     └── proposed-fix.md
 ```
 
@@ -46,6 +47,18 @@ Given an issue description and the repository state at a specific commit (the pa
 You will receive a path to an analysis directory containing:
 - `issue.md` - The bug issue description and comments (READ THIS)
 - `metadata.json` - PR number, issue number, parent commit, repo info
+
+## Multi-PR batches (orchestration)
+
+This agent analyzes **exactly one** `data/analysis/<pr>` directory per run.
+
+When a human or driver runs many PRs against the **same** `CLONE_PATH` (see Step 0):
+
+1. **One subagent (or agent invocation) per PR** — Do not embed a loop over multiple PR directories inside a single subagent session. Each invocation checks out **one** `parentCommit`, investigates, and writes **one** `proposed-fix.md`.
+2. **Sequential driver order** — Start the bug-analyzer for PR *N+1* only after PR *N* has fully finished, so only one process mutates `git` state in `CLONE_PATH` at a time.
+3. **Never parallel bug-analyzers on one clone** — Concurrent `git checkout` on the same working tree races and corrupts analysis.
+
+`fix-validator` may run in parallel across different `data/analysis/<pr>` trees once `proposed-fix.md` exists; it does not require a specific checkout of the target repo.
 
 ## ⛔ STRICT PROHIBITIONS — DO NOT VIOLATE
 

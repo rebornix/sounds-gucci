@@ -1,0 +1,13 @@
+{
+  "pr": 300322,
+  "prTitle": "Bump xterm to take IME overflow fix",
+  "mergeCommit": "01eb53f0f975ea9b316210e921f0144fcf99fe25",
+  "parentCommit": "",
+  "fileCount": 6,
+  "issue": 300251,
+  "issueTitle": "Terminal input with IME overflows to outside of the terminal",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 22947236274,
+  "closedAt": "2026-03-10T18:03:45Z"
+}

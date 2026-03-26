@@ -1,0 +1,1014 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugCollapsible.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugCollapsible.ts
+index afbe701f809d1..b2226d30fca1f 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugCollapsible.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugCollapsible.ts
+@@ -7,9 +7,6 @@ import * as DOM from '../../../../../base/browser/dom.js';
+ import { Codicon } from '../../../../../base/common/codicons.js';
+ import { DisposableStore } from '../../../../../base/common/lifecycle.js';
+ import { ThemeIcon } from '../../../../../base/common/themables.js';
+-import { IChatDebugMessageSection } from '../../common/chatDebugService.js';
+-
+-const $ = DOM.$;
+ 
+ /**
+  * Wire up a collapsible toggle on a chevron+header+content triple.
+@@ -47,25 +44,3 @@ export function setupCollapsibleToggle(chevron: HTMLElement, header: HTMLElement
+ 		}
+ 	}));
+ }
+-
+-/**
+- * Render a collapsible section with a clickable header and pre-formatted content
+- * wrapped in a scrollable element.
+- */
+-export function renderCollapsibleSection(parent: HTMLElement, section: IChatDebugMessageSection, disposables: DisposableStore, initiallyCollapsed: boolean = false): void {
+-	const sectionEl = DOM.append(parent, $('div.chat-debug-message-section'));
+-
+-	const header = DOM.append(sectionEl, $('div.chat-debug-message-section-header'));
+-
+-	const chevron = DOM.append(header, $(`span.chat-debug-message-section-chevron`));
+-	DOM.append(header, $('span.chat-debug-message-section-title', undefined, section.name));
+-
+-	const contentEl = $('pre.chat-debug-message-section-content');
+-	contentEl.textContent = section.content;
+-	contentEl.tabIndex = 0;
+-
+-	const wrapper = DOM.append(sectionEl, $('div.chat-debug-message-section-content-wrapper'));
+-	wrapper.appendChild(contentEl);
+-
+-	setupCollapsibleToggle(chevron, header, wrapper, disposables, initiallyCollapsed);
+-}
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugDetailPanel.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugDetailPanel.ts
+index bd8fcbb3c703e..1aa182e75a951 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugDetailPanel.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugDetailPanel.ts
+@@ -5,6 +5,9 @@
+ 
+ import * as DOM from '../../../../../base/browser/dom.js';
+ import { Button } from '../../../../../base/browser/ui/button/button.js';
++import { Orientation, Sash, SashState } from '../../../../../base/browser/ui/sash/sash.js';
++import { DomScrollableElement } from '../../../../../base/browser/ui/scrollbar/scrollableElement.js';
++import { ScrollbarVisibility } from '../../../../../base/common/scrollable.js';
+ import { Codicon } from '../../../../../base/common/codicons.js';
+ import { Emitter } from '../../../../../base/common/event.js';
+ import { Disposable, DisposableStore } from '../../../../../base/common/lifecycle.js';
+@@ -27,6 +30,10 @@ import { renderModelTurnContent, modelTurnContentToPlainText } from './chatDebug
+ 
+ const $ = DOM.$;
+ 
++const DETAIL_PANEL_DEFAULT_WIDTH = 350;
++const DETAIL_PANEL_MIN_WIDTH = 200;
++const DETAIL_PANEL_MAX_WIDTH = 800;
++
+ /**
+  * Reusable detail panel that resolves and displays the content of a
+  * single {@link IChatDebugEvent}. Used by both the logs view and the
+@@ -37,12 +44,23 @@ export class ChatDebugDetailPanel extends Disposable {
+ 	private readonly _onDidHide = this._register(new Emitter<void>());
+ 	readonly onDidHide = this._onDidHide.event;
+ 
++	private readonly _onDidChangeWidth = this._register(new Emitter<number>());
++	readonly onDidChangeWidth = this._onDidChangeWidth.event;
++
+ 	readonly element: HTMLElement;
+ 	private readonly contentContainer: HTMLElement;
++	private readonly scrollable: DomScrollableElement;
++	private readonly sash: Sash;
++	private headerElement: HTMLElement | undefined;
+ 	private readonly detailDisposables = this._register(new DisposableStore());
+ 	private currentDetailText: string = '';
+ 	private currentDetailEventId: string | undefined;
+ 	private firstFocusableElement: HTMLElement | undefined;
++	private _width: number = DETAIL_PANEL_DEFAULT_WIDTH;
++
++	get width(): number {
++		return this._width;
++	}
+ 
+ 	constructor(
+ 		parent: HTMLElement,
+@@ -52,12 +70,43 @@ export class ChatDebugDetailPanel extends Disposable {
+ 		@IClipboardService private readonly clipboardService: IClipboardService,
+ 		@IHoverService private readonly hoverService: IHoverService,
+ 		@IOpenerService private readonly openerService: IOpenerService,
++		@ILanguageService private readonly languageService: ILanguageService,
+ 	) {
+ 		super();
+ 		this.element = DOM.append(parent, $('.chat-debug-detail-panel'));
+ 		this.contentContainer = $('.chat-debug-detail-content');
++		this.scrollable = this._register(new DomScrollableElement(this.contentContainer, {
++			horizontal: ScrollbarVisibility.Hidden,
++			vertical: ScrollbarVisibility.Auto,
++		}));
++		this.element.style.width = `${this._width}px`;
+ 		DOM.hide(this.element);
+ 
++		// Sash on the parent container, positioned at the left edge of the detail panel
++		this.sash = this._register(new Sash(parent, {
++			getVerticalSashLeft: () => parent.offsetWidth - this._width,
++		}, { orientation: Orientation.VERTICAL }));
++		this.sash.state = SashState.Disabled;
++
++		let sashStartWidth: number | undefined;
++		this._register(this.sash.onDidStart(() => sashStartWidth = this._width));
++		this._register(this.sash.onDidEnd(() => {
++			sashStartWidth = undefined;
++			this.sash.layout();
++		}));
++		this._register(this.sash.onDidChange(e => {
++			if (sashStartWidth === undefined) {
++				return;
++			}
++			// Dragging left (negative currentX delta) should increase width
++			const delta = e.startX - e.currentX;
++			const newWidth = Math.max(DETAIL_PANEL_MIN_WIDTH, Math.min(DETAIL_PANEL_MAX_WIDTH, sashStartWidth + delta));
++			this._width = newWidth;
++			this.element.style.width = `${newWidth}px`;
++			this.sash.layout();
++			this._onDidChangeWidth.fire(newWidth);
++		}));
++
+ 		// Handle Ctrl+A / Cmd+A to select all within the detail panel
+ 		this._register(DOM.addDisposableListener(this.element, DOM.EventType.KEY_DOWN, (e: KeyboardEvent) => {
+ 			if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+@@ -87,13 +136,16 @@ export class ChatDebugDetailPanel extends Disposable {
+ 		const resolved = event.id ? await this.chatDebugService.resolveEvent(event.id) : undefined;
+ 
+ 		DOM.show(this.element);
++		this.sash.state = SashState.Enabled;
++		this.sash.layout();
+ 		DOM.clearNode(this.element);
+ 		DOM.clearNode(this.contentContainer);
+ 		this.detailDisposables.clear();
+ 
+ 		// Header with action buttons
+ 		const header = DOM.append(this.element, $('.chat-debug-detail-header'));
+-		this.element.appendChild(this.contentContainer);
++		this.headerElement = header;
++		this.element.appendChild(this.scrollable.getDomNode());
+ 
+ 		const fullScreenButton = this.detailDisposables.add(new Button(header, { ariaLabel: localize('chatDebug.openInEditor', "Open in Editor"), title: localize('chatDebug.openInEditor', "Open in Editor") }));
+ 		fullScreenButton.element.classList.add('chat-debug-detail-button');
+@@ -120,14 +172,13 @@ export class ChatDebugDetailPanel extends Disposable {
+ 		if (resolved && resolved.kind === 'fileList') {
+ 			this.currentDetailText = fileListToPlainText(resolved);
+ 			const { element: contentEl, disposables: contentDisposables } = this.instantiationService.invokeFunction(accessor =>
+-				renderCustomizationDiscoveryContent(resolved, this.openerService, accessor.get(IModelService), accessor.get(ILanguageService), this.hoverService, accessor.get(ILabelService))
++				renderCustomizationDiscoveryContent(resolved, this.openerService, accessor.get(IModelService), this.languageService, this.hoverService, accessor.get(ILabelService))
+ 			);
+ 			this.detailDisposables.add(contentDisposables);
+ 			this.contentContainer.appendChild(contentEl);
+ 		} else if (resolved && resolved.kind === 'toolCall') {
+ 			this.currentDetailText = toolCallContentToPlainText(resolved);
+-			const languageService = this.instantiationService.invokeFunction(accessor => accessor.get(ILanguageService));
+-			const { element: contentEl, disposables: contentDisposables } = await renderToolCallContent(resolved, languageService);
++			const { element: contentEl, disposables: contentDisposables } = await renderToolCallContent(resolved, this.languageService, this.clipboardService);
+ 			if (this.currentDetailEventId !== event.id) {
+ 				// Another event was selected while we were rendering
+ 				contentDisposables.dispose();
+@@ -137,22 +188,39 @@ export class ChatDebugDetailPanel extends Disposable {
+ 			this.contentContainer.appendChild(contentEl);
+ 		} else if (resolved && resolved.kind === 'message') {
+ 			this.currentDetailText = resolvedMessageToPlainText(resolved);
+-			const { element: contentEl, disposables: contentDisposables } = renderResolvedMessageContent(resolved);
++			const { element: contentEl, disposables: contentDisposables } = await renderResolvedMessageContent(resolved, this.languageService, this.clipboardService);
++			if (this.currentDetailEventId !== event.id) {
++				contentDisposables.dispose();
++				return;
++			}
+ 			this.detailDisposables.add(contentDisposables);
+ 			this.contentContainer.appendChild(contentEl);
+ 		} else if (resolved && resolved.kind === 'modelTurn') {
+ 			this.currentDetailText = modelTurnContentToPlainText(resolved);
+-			const { element: contentEl, disposables: contentDisposables } = renderModelTurnContent(resolved);
++			const { element: contentEl, disposables: contentDisposables } = await renderModelTurnContent(resolved, this.languageService, this.clipboardService);
++			if (this.currentDetailEventId !== event.id) {
++				// Another event was selected while we were rendering
++				contentDisposables.dispose();
++				return;
++			}
+ 			this.detailDisposables.add(contentDisposables);
+ 			this.contentContainer.appendChild(contentEl);
+ 		} else if (event.kind === 'userMessage') {
+ 			this.currentDetailText = messageEventToPlainText(event);
+-			const { element: contentEl, disposables: contentDisposables } = renderUserMessageContent(event);
++			const { element: contentEl, disposables: contentDisposables } = await renderUserMessageContent(event, this.languageService, this.clipboardService);
++			if (this.currentDetailEventId !== event.id) {
++				contentDisposables.dispose();
++				return;
++			}
+ 			this.detailDisposables.add(contentDisposables);
+ 			this.contentContainer.appendChild(contentEl);
+ 		} else if (event.kind === 'agentResponse') {
+ 			this.currentDetailText = messageEventToPlainText(event);
+-			const { element: contentEl, disposables: contentDisposables } = renderAgentResponseContent(event);
++			const { element: contentEl, disposables: contentDisposables } = await renderAgentResponseContent(event, this.languageService, this.clipboardService);
++			if (this.currentDetailEventId !== event.id) {
++				contentDisposables.dispose();
++				return;
++			}
+ 			this.detailDisposables.add(contentDisposables);
+ 			this.contentContainer.appendChild(contentEl);
+ 		} else {
+@@ -165,6 +233,15 @@ export class ChatDebugDetailPanel extends Disposable {
+ 			}
+ 			pre.textContent = this.currentDetailText;
+ 		}
++
++		// Compute height from the parent container and set explicit
++		// dimensions so the scrollable element can show proper scrollbars.
++		const parentHeight = this.element.parentElement?.clientHeight ?? 0;
++		if (parentHeight > 0) {
++			this.layout(parentHeight);
++		} else {
++			this.scrollable.scanDomNode();
++		}
+ 	}
+ 
+ 	get isVisible(): boolean {
+@@ -175,10 +252,29 @@ export class ChatDebugDetailPanel extends Disposable {
+ 		this.firstFocusableElement?.focus();
+ 	}
+ 
++	/**
++	 * Set explicit dimensions on the scrollable element so the scrollbar
++	 * can compute its size. Call after the panel is shown and whenever
++	 * the available space changes.
++	 */
++	layout(height: number): void {
++		const headerHeight = this.headerElement?.offsetHeight ?? 0;
++		const scrollableHeight = Math.max(0, height - headerHeight);
++		this.contentContainer.style.height = `${scrollableHeight}px`;
++		this.scrollable.scanDomNode();
++		this.sash.layout();
++	}
++
++	layoutSash(): void {
++		this.sash.layout();
++	}
++
+ 	hide(): void {
+ 		this.currentDetailEventId = undefined;
+ 		this.firstFocusableElement = undefined;
++		this.headerElement = undefined;
+ 		DOM.hide(this.element);
++		this.sash.state = SashState.Disabled;
+ 		DOM.clearNode(this.element);
+ 		DOM.clearNode(this.contentContainer);
+ 		this.detailDisposables.clear();
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts
+index 8506304425916..80fb8635e65e0 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts
+@@ -174,13 +174,6 @@ export class ChatDebugEditor extends EditorPane {
+ 		}));
+ 
+ 		this._register(this.chatService.onDidCreateModel(model => {
+-			if (this.viewState === ViewState.Home && this.configurationService.getValue<boolean>(AGENT_DEBUG_LOG_ENABLED_SETTING)) {
+-				// Auto-navigate to the new session when the Agent Debug Logs is
+-				// already open on the home view.  This avoids the user having to
+-				// wait for the title to resolve and manually clicking the session.
+-				this.navigateToSession(model.sessionResource);
+-			}
+-
+ 			// Track title changes per model, disposing the previous listener
+ 			// for the same model URI to avoid leaks.
+ 			const key = model.sessionResource.toString();
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEventDetailRenderer.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEventDetailRenderer.ts
+index be68f3d757e06..5f7fd3267aa7b 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEventDetailRenderer.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEventDetailRenderer.ts
+@@ -5,6 +5,9 @@
+ 
+ import { localize } from '../../../../../nls.js';
+ import { IChatDebugEvent } from '../../common/chatDebugService.js';
++import { safeIntl } from '../../../../../base/common/date.js';
++
++const numberFormatter = safeIntl.NumberFormat();
+ 
+ /**
+  * Format the detail text for a debug event (used when no resolved content is available).
+@@ -15,17 +18,17 @@ export function formatEventDetail(event: IChatDebugEvent): string {
+ 			const parts = [localize('chatDebug.detail.tool', "Tool: {0}", event.toolName)];
+ 			if (event.toolCallId) { parts.push(localize('chatDebug.detail.callId', "Call ID: {0}", event.toolCallId)); }
+ 			if (event.result) { parts.push(localize('chatDebug.detail.result', "Result: {0}", event.result)); }
+-			if (event.durationInMillis !== undefined) { parts.push(localize('chatDebug.detail.durationMs', "Duration: {0}ms", event.durationInMillis)); }
++			if (event.durationInMillis !== undefined) { parts.push(localize('chatDebug.detail.durationMs', "Duration: {0}ms", numberFormatter.value.format(event.durationInMillis))); }
+ 			if (event.input) { parts.push(`\n${localize('chatDebug.detail.input', "Input:")}\n${event.input}`); }
+ 			if (event.output) { parts.push(`\n${localize('chatDebug.detail.output', "Output:")}\n${event.output}`); }
+ 			return parts.join('\n');
+ 		}
+ 		case 'modelTurn': {
+ 			const parts = [event.model ?? localize('chatDebug.detail.modelTurn', "Model Turn")];
+-			if (event.inputTokens !== undefined) { parts.push(localize('chatDebug.detail.inputTokens', "Input tokens: {0}", event.inputTokens)); }
+-			if (event.outputTokens !== undefined) { parts.push(localize('chatDebug.detail.outputTokens', "Output tokens: {0}", event.outputTokens)); }
+-			if (event.totalTokens !== undefined) { parts.push(localize('chatDebug.detail.totalTokens', "Total tokens: {0}", event.totalTokens)); }
+-			if (event.durationInMillis !== undefined) { parts.push(localize('chatDebug.detail.durationMs', "Duration: {0}ms", event.durationInMillis)); }
++			if (event.inputTokens !== undefined) { parts.push(localize('chatDebug.detail.inputTokens', "Input tokens: {0}", numberFormatter.value.format(event.inputTokens))); }
++			if (event.outputTokens !== undefined) { parts.push(localize('chatDebug.detail.outputTokens', "Output tokens: {0}", numberFormatter.value.format(event.outputTokens))); }
++			if (event.totalTokens !== undefined) { parts.push(localize('chatDebug.detail.totalTokens', "Total tokens: {0}", numberFormatter.value.format(event.totalTokens))); }
++			if (event.durationInMillis !== undefined) { parts.push(localize('chatDebug.detail.durationMs', "Duration: {0}ms", numberFormatter.value.format(event.durationInMillis))); }
+ 			return parts.join('\n');
+ 		}
+ 		case 'generic':
+@@ -34,9 +37,9 @@ export function formatEventDetail(event: IChatDebugEvent): string {
+ 			const parts = [localize('chatDebug.detail.agent', "Agent: {0}", event.agentName)];
+ 			if (event.description) { parts.push(localize('chatDebug.detail.description', "Description: {0}", event.description)); }
+ 			if (event.status) { parts.push(localize('chatDebug.detail.status', "Status: {0}", event.status)); }
+-			if (event.durationInMillis !== undefined) { parts.push(localize('chatDebug.detail.durationMs', "Duration: {0}ms", event.durationInMillis)); }
+-			if (event.toolCallCount !== undefined) { parts.push(localize('chatDebug.detail.toolCallCount', "Tool calls: {0}", event.toolCallCount)); }
+-			if (event.modelTurnCount !== undefined) { parts.push(localize('chatDebug.detail.modelTurnCount', "Model turns: {0}", event.modelTurnCount)); }
++			if (event.durationInMillis !== undefined) { parts.push(localize('chatDebug.detail.durationMs', "Duration: {0}ms", numberFormatter.value.format(event.durationInMillis))); }
++			if (event.toolCallCount !== undefined) { parts.push(localize('chatDebug.detail.toolCallCount', "Tool calls: {0}", numberFormatter.value.format(event.toolCallCount))); }
++			if (event.modelTurnCount !== undefined) { parts.push(localize('chatDebug.detail.modelTurnCount', "Model turns: {0}", numberFormatter.value.format(event.modelTurnCount))); }
+ 			return parts.join('\n');
+ 		}
+ 		case 'userMessage': {
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEventList.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEventList.ts
+index 9797275555bd2..11ea6f766016c 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEventList.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEventList.ts
+@@ -28,6 +28,8 @@ const dateFormatter = safeIntl.DateTimeFormat(undefined, {
+ 	second: '2-digit',
+ });
+ 
++const numberFormatter = safeIntl.NumberFormat();
++
+ export interface IChatDebugEventTemplate {
+ 	readonly container: HTMLElement;
+ 	readonly created: HTMLElement;
+@@ -35,38 +37,42 @@ export interface IChatDebugEventTemplate {
+ 	readonly details: HTMLElement;
+ }
+ 
+-function renderEventToTemplate(element: IChatDebugEvent, templateData: IChatDebugEventTemplate): void {
+-	templateData.created.textContent = dateFormatter.value.format(element.created);
++/** Returns the formatted creation timestamp for a debug event. */
++export function getEventCreatedText(element: IChatDebugEvent): string {
++	return dateFormatter.value.format(element.created);
++}
++
++/** Returns the display name for a debug event. */
++export function getEventNameText(element: IChatDebugEvent): string {
++	switch (element.kind) {
++		case 'toolCall': return safeStr(element.toolName, localize('chatDebug.unknownEvent', "(unknown)"));
++		case 'modelTurn': return safeStr(element.model) || localize('chatDebug.modelTurn', "Model Turn");
++		case 'generic': return safeStr(element.name, localize('chatDebug.unknownEvent', "(unknown)"));
++		case 'subagentInvocation': return safeStr(element.agentName, localize('chatDebug.unknownEvent', "(unknown)"));
++		case 'userMessage': return localize('chatDebug.userMessage', "User Message");
++		case 'agentResponse': return localize('chatDebug.agentResponse', "Agent Response");
++	}
++}
+ 
++/** Returns the details text for a debug event. */
++export function getEventDetailsText(element: IChatDebugEvent): string {
+ 	switch (element.kind) {
+-		case 'toolCall':
+-			templateData.name.textContent = safeStr(element.toolName, localize('chatDebug.unknownEvent', "(unknown)"));
+-			templateData.details.textContent = safeStr(element.result);
+-			break;
+-		case 'modelTurn':
+-			templateData.name.textContent = safeStr(element.model) || localize('chatDebug.modelTurn', "Model Turn");
+-			templateData.details.textContent = [
+-				safeStr(element.requestName),
+-				element.totalTokens !== undefined ? localize('chatDebug.tokens', "{0} tokens", element.totalTokens) : '',
+-			].filter(Boolean).join(' \u00b7 ');
+-			break;
+-		case 'generic':
+-			templateData.name.textContent = safeStr(element.name, localize('chatDebug.unknownEvent', "(unknown)"));
+-			templateData.details.textContent = safeStr(element.details);
+-			break;
+-		case 'subagentInvocation':
+-			templateData.name.textContent = safeStr(element.agentName, localize('chatDebug.unknownEvent', "(unknown)"));
+-			templateData.details.textContent = safeStr(element.description) || safeStr(element.status);
+-			break;
+-		case 'userMessage':
+-			templateData.name.textContent = localize('chatDebug.userMessage', "User Message");
+-			templateData.details.textContent = safeStr(element.message);
+-			break;
+-		case 'agentResponse':
+-			templateData.name.textContent = localize('chatDebug.agentResponse', "Agent Response");
+-			templateData.details.textContent = safeStr(element.message);
+-			break;
++		case 'toolCall': return safeStr(element.result);
++		case 'modelTurn': return [
++			safeStr(element.requestName),
++			element.totalTokens !== undefined ? localize('chatDebug.tokens', "{0} tokens", numberFormatter.value.format(element.totalTokens)) : '',
++		].filter(Boolean).join(' \u00b7 ');
++		case 'generic': return safeStr(element.details);
++		case 'subagentInvocation': return safeStr(element.description) || safeStr(element.status);
++		case 'userMessage': return safeStr(element.message);
++		case 'agentResponse': return safeStr(element.message);
+ 	}
++}
++
++function renderEventToTemplate(element: IChatDebugEvent, templateData: IChatDebugEventTemplate): void {
++	templateData.created.textContent = getEventCreatedText(element);
++	templateData.name.textContent = getEventNameText(element);
++	templateData.details.textContent = getEventDetailsText(element);
+ 
+ 	const isError = element.kind === 'generic' && element.level === ChatDebugLogLevel.Error
+ 		|| element.kind === 'toolCall' && element.result === 'error';
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugLogsView.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugLogsView.ts
+index 701f5099d401e..b5d3f116acf10 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugLogsView.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugLogsView.ts
+@@ -26,12 +26,16 @@ import { IChatDebugEvent, IChatDebugService } from '../../common/chatDebugServic
+ import { filterDebugEventsByText } from '../../common/chatDebugEvents.js';
+ import { IChatService } from '../../common/chatService/chatService.js';
+ import { LocalChatSessionUri } from '../../common/model/chatUri.js';
+-import { ChatDebugEventRenderer, ChatDebugEventDelegate, ChatDebugEventTreeRenderer } from './chatDebugEventList.js';
++import { ChatDebugEventRenderer, ChatDebugEventDelegate, ChatDebugEventTreeRenderer, getEventCreatedText, getEventNameText, getEventDetailsText } from './chatDebugEventList.js';
+ import { setupBreadcrumbKeyboardNavigation, TextBreadcrumbItem, LogsViewMode } from './chatDebugTypes.js';
+ import { ChatDebugFilterState, bindFilterContextKeys } from './chatDebugFilters.js';
+ import { ChatDebugDetailPanel } from './chatDebugDetailPanel.js';
+ import { IChatWidgetService } from '../chat.js';
+ import { createDebugEventsAttachment } from './chatDebugAttachment.js';
++import { IClipboardService } from '../../../../../platform/clipboard/common/clipboardService.js';
++import { IContextMenuService } from '../../../../../platform/contextview/browser/contextView.js';
++import { Action, Separator } from '../../../../../base/common/actions.js';
++import { StandardMouseEvent } from '../../../../../base/browser/mouseEvent.js';
+ 
+ const $ = DOM.$;
+ 
+@@ -76,6 +80,8 @@ export class ChatDebugLogsView extends Disposable {
+ 		@IInstantiationService private readonly instantiationService: IInstantiationService,
+ 		@IContextKeyService private readonly contextKeyService: IContextKeyService,
+ 		@IChatWidgetService private readonly chatWidgetService: IChatWidgetService,
++		@IClipboardService private readonly clipboardService: IClipboardService,
++		@IContextMenuService private readonly contextMenuService: IContextMenuService,
+ 	) {
+ 		super();
+ 		this.refreshScheduler = this._register(new RunOnceScheduler(() => this.refreshList(), 50));
+@@ -231,6 +237,11 @@ export class ChatDebugLogsView extends Disposable {
+ 
+ 		// Detail panel (sibling of main column so it aligns with table header)
+ 		this.detailPanel = this._register(this.instantiationService.createInstance(ChatDebugDetailPanel, contentContainer));
++		this._register(this.detailPanel.onDidChangeWidth(() => {
++			if (this.currentDimension) {
++				this.layout(this.currentDimension);
++			}
++		}));
+ 		this._register(this.detailPanel.onDidHide(() => {
+ 			if (this.list.getSelection().length > 0) {
+ 				this.list.setSelection([]);
+@@ -238,6 +249,21 @@ export class ChatDebugLogsView extends Disposable {
+ 			if (this.tree.getSelection().length > 0) {
+ 				this.tree.setSelection([]);
+ 			}
++			if (this.currentDimension) {
++				this.layout(this.currentDimension);
++			}
++		}));
++
++		// Context menu
++		this._register(this.list.onContextMenu(e => {
++			if (e.element) {
++				this.showEventContextMenu(e.element, e.browserEvent);
++			}
++		}));
++		this._register(this.tree.onContextMenu(e => {
++			if (e.element) {
++				this.showEventContextMenu(e.element, e.browserEvent);
++			}
+ 		}));
+ 
+ 		// Resolve event details on selection
+@@ -303,8 +329,8 @@ export class ChatDebugLogsView extends Disposable {
+ 		const breadcrumbHeight = 22;
+ 		const headerHeight = this.headerContainer.offsetHeight;
+ 		const tableHeaderHeight = this.tableHeader.offsetHeight;
+-		const detailVisible = this.detailPanel.element.style.display !== 'none';
+-		const detailWidth = detailVisible ? this.detailPanel.element.offsetWidth : 0;
++		const detailVisible = this.detailPanel.isVisible;
++		const detailWidth = detailVisible ? this.detailPanel.width : 0;
+ 		const listHeight = dimension.height - breadcrumbHeight - headerHeight - tableHeaderHeight;
+ 		const listWidth = dimension.width - detailWidth;
+ 		if (this.logsViewMode === LogsViewMode.Tree) {
+@@ -312,6 +338,10 @@ export class ChatDebugLogsView extends Disposable {
+ 		} else {
+ 			this.list.layout(listHeight, listWidth);
+ 		}
++		if (this.detailPanel.isVisible) {
++			this.detailPanel.layout(listHeight);
++		}
++		this.detailPanel.layoutSash();
+ 	}
+ 
+ 	refreshList(): void {
+@@ -506,5 +536,29 @@ export class ChatDebugLogsView extends Disposable {
+ 		this.filterWidget.checkMoreFilters(!this.filterState.isAllFiltersDefault());
+ 	}
+ 
++	private showEventContextMenu(event: IChatDebugEvent, browserEvent: UIEvent): void {
++		const d = event.created;
++		const pad = (n: number) => String(n).padStart(2, '0');
++		const timestamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
++		const row = [getEventCreatedText(event), getEventNameText(event), getEventDetailsText(event)].filter(Boolean).join('\t');
++		const name = getEventNameText(event);
++		this.contextMenuService.showContextMenu({
++			getAnchor: () => DOM.isMouseEvent(browserEvent)
++				? new StandardMouseEvent(DOM.getWindow(this.container), browserEvent)
++				: this.container,
++			getActions: () => [
++				new Action('chatDebug.copyTimestamp', localize('chatDebug.copyTimestamp', "Copy Timestamp"), undefined, true, () => this.clipboardService.writeText(timestamp)),
++				new Action('chatDebug.copyRow', localize('chatDebug.copyRow', "Copy Row"), undefined, true, () => this.clipboardService.writeText(row)),
++				new Separator(),
++				new Action('chatDebug.filterBefore', localize('chatDebug.filterBefore', "Filter Before Timestamp"), undefined, true, () => this.applyFilterToken(`before:${timestamp}`)),
++				new Action('chatDebug.filterAfter', localize('chatDebug.filterAfter', "Filter After Timestamp"), undefined, true, () => this.applyFilterToken(`after:${timestamp}`)),
++				new Action('chatDebug.filterName', localize('chatDebug.filterName', "Filter Name"), undefined, !!name, () => this.applyFilterToken(name)),
++			],
++		});
++	}
++
++	private applyFilterToken(token: string): void {
++		this.filterWidget.setFilterText(token);
++	}
+ 
+ }
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugMessageContentRenderer.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugMessageContentRenderer.ts
+index c06be60cbaae7..7daa93c573dec 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugMessageContentRenderer.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugMessageContentRenderer.ts
+@@ -6,15 +6,19 @@
+ import * as DOM from '../../../../../base/browser/dom.js';
+ import { DisposableStore } from '../../../../../base/common/lifecycle.js';
+ import { localize } from '../../../../../nls.js';
++import { IClipboardService } from '../../../../../platform/clipboard/common/clipboardService.js';
++import { ILanguageService } from '../../../../../editor/common/languages/language.js';
++import { tokenizeToString } from '../../../../../editor/common/languages/textToHtmlTokenizer.js';
+ import { IChatDebugUserMessageEvent, IChatDebugAgentResponseEvent, IChatDebugEventMessageContent } from '../../common/chatDebugService.js';
+-import { renderCollapsibleSection } from './chatDebugCollapsible.js';
++import { tryParseJSON, renderSection } from './chatDebugToolCallContentRenderer.js';
+ 
+ const $ = DOM.$;
+ 
+ /**
+  * Render a user message event with collapsible prompt sections.
++ * JSON content in sections is syntax-highlighted.
+  */
+-export function renderUserMessageContent(event: IChatDebugUserMessageEvent): { element: HTMLElement; disposables: DisposableStore } {
++export async function renderUserMessageContent(event: IChatDebugUserMessageEvent, languageService: ILanguageService, clipboardService?: IClipboardService): Promise<{ element: HTMLElement; disposables: DisposableStore }> {
+ 	const disposables = new DisposableStore();
+ 	const container = $('div.chat-debug-message-content');
+ 	container.tabIndex = 0;
+@@ -28,7 +32,12 @@ export function renderUserMessageContent(event: IChatDebugUserMessageEvent): { e
+ 			localize('chatDebug.promptSections', "Prompt Sections ({0})", event.sections.length)));
+ 
+ 		for (const section of event.sections) {
+-			renderCollapsibleSection(sectionsContainer, section, disposables);
++			const result = tryParseJSON(section.content);
++			const plainText = result.isJSON ? JSON.stringify(result.parsed, null, 2) : section.content;
++			const tokenizedHtml = result.isJSON
++				? await tokenizeToString(languageService, plainText, 'json')
++				: undefined;
++			renderSection(sectionsContainer, section.name, plainText, tokenizedHtml, disposables, false, clipboardService);
+ 		}
+ 	}
+ 
+@@ -37,8 +46,9 @@ export function renderUserMessageContent(event: IChatDebugUserMessageEvent): { e
+ 
+ /**
+  * Render an agent response event with collapsible response sections.
++ * JSON content in sections is syntax-highlighted.
+  */
+-export function renderAgentResponseContent(event: IChatDebugAgentResponseEvent): { element: HTMLElement; disposables: DisposableStore } {
++export async function renderAgentResponseContent(event: IChatDebugAgentResponseEvent, languageService: ILanguageService, clipboardService?: IClipboardService): Promise<{ element: HTMLElement; disposables: DisposableStore }> {
+ 	const disposables = new DisposableStore();
+ 	const container = $('div.chat-debug-message-content');
+ 	container.tabIndex = 0;
+@@ -52,7 +62,12 @@ export function renderAgentResponseContent(event: IChatDebugAgentResponseEvent):
+ 			localize('chatDebug.responseSections', "Response Sections ({0})", event.sections.length)));
+ 
+ 		for (const section of event.sections) {
+-			renderCollapsibleSection(sectionsContainer, section, disposables);
++			const result = tryParseJSON(section.content);
++			const plainText = result.isJSON ? JSON.stringify(result.parsed, null, 2) : section.content;
++			const tokenizedHtml = result.isJSON
++				? await tokenizeToString(languageService, plainText, 'json')
++				: undefined;
++			renderSection(sectionsContainer, section.name, plainText, tokenizedHtml, disposables, false, clipboardService);
+ 		}
+ 	}
+ 
+@@ -79,8 +94,9 @@ export function messageEventToPlainText(event: IChatDebugUserMessageEvent | ICha
+ 
+ /**
+  * Render a resolved message content (from resolveChatDebugLogEvent) with collapsible sections.
++ * JSON content in sections is syntax-highlighted.
+  */
+-export function renderResolvedMessageContent(content: IChatDebugEventMessageContent): { element: HTMLElement; disposables: DisposableStore } {
++export async function renderResolvedMessageContent(content: IChatDebugEventMessageContent, languageService: ILanguageService, clipboardService?: IClipboardService): Promise<{ element: HTMLElement; disposables: DisposableStore }> {
+ 	const disposables = new DisposableStore();
+ 	const container = $('div.chat-debug-message-content');
+ 	container.tabIndex = 0;
+@@ -99,7 +115,12 @@ export function renderResolvedMessageContent(content: IChatDebugEventMessageCont
+ 		DOM.append(sectionsContainer, $('div.chat-debug-message-sections-label', undefined, label));
+ 
+ 		for (const section of content.sections) {
+-			renderCollapsibleSection(sectionsContainer, section, disposables);
++			const result = tryParseJSON(section.content);
++			const plainText = result.isJSON ? JSON.stringify(result.parsed, null, 2) : section.content;
++			const tokenizedHtml = result.isJSON
++				? await tokenizeToString(languageService, plainText, 'json')
++				: undefined;
++			renderSection(sectionsContainer, section.name, plainText, tokenizedHtml, disposables, false, clipboardService);
+ 		}
+ 	}
+ 
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugModelTurnContentRenderer.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugModelTurnContentRenderer.ts
+index cc88136bf2b3f..9194dfec6d6f9 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugModelTurnContentRenderer.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugModelTurnContentRenderer.ts
+@@ -6,16 +6,22 @@
+ import * as DOM from '../../../../../base/browser/dom.js';
+ import { DisposableStore } from '../../../../../base/common/lifecycle.js';
+ import { localize } from '../../../../../nls.js';
++import { IClipboardService } from '../../../../../platform/clipboard/common/clipboardService.js';
++import { ILanguageService } from '../../../../../editor/common/languages/language.js';
++import { tokenizeToString } from '../../../../../editor/common/languages/textToHtmlTokenizer.js';
+ import { IChatDebugEventModelTurnContent } from '../../common/chatDebugService.js';
+-import { renderCollapsibleSection } from './chatDebugCollapsible.js';
++import { tryParseJSON, renderSection } from './chatDebugToolCallContentRenderer.js';
++import { safeIntl } from '../../../../../base/common/date.js';
+ 
+ const $ = DOM.$;
++const numberFormatter = safeIntl.NumberFormat();
+ 
+ /**
+  * Render a resolved model turn content with structured display of
+  * request metadata, token usage, and timing.
++ * When JSON is detected in section content, renders it with syntax highlighting.
+  */
+-export function renderModelTurnContent(content: IChatDebugEventModelTurnContent): { element: HTMLElement; disposables: DisposableStore } {
++export async function renderModelTurnContent(content: IChatDebugEventModelTurnContent, languageService: ILanguageService, clipboardService?: IClipboardService): Promise<{ element: HTMLElement; disposables: DisposableStore }> {
+ 	const disposables = new DisposableStore();
+ 	const container = $('div.chat-debug-message-content');
+ 	container.tabIndex = 0;
+@@ -31,11 +37,11 @@ export function renderModelTurnContent(content: IChatDebugEventModelTurnContent)
+ 	if (content.model) {
+ 		statusParts.push(content.model);
+ 	}
+-	if (content.status) {
++	if (content.status && content.status !== 'unknown') {
+ 		statusParts.push(content.status);
+ 	}
+ 	if (content.durationInMillis !== undefined) {
+-		statusParts.push(localize('chatDebug.modelTurn.duration', "{0}ms", content.durationInMillis));
++		statusParts.push(localize('chatDebug.modelTurn.duration', "{0}ms", numberFormatter.value.format(content.durationInMillis)));
+ 	}
+ 	if (statusParts.length > 0) {
+ 		DOM.append(container, $('div.chat-debug-message-content-summary', undefined, statusParts.join(' \u00b7 ')));
+@@ -45,25 +51,25 @@ export function renderModelTurnContent(content: IChatDebugEventModelTurnContent)
+ 	const detailsContainer = DOM.append(container, $('div.chat-debug-model-turn-details'));
+ 
+ 	if (content.inputTokens !== undefined) {
+-		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.inputTokens', "Input tokens: {0}", content.inputTokens)));
++		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.inputTokens', "Input tokens: {0}", numberFormatter.value.format(content.inputTokens))));
+ 	}
+ 	if (content.outputTokens !== undefined) {
+-		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.outputTokens', "Output tokens: {0}", content.outputTokens)));
++		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.outputTokens', "Output tokens: {0}", numberFormatter.value.format(content.outputTokens))));
+ 	}
+ 	if (content.cachedTokens !== undefined) {
+-		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.cachedTokens', "Cached tokens: {0}", content.cachedTokens)));
++		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.cachedTokens', "Cached tokens: {0}", numberFormatter.value.format(content.cachedTokens))));
+ 	}
+ 	if (content.totalTokens !== undefined) {
+-		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.totalTokens', "Total tokens: {0}", content.totalTokens)));
++		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.totalTokens', "Total tokens: {0}", numberFormatter.value.format(content.totalTokens))));
+ 	}
+ 	if (content.timeToFirstTokenInMillis !== undefined) {
+-		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.ttft', "Time to first token: {0}ms", content.timeToFirstTokenInMillis)));
++		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.ttft', "Time to first token: {0}ms", numberFormatter.value.format(content.timeToFirstTokenInMillis))));
+ 	}
+ 	if (content.maxInputTokens !== undefined) {
+-		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.maxInputTokens', "Max input tokens: {0}", content.maxInputTokens)));
++		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.maxInputTokens', "Max input tokens: {0}", numberFormatter.value.format(content.maxInputTokens))));
+ 	}
+ 	if (content.maxOutputTokens !== undefined) {
+-		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.maxOutputTokens', "Max output tokens: {0}", content.maxOutputTokens)));
++		DOM.append(detailsContainer, $('div', undefined, localize('chatDebug.modelTurn.maxOutputTokens', "Max output tokens: {0}", numberFormatter.value.format(content.maxOutputTokens))));
+ 	}
+ 	if (content.errorMessage) {
+ 		DOM.append(detailsContainer, $('div.chat-debug-model-turn-error', undefined, localize('chatDebug.modelTurn.error', "Error: {0}", content.errorMessage)));
+@@ -76,7 +82,12 @@ export function renderModelTurnContent(content: IChatDebugEventModelTurnContent)
+ 			localize('chatDebug.modelTurn.sections', "Sections ({0})", content.sections.length)));
+ 
+ 		for (const section of content.sections) {
+-			renderCollapsibleSection(sectionsContainer, section, disposables);
++			const result = tryParseJSON(section.content);
++			const plainText = result.isJSON ? JSON.stringify(result.parsed, null, 2) : section.content;
++			const tokenizedHtml = result.isJSON
++				? await tokenizeToString(languageService, plainText, 'json')
++				: undefined;
++			renderSection(sectionsContainer, section.name, plainText, tokenizedHtml, disposables, false, clipboardService);
+ 		}
+ 	}
+ 
+@@ -93,32 +104,32 @@ export function modelTurnContentToPlainText(content: IChatDebugEventModelTurnCon
+ 	if (content.model) {
+ 		lines.push(localize('chatDebug.modelTurn.modelLabel', "Model: {0}", content.model));
+ 	}
+-	if (content.status) {
++	if (content.status && content.status !== 'unknown') {
+ 		lines.push(localize('chatDebug.modelTurn.statusLabel', "Status: {0}", content.status));
+ 	}
+ 	if (content.durationInMillis !== undefined) {
+-		lines.push(localize('chatDebug.modelTurn.durationLabel', "Duration: {0}ms", content.durationInMillis));
++		lines.push(localize('chatDebug.modelTurn.durationLabel', "Duration: {0}ms", numberFormatter.value.format(content.durationInMillis)));
+ 	}
+ 	if (content.timeToFirstTokenInMillis !== undefined) {
+-		lines.push(localize('chatDebug.modelTurn.ttftLabel', "Time to first token: {0}ms", content.timeToFirstTokenInMillis));
++		lines.push(localize('chatDebug.modelTurn.ttftLabel', "Time to first token: {0}ms", numberFormatter.value.format(content.timeToFirstTokenInMillis)));
+ 	}
+ 	if (content.inputTokens !== undefined) {
+-		lines.push(localize('chatDebug.modelTurn.inputTokensLabel', "Input tokens: {0}", content.inputTokens));
++		lines.push(localize('chatDebug.modelTurn.inputTokensLabel', "Input tokens: {0}", numberFormatter.value.format(content.inputTokens)));
+ 	}
+ 	if (content.outputTokens !== undefined) {
+-		lines.push(localize('chatDebug.modelTurn.outputTokensLabel', "Output tokens: {0}", content.outputTokens));
++		lines.push(localize('chatDebug.modelTurn.outputTokensLabel', "Output tokens: {0}", numberFormatter.value.format(content.outputTokens)));
+ 	}
+ 	if (content.cachedTokens !== undefined) {
+-		lines.push(localize('chatDebug.modelTurn.cachedTokensLabel', "Cached tokens: {0}", content.cachedTokens));
++		lines.push(localize('chatDebug.modelTurn.cachedTokensLabel', "Cached tokens: {0}", numberFormatter.value.format(content.cachedTokens)));
+ 	}
+ 	if (content.totalTokens !== undefined) {
+-		lines.push(localize('chatDebug.modelTurn.totalTokensLabel', "Total tokens: {0}", content.totalTokens));
++		lines.push(localize('chatDebug.modelTurn.totalTokensLabel', "Total tokens: {0}", numberFormatter.value.format(content.totalTokens)));
+ 	}
+ 	if (content.maxInputTokens !== undefined) {
+-		lines.push(localize('chatDebug.modelTurn.maxInputTokensLabel', "Max input tokens: {0}", content.maxInputTokens));
++		lines.push(localize('chatDebug.modelTurn.maxInputTokensLabel', "Max input tokens: {0}", numberFormatter.value.format(content.maxInputTokens)));
+ 	}
+ 	if (content.maxOutputTokens !== undefined) {
+-		lines.push(localize('chatDebug.modelTurn.maxOutputTokensLabel', "Max output tokens: {0}", content.maxOutputTokens));
++		lines.push(localize('chatDebug.modelTurn.maxOutputTokensLabel', "Max output tokens: {0}", numberFormatter.value.format(content.maxOutputTokens)));
+ 	}
+ 	if (content.errorMessage) {
+ 		lines.push(localize('chatDebug.modelTurn.errorLabel', "Error: {0}", content.errorMessage));
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugOverviewView.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugOverviewView.ts
+index 24a8b9b1efd3c..dfe3405b4b344 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugOverviewView.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugOverviewView.ts
+@@ -15,6 +15,7 @@ import { URI } from '../../../../../base/common/uri.js';
+ import { localize } from '../../../../../nls.js';
+ import { defaultBreadcrumbsWidgetStyles, defaultButtonStyles } from '../../../../../platform/theme/browser/defaultStyles.js';
+ import { ChatDebugLogLevel, IChatDebugEvent, IChatDebugService } from '../../common/chatDebugService.js';
++import { safeIntl } from '../../../../../base/common/date.js';
+ import { IChatService } from '../../common/chatService/chatService.js';
+ import { ChatAgentLocation } from '../../common/constants.js';
+ import { IChatSessionsService, localChatSessionType } from '../../common/chatSessionsService.js';
+@@ -23,6 +24,7 @@ import { IChatWidgetService } from '../chat.js';
+ import { setupBreadcrumbKeyboardNavigation, TextBreadcrumbItem } from './chatDebugTypes.js';
+ 
+ const $ = DOM.$;
++const numberFormatter = safeIntl.NumberFormat();
+ 
+ export const enum OverviewNavigation {
+ 	Home = 'home',
+@@ -284,7 +286,7 @@ export class ChatDebugOverviewView extends Disposable {
+ 		const metrics: OverviewMetric[] = [
+ 			{ label: localize('chatDebug.metric.modelTurns', "Model Turns"), value: String(modelTurns.length) },
+ 			{ label: localize('chatDebug.metric.toolCalls', "Tool Calls"), value: String(toolCalls.length) },
+-			{ label: localize('chatDebug.metric.totalTokens', "Total Tokens"), value: totalTokens.toLocaleString() },
++			{ label: localize('chatDebug.metric.totalTokens', "Total Tokens"), value: numberFormatter.value.format(totalTokens) },
+ 			{ label: localize('chatDebug.metric.errors', "Errors"), value: String(errors.length) },
+ 			{ label: localize('chatDebug.metric.totalEvents', "Total Events"), value: String(events.length) },
+ 		];
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugToolCallContentRenderer.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugToolCallContentRenderer.ts
+index f8e0618f271ba..b1e06a5f0f7c3 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugToolCallContentRenderer.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugToolCallContentRenderer.ts
+@@ -4,9 +4,13 @@
+  *--------------------------------------------------------------------------------------------*/
+ 
+ import * as DOM from '../../../../../base/browser/dom.js';
++import { Button } from '../../../../../base/browser/ui/button/button.js';
++import { getDefaultHoverDelegate } from '../../../../../base/browser/ui/hover/hoverDelegateFactory.js';
+ import { createTrustedTypesPolicy } from '../../../../../base/browser/trustedTypes.js';
++import { Codicon } from '../../../../../base/common/codicons.js';
+ import { DisposableStore } from '../../../../../base/common/lifecycle.js';
+ import { localize } from '../../../../../nls.js';
++import { IClipboardService } from '../../../../../platform/clipboard/common/clipboardService.js';
+ import { ILanguageService } from '../../../../../editor/common/languages/language.js';
+ import { tokenizeToString } from '../../../../../editor/common/languages/textToHtmlTokenizer.js';
+ import { IChatDebugEventToolCallContent } from '../../common/chatDebugService.js';
+@@ -20,7 +24,7 @@ const _ttpPolicy = createTrustedTypesPolicy('chatDebugTokenizer', {
+ 	}
+ });
+ 
+-function tryParseJSON(text: string): { parsed: unknown; isJSON: true } | { isJSON: false } {
++export function tryParseJSON(text: string): { parsed: unknown; isJSON: true } | { isJSON: false } {
+ 	try {
+ 		return { parsed: JSON.parse(text), isJSON: true };
+ 	} catch {
+@@ -31,20 +35,44 @@ function tryParseJSON(text: string): { parsed: unknown; isJSON: true } | { isJSO
+ /**
+  * Render a collapsible section. When `tokenizedHtml` is provided the content
+  * is rendered as syntax-highlighted HTML; otherwise plain-text is used.
++ * Optionally adds a copy button when `clipboardService` is provided.
+  */
+-function renderSection(
++export function renderSection(
+ 	parent: HTMLElement,
+ 	label: string,
+ 	plainText: string,
+ 	tokenizedHtml: string | undefined,
+ 	disposables: DisposableStore,
+ 	initiallyCollapsed: boolean = false,
++	clipboardService?: IClipboardService,
+ ): void {
+ 	const sectionEl = DOM.append(parent, $('div.chat-debug-message-section'));
+ 	const header = DOM.append(sectionEl, $('div.chat-debug-message-section-header'));
+ 	const chevron = DOM.append(header, $('span.chat-debug-message-section-chevron'));
+ 	DOM.append(header, $('span.chat-debug-message-section-title', undefined, label));
+ 
++	if (clipboardService) {
++		const copyBtn = disposables.add(new Button(header, {
++			title: localize('chatDebug.section.copy', "Copy"),
++			ariaLabel: localize('chatDebug.section.copy', "Copy"),
++			hoverDelegate: getDefaultHoverDelegate('mouse'),
++		}));
++		copyBtn.icon = Codicon.copy;
++		copyBtn.element.classList.add('chat-debug-section-copy-btn');
++		disposables.add(DOM.addDisposableListener(copyBtn.element, DOM.EventType.MOUSE_ENTER, () => {
++			header.classList.add('chat-debug-section-copy-header-passthrough');
++		}));
++		disposables.add(DOM.addDisposableListener(copyBtn.element, DOM.EventType.MOUSE_LEAVE, () => {
++			header.classList.remove('chat-debug-section-copy-header-passthrough');
++		}));
++		disposables.add(copyBtn.onDidClick(e => {
++			if (e) {
++				DOM.EventHelper.stop(e, true);
++			}
++			clipboardService.writeText(plainText);
++		}));
++	}
++
+ 	const wrapper = DOM.append(sectionEl, $('div.chat-debug-message-section-content-wrapper'));
+ 	const contentEl = DOM.append(wrapper, $('pre.chat-debug-message-section-content'));
+ 	contentEl.tabIndex = 0;
+@@ -66,7 +94,7 @@ function renderSection(
+  * When JSON is detected in input/output, renders it with syntax highlighting
+  * using the editor's tokenization.
+  */
+-export async function renderToolCallContent(content: IChatDebugEventToolCallContent, languageService: ILanguageService): Promise<{ element: HTMLElement; disposables: DisposableStore }> {
++export async function renderToolCallContent(content: IChatDebugEventToolCallContent, languageService: ILanguageService, clipboardService?: IClipboardService): Promise<{ element: HTMLElement; disposables: DisposableStore }> {
+ 	const disposables = new DisposableStore();
+ 	const container = $('div.chat-debug-message-content');
+ 	container.tabIndex = 0;
+@@ -97,7 +125,7 @@ export async function renderToolCallContent(content: IChatDebugEventToolCallCont
+ 		const tokenizedHtml = result.isJSON
+ 			? await tokenizeToString(languageService, plainText, 'json')
+ 			: undefined;
+-		renderSection(sectionsContainer, localize('chatDebug.toolCall.arguments', "Arguments"), plainText, tokenizedHtml, disposables);
++		renderSection(sectionsContainer, localize('chatDebug.toolCall.arguments', "Arguments"), plainText, tokenizedHtml, disposables, false, clipboardService);
+ 	}
+ 
+ 	if (content.output) {
+@@ -106,7 +134,7 @@ export async function renderToolCallContent(content: IChatDebugEventToolCallCont
+ 		const tokenizedHtml = result.isJSON
+ 			? await tokenizeToString(languageService, plainText, 'json')
+ 			: undefined;
+-		renderSection(sectionsContainer, localize('chatDebug.toolCall.output', "Output"), plainText, tokenizedHtml, disposables);
++		renderSection(sectionsContainer, localize('chatDebug.toolCall.output', "Output"), plainText, tokenizedHtml, disposables, false, clipboardService);
+ 	}
+ 
+ 	return { element: container, disposables };
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/media/chatDebug.css b/src/vs/workbench/contrib/chat/browser/chatDebug/media/chatDebug.css
+index 7efa2352ee7cc..eade72c676f6b 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/media/chatDebug.css
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/media/chatDebug.css
+@@ -336,6 +336,7 @@
+ 	flex-direction: row;
+ 	flex: 1;
+ 	overflow: hidden;
++	position: relative;
+ }
+ .chat-debug-logs-main {
+ 	display: flex;
+@@ -428,7 +429,6 @@
+ }
+ .chat-debug-detail-panel {
+ 	flex-shrink: 0;
+-	width: 350px;
+ 	display: flex;
+ 	flex-direction: column;
+ 	border-left: 1px solid var(--vscode-widget-border, var(--vscode-panel-border));
+@@ -461,11 +461,6 @@
+ 	opacity: 1;
+ 	background: var(--vscode-toolbar-hoverBackground);
+ }
+-.chat-debug-detail-content {
+-	flex: 1;
+-	min-height: 0;
+-	overflow-y: auto;
+-}
+ .chat-debug-detail-panel pre {
+ 	margin: 0;
+ 	padding: 8px 16px;
+@@ -643,8 +638,6 @@
+ }
+ .chat-debug-message-section-content-wrapper {
+ 	border-top: 1px solid var(--vscode-widget-border, transparent);
+-	max-height: 300px;
+-	overflow-y: auto;
+ }
+ .chat-debug-message-section-content {
+ 	margin: 0;
+@@ -666,7 +659,8 @@
+ }
+ 
+ /* ---- File list: settings gear button ---- */
+-.chat-debug-settings-gear.monaco-button {
++.chat-debug-settings-gear.monaco-button,
++.chat-debug-section-copy-btn.monaco-button {
+ 	flex-shrink: 0;
+ 	opacity: 0.7;
+ 	border-radius: 3px;
+@@ -676,14 +670,17 @@
+ 	color: inherit;
+ 	min-width: auto;
+ }
+-.chat-debug-settings-gear.monaco-button:hover {
++.chat-debug-settings-gear.monaco-button:hover,
++.chat-debug-section-copy-btn.monaco-button:hover {
+ 	opacity: 1;
+ 	background: var(--vscode-toolbar-hoverBackground);
+ }
+-.chat-debug-settings-gear-header-passthrough {
++.chat-debug-settings-gear-header-passthrough,
++.chat-debug-section-copy-header-passthrough {
+ 	pointer-events: none;
+ }
+-.chat-debug-settings-gear-header-passthrough .chat-debug-settings-gear {
++.chat-debug-settings-gear-header-passthrough .chat-debug-settings-gear,
++.chat-debug-section-copy-header-passthrough .chat-debug-section-copy-btn {
+ 	pointer-events: auto;
+ }
+ 
+@@ -727,6 +724,14 @@
+ 	display: flex;
+ 	flex: 1;
+ 	overflow: hidden;
++	position: relative;
++}
++.chat-debug-flowchart-content-wrapper > .chat-debug-detail-panel {
++	position: absolute;
++	top: 0;
++	right: 0;
++	bottom: 0;
++	z-index: 10;
+ }
+ .chat-debug-flowchart-content {
+ 	flex: 1;
+diff --git a/src/vs/workbench/contrib/chat/test/browser/chatDebugEventDetailRenderer.test.ts b/src/vs/workbench/contrib/chat/test/browser/chatDebugEventDetailRenderer.test.ts
+index 3a0f01975d1f7..8d9a7d19bfda1 100644
+--- a/src/vs/workbench/contrib/chat/test/browser/chatDebugEventDetailRenderer.test.ts
++++ b/src/vs/workbench/contrib/chat/test/browser/chatDebugEventDetailRenderer.test.ts
+@@ -60,17 +60,17 @@ suite('formatEventDetail', () => {
+ 			sessionResource: URI.parse('test://s1'),
+ 			created: new Date(),
+ 			model: 'gpt-4o',
+-			inputTokens: 1000,
+-			outputTokens: 500,
+-			totalTokens: 1500,
+-			durationInMillis: 3200,
++			inputTokens: 100,
++			outputTokens: 50,
++			totalTokens: 150,
++			durationInMillis: 320,
+ 		};
+ 		const result = formatEventDetail(event);
+ 		assert.ok(result.includes('gpt-4o'));
+-		assert.ok(result.includes('1000'));
+-		assert.ok(result.includes('500'));
+-		assert.ok(result.includes('1500'));
+-		assert.ok(result.includes('3200'));
++		assert.ok(result.includes('100'));
++		assert.ok(result.includes('50'));
++		assert.ok(result.includes('150'));
++		assert.ok(result.includes('320'));
+ 	});
+ 
+ 	test('generic event', () => {
+@@ -118,7 +118,7 @@ suite('formatEventDetail', () => {
+ 			agentName: 'Data',
+ 			description: 'Querying KQL',
+ 			status: 'completed',
+-			durationInMillis: 5000,
++			durationInMillis: 500,
+ 			toolCallCount: 3,
+ 			modelTurnCount: 2,
+ 		};
+@@ -126,7 +126,7 @@ suite('formatEventDetail', () => {
+ 		assert.ok(result.includes('Data'));
+ 		assert.ok(result.includes('Querying KQL'));
+ 		assert.ok(result.includes('completed'));
+-		assert.ok(result.includes('5000'));
++		assert.ok(result.includes('500'));
+ 		assert.ok(result.includes('3'));
+ 		assert.ok(result.includes('2'));
+ 	});

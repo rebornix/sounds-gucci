@@ -1,0 +1,13 @@
+{
+  "pr": 300563,
+  "prTitle": "hide \"Ask for Edits\" affordance when AI features are disabled",
+  "mergeCommit": "6a97d569afb95e48de8e66d174fc61d53b81242e",
+  "parentCommit": "",
+  "fileCount": 1,
+  "issue": 300500,
+  "issueTitle": "\"Ask for Edits\" shows up even if you have \"Disable AI Features\" enabled",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 22968305232,
+  "closedAt": "2026-03-11T11:17:19Z"
+}

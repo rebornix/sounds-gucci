@@ -1,0 +1,13 @@
+{
+  "pr": 300685,
+  "prTitle": "fix: move versioned folder check closer to the package task",
+  "mergeCommit": "85b156f97694e3b0c19b1af3a5c01be1fae78ff8",
+  "parentCommit": "",
+  "fileCount": 2,
+  "issue": 293098,
+  "issueTitle": "Vs code icon missing from Windows 10 start menu",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23007257939,
+  "closedAt": "2026-03-12T04:51:45Z"
+}

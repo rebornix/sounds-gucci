@@ -1,0 +1,13 @@
+{
+  "pr": 4393,
+  "prTitle": "Ensure steering while processing the first CLI prompt works as expected",
+  "mergeCommit": "ead08ddc14a57f02fc41aca560966664c8bbe9b9",
+  "parentCommit": "",
+  "fileCount": 2,
+  "issue": 301355,
+  "issueTitle": "Steering messages disappear from Copilot CLI (for new sessions)",
+  "repo": "microsoft/vscode-copilot-chat",
+  "tags": [],
+  "workflowRunId": 23033158592,
+  "closedAt": "2026-03-13T04:55:02Z"
+}

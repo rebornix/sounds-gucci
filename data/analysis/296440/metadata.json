@@ -1,0 +1,13 @@
+{
+  "pr": 4372,
+  "prTitle": "Contribute terminal link provider for copilot cli ",
+  "mergeCommit": "de488d25e6ea05ad3413c0e3e7a47340177458c2",
+  "parentCommit": "",
+  "fileCount": 8,
+  "issue": 296440,
+  "issueTitle": "Copilot CLI in VS Code should open file links when clicked",
+  "repo": "microsoft/vscode-copilot-chat",
+  "tags": [],
+  "workflowRunId": 23019245234,
+  "closedAt": "2026-03-13T01:24:38Z"
+}

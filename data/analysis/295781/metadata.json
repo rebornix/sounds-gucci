@@ -1,0 +1,13 @@
+{
+  "pr": 300453,
+  "prTitle": "Update action for the title bar",
+  "mergeCommit": "cfe3b3286e45f2ddafedea30b9ce840c2f143aa6",
+  "parentCommit": "",
+  "fileCount": 18,
+  "issue": 295781,
+  "issueTitle": "Update widget jumps when streaming progress",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 22947257743,
+  "closedAt": "2026-03-10T19:20:45Z"
+}

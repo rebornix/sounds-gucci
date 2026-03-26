@@ -1,0 +1,243 @@
+diff --git a/src/vs/workbench/api/browser/mainThreadChatSessions.ts b/src/vs/workbench/api/browser/mainThreadChatSessions.ts
+index d694b984912f9..63729a8388184 100644
+--- a/src/vs/workbench/api/browser/mainThreadChatSessions.ts
++++ b/src/vs/workbench/api/browser/mainThreadChatSessions.ts
+@@ -35,7 +35,7 @@ import { IEditorGroupsService } from '../../services/editor/common/editorGroupsS
+ import { IEditorService } from '../../services/editor/common/editorService.js';
+ import { extHostNamedCustomer, IExtHostContext } from '../../services/extensions/common/extHostCustomers.js';
+ import { Dto } from '../../services/extensions/common/proxyIdentifier.js';
+-import { ExtHostChatSessionsShape, ExtHostContext, IChatProgressDto, IChatSessionHistoryItemDto, IChatSessionItemsChange, MainContext, MainThreadChatSessionsShape } from '../common/extHost.protocol.js';
++import { ChatSessionContentContextDto, ExtHostChatSessionsShape, ExtHostContext, IChatProgressDto, IChatSessionHistoryItemDto, IChatSessionItemsChange, MainContext, MainThreadChatSessionsShape } from '../common/extHost.protocol.js';
+ 
+ export class ObservableChatSession extends Disposable implements IChatSession {
+ 
+@@ -99,17 +99,17 @@ export class ObservableChatSession extends Disposable implements IChatSession {
+ 		this._dialogService = dialogService;
+ 	}
+ 
+-	initialize(token: CancellationToken): Promise<void> {
++	initialize(token: CancellationToken, context: ChatSessionContentContextDto): Promise<void> {
+ 		if (!this._initializationPromise) {
+-			this._initializationPromise = this._doInitializeContent(token);
++			this._initializationPromise = this._doInitializeContent(token, context);
+ 		}
+ 		return this._initializationPromise;
+ 	}
+ 
+-	private async _doInitializeContent(token: CancellationToken): Promise<void> {
++	private async _doInitializeContent(token: CancellationToken, context: ChatSessionContentContextDto): Promise<void> {
+ 		try {
+ 			const sessionContent = await raceCancellationError(
+-				this._proxy.$provideChatSessionContent(this._providerHandle, this.sessionResource, token),
++				this._proxy.$provideChatSessionContent(this._providerHandle, this.sessionResource, context, token),
+ 				token
+ 			);
+ 
+@@ -668,7 +668,10 @@ export class MainThreadChatSessions extends Disposable implements MainThreadChat
+ 		}
+ 
+ 		try {
+-			await session.initialize(token);
++			const initialSessionOptions = this._chatSessionsService.getSessionOptions(sessionResource);
++			await session.initialize(token, {
++				initialSessionOptions: initialSessionOptions ? [...initialSessionOptions].map(([optionId, value]) => ({ optionId, value })) : undefined,
++			});
+ 			if (session.options) {
+ 				for (const [_, handle] of this._sessionTypeToHandle) {
+ 					if (handle === providerHandle) {
+diff --git a/src/vs/workbench/api/common/extHost.protocol.ts b/src/vs/workbench/api/common/extHost.protocol.ts
+index cd07cdf94ad4e..66eebd6da507f 100644
+--- a/src/vs/workbench/api/common/extHost.protocol.ts
++++ b/src/vs/workbench/api/common/extHost.protocol.ts
+@@ -3587,6 +3587,10 @@ export interface ChatSessionOptionUpdateDto2 {
+ 	readonly value: string | IChatSessionProviderOptionItem;
+ }
+ 
++export interface ChatSessionContentContextDto {
++	readonly initialSessionOptions?: ReadonlyArray<{ optionId: string; value: string }>;
++}
++
+ export interface ChatSessionDto {
+ 	id: string;
+ 	resource: UriComponents;
+@@ -3629,7 +3633,7 @@ export interface ExtHostChatSessionsShape {
+ 	$onDidChangeChatSessionItemState(providerHandle: number, sessionResource: UriComponents, archived: boolean): void;
+ 	$newChatSessionItem(controllerHandle: number, request: IChatNewSessionRequest, token: CancellationToken): Promise<Dto<IChatSessionItem> | undefined>;
+ 
+-	$provideChatSessionContent(providerHandle: number, sessionResource: UriComponents, token: CancellationToken): Promise<ChatSessionDto>;
++	$provideChatSessionContent(providerHandle: number, sessionResource: UriComponents, context: ChatSessionContentContextDto, token: CancellationToken): Promise<ChatSessionDto>;
+ 	$interruptChatSessionActiveResponse(providerHandle: number, sessionResource: UriComponents, requestId: string): Promise<void>;
+ 	$disposeChatSessionContent(providerHandle: number, sessionResource: UriComponents): Promise<void>;
+ 	$invokeChatSessionRequestHandler(providerHandle: number, sessionResource: UriComponents, request: IChatAgentRequest, history: any[], token: CancellationToken): Promise<IChatAgentResult>;
+diff --git a/src/vs/workbench/api/common/extHostChatSessions.ts b/src/vs/workbench/api/common/extHostChatSessions.ts
+index ac1a6843d4e42..62ff2c6c10204 100644
+--- a/src/vs/workbench/api/common/extHostChatSessions.ts
++++ b/src/vs/workbench/api/common/extHostChatSessions.ts
+@@ -22,7 +22,7 @@ import { IChatNewSessionRequest, IChatSessionProviderOptionItem } from '../../co
+ import { ChatAgentLocation } from '../../contrib/chat/common/constants.js';
+ import { IChatAgentRequest, IChatAgentResult } from '../../contrib/chat/common/participants/chatAgents.js';
+ import { Proxied } from '../../services/extensions/common/proxyIdentifier.js';
+-import { ChatSessionDto, ExtHostChatSessionsShape, IChatAgentProgressShape, IChatSessionProviderOptions, MainContext, MainThreadChatSessionsShape } from './extHost.protocol.js';
++import { ChatSessionContentContextDto, ChatSessionDto, ExtHostChatSessionsShape, IChatAgentProgressShape, IChatSessionProviderOptions, MainContext, MainThreadChatSessionsShape } from './extHost.protocol.js';
+ import { ChatAgentResponseStream } from './extHostChatAgents2.js';
+ import { CommandsConverter, ExtHostCommands } from './extHostCommands.js';
+ import { ExtHostLanguageModels } from './extHostLanguageModels.js';
+@@ -499,7 +499,7 @@ export class ExtHostChatSessions extends Disposable implements ExtHostChatSessio
+ 		});
+ 	}
+ 
+-	async $provideChatSessionContent(handle: number, sessionResourceComponents: UriComponents, token: CancellationToken): Promise<ChatSessionDto> {
++	async $provideChatSessionContent(handle: number, sessionResourceComponents: UriComponents, context: ChatSessionContentContextDto, token: CancellationToken): Promise<ChatSessionDto> {
+ 		const provider = this._chatSessionContentProviders.get(handle);
+ 		if (!provider) {
+ 			throw new Error(`No provider for handle ${handle}`);
+@@ -507,7 +507,9 @@ export class ExtHostChatSessions extends Disposable implements ExtHostChatSessio
+ 
+ 		const sessionResource = URI.revive(sessionResourceComponents);
+ 
+-		const session = await provider.provider.provideChatSessionContent(sessionResource, token);
++		const session = await provider.provider.provideChatSessionContent(sessionResource, token, {
++			sessionOptions: context?.initialSessionOptions ?? []
++		});
+ 		if (token.isCancellationRequested) {
+ 			throw new CancellationError();
+ 		}
+@@ -785,7 +787,13 @@ export class ExtHostChatSessions extends Disposable implements ExtHostChatSessio
+ 			return undefined;
+ 		}
+ 
+-		const item = await handler({ request: { prompt: request.prompt, command: request.command } }, token);
++		const item = await handler({
++			request: {
++				prompt: request.prompt,
++				command: request.command
++			},
++			sessionOptions: request.initialSessionOptions ?? [],
++		}, token);
+ 		if (!item) {
+ 			return undefined;
+ 		}
+diff --git a/src/vs/workbench/api/test/browser/mainThreadChatSessions.test.ts b/src/vs/workbench/api/test/browser/mainThreadChatSessions.test.ts
+index 2e31054aa64b7..eeb2d197d829d 100644
+--- a/src/vs/workbench/api/test/browser/mainThreadChatSessions.test.ts
++++ b/src/vs/workbench/api/test/browser/mainThreadChatSessions.test.ts
+@@ -93,7 +93,7 @@ suite('ObservableChatSession', function () {
+ 		const resource = LocalChatSessionUri.forSession(sessionId);
+ 		const session = new ObservableChatSession(resource, 1, proxy, logService, dialogService);
+ 		(proxy.$provideChatSessionContent as sinon.SinonStub).resolves(sessionContent);
+-		await session.initialize(CancellationToken.None);
++		await session.initialize(CancellationToken.None, { initialSessionOptions: [] });
+ 		return session;
+ 	}
+ 
+@@ -130,7 +130,7 @@ suite('ObservableChatSession', function () {
+ 		// Initialize the session
+ 		const sessionContent = createSessionContent();
+ 		(proxy.$provideChatSessionContent as sinon.SinonStub).resolves(sessionContent);
+-		await session.initialize(CancellationToken.None);
++		await session.initialize(CancellationToken.None, { initialSessionOptions: [] });
+ 
+ 		// Now progress should be visible
+ 		assert.strictEqual(session.progressObs.get().length, 2);
+@@ -187,8 +187,8 @@ suite('ObservableChatSession', function () {
+ 		const sessionContent = createSessionContent();
+ 		(proxy.$provideChatSessionContent as sinon.SinonStub).resolves(sessionContent);
+ 
+-		const promise1 = session.initialize(CancellationToken.None);
+-		const promise2 = session.initialize(CancellationToken.None);
++		const promise1 = session.initialize(CancellationToken.None, { initialSessionOptions: [] });
++		const promise2 = session.initialize(CancellationToken.None, { initialSessionOptions: [] });
+ 
+ 		assert.strictEqual(promise1, promise2);
+ 		await promise1;
+@@ -197,6 +197,25 @@ suite('ObservableChatSession', function () {
+ 		assert.ok((proxy.$provideChatSessionContent as sinon.SinonStub).calledOnce);
+ 	});
+ 
++	test('initialization forwards initial session options context', async function () {
++		const sessionId = 'test-id';
++		const resource = LocalChatSessionUri.forSession(sessionId);
++		const session = disposables.add(new ObservableChatSession(resource, 1, proxy, logService, dialogService));
++		const initialSessionOptions = [{ optionId: 'model', value: 'gpt-4.1' }];
++
++		const sessionContent = createSessionContent();
++		(proxy.$provideChatSessionContent as sinon.SinonStub).resolves(sessionContent);
++
++		await session.initialize(CancellationToken.None, { initialSessionOptions });
++
++		assert.ok((proxy.$provideChatSessionContent as sinon.SinonStub).calledOnceWith(
++			1,
++			resource,
++			{ initialSessionOptions },
++			CancellationToken.None
++		));
++	});
++
+ 	test('progress handling works correctly after initialization', async function () {
+ 		const sessionContent = createSessionContent();
+ 		const session = disposables.add(await createInitializedSession(sessionContent));
+diff --git a/src/vs/workbench/contrib/chat/common/chatService/chatServiceImpl.ts b/src/vs/workbench/contrib/chat/common/chatService/chatServiceImpl.ts
+index 18fe381887949..4ac9365bdf66d 100644
+--- a/src/vs/workbench/contrib/chat/common/chatService/chatServiceImpl.ts
++++ b/src/vs/workbench/contrib/chat/common/chatService/chatServiceImpl.ts
+@@ -824,13 +824,14 @@ export class ChatService extends Disposable implements IChatService {
+ 			const parsedRequest = this.parseChatRequest(sessionResource, request, options?.location ?? model.initialLocation, options);
+ 			const commandPart = parsedRequest.parts.find((r): r is ChatRequestSlashCommandPart => r instanceof ChatRequestSlashCommandPart);
+ 			const requestText = getPromptText(parsedRequest).message;
+-			const newItem = await this.chatSessionService.createNewChatSessionItem(getChatSessionType(sessionResource), { prompt: requestText, command: commandPart?.text }, CancellationToken.None);
+-			if (newItem) {
+ 
+-				// Capture session options before loading the remote session,
+-				// since the alias registration below may change the lookup.
+-				const sessionOptions = this.chatSessionService.getSessionOptions(sessionResource);
++			// Capture session options before loading the remote session,
++			// since the alias registration below may change the lookup.
++			const sessionOptions = this.chatSessionService.getSessionOptions(sessionResource);
++			const initialSessionOptions = sessionOptions ? [...sessionOptions].map(([optionId, value]) => ({ optionId, value })) : undefined;
+ 
++			const newItem = await this.chatSessionService.createNewChatSessionItem(getChatSessionType(sessionResource), { prompt: requestText, command: commandPart?.text, initialSessionOptions }, CancellationToken.None);
++			if (newItem) {
+ 				model = (await this.loadRemoteSession(newItem.resource, model.initialLocation, CancellationToken.None))?.object as ChatModel | undefined;
+ 				if (!model) {
+ 					throw new Error(`Failed to load session for resource: ${newItem.resource}`);
+diff --git a/src/vs/workbench/contrib/chat/common/chatSessionsService.ts b/src/vs/workbench/contrib/chat/common/chatSessionsService.ts
+index 1b843bce36be0..7f2b2a277aa8f 100644
+--- a/src/vs/workbench/contrib/chat/common/chatSessionsService.ts
++++ b/src/vs/workbench/contrib/chat/common/chatSessionsService.ts
+@@ -196,6 +196,8 @@ export interface IChatSessionContentProvider {
+ export interface IChatNewSessionRequest {
+ 	readonly prompt: string;
+ 	readonly command?: string;
++
++	readonly initialSessionOptions?: ReadonlyArray<{ optionId: string; value: string | IChatSessionProviderOptionItem }>;
+ }
+ 
+ export interface IChatSessionItemsDelta {
+diff --git a/src/vscode-dts/vscode.proposed.chatSessionsProvider.d.ts b/src/vscode-dts/vscode.proposed.chatSessionsProvider.d.ts
+index b9b2846f49317..69679ab35c7e9 100644
+--- a/src/vscode-dts/vscode.proposed.chatSessionsProvider.d.ts
++++ b/src/vscode-dts/vscode.proposed.chatSessionsProvider.d.ts
+@@ -99,6 +99,8 @@ declare module 'vscode' {
+ 			readonly prompt: string;
+ 			readonly command?: string;
+ 		};
++
++		readonly sessionOptions: ReadonlyArray<{ optionId: string; value: string | ChatSessionProviderOptionItem }>;
+ 	}
+ 
+ 	/**
+@@ -447,10 +449,13 @@ declare module 'vscode' {
+ 		 *
+ 		 * @param resource The URI of the chat session to resolve.
+ 		 * @param token A cancellation token that can be used to cancel the operation.
++		 * @param context Additional context for the chat session.
+ 		 *
+ 		 * @return The {@link ChatSession chat session} associated with the given URI.
+ 		 */
+-		provideChatSessionContent(resource: Uri, token: CancellationToken): Thenable<ChatSession> | ChatSession;
++		provideChatSessionContent(resource: Uri, token: CancellationToken, context: {
++			readonly sessionOptions: ReadonlyArray<{ optionId: string; value: string | ChatSessionProviderOptionItem }>;
++		}): Thenable<ChatSession> | ChatSession;
+ 
+ 		/**
+ 		 * @param resource Identifier of the chat session being updated.

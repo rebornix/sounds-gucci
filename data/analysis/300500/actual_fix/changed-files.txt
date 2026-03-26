@@ -1,0 +1,1 @@
+src/vs/workbench/contrib/inlineChat/browser/inlineChatActions.ts

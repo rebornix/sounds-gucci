@@ -46,7 +46,7 @@ You will receive a path to an analysis directory (e.g., `data/analysis/12345`).
 
 If no specific experiment subdirectory is given, find the **most recent** one:
 1. List subdirectories in the analysis directory (e.g., `ls data/analysis/12345/`)
-2. Experiment directories are named `<model>-<date>` (e.g., `gpt-5.2-codex-2026-02-20`)
+2. Experiment directories are named `<model>-<date>` or a consolidated `<slug>` (e.g. `composer-2`)
 3. Skip `actual_fix/` — that's the real solution, not an experiment
 4. Pick the one that sorts last alphabetically (most recent by date)
 5. Read `proposed-fix.md` from that subdirectory

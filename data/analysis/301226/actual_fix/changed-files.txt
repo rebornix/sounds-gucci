@@ -1,0 +1,9 @@
+src/vs/platform/update/common/update.config.contribution.ts
+src/vs/workbench/contrib/update/browser/media/updateTitleBarEntry.css
+src/vs/workbench/contrib/update/browser/media/updateTooltip.css
+src/vs/workbench/contrib/update/browser/update.ts
+src/vs/workbench/contrib/update/browser/updateStatusBarEntry.ts
+src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts
+src/vs/workbench/contrib/update/browser/updateTooltip.ts
+src/vs/workbench/contrib/update/common/updateUtils.ts
+src/vs/workbench/contrib/update/test/common/updateUtils.test.ts

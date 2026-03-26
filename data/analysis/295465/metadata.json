@@ -1,0 +1,13 @@
+{
+  "pr": 300685,
+  "prTitle": "fix: move versioned folder check closer to the package task",
+  "mergeCommit": "85b156f97694e3b0c19b1af3a5c01be1fae78ff8",
+  "parentCommit": "",
+  "fileCount": 2,
+  "issue": 295465,
+  "issueTitle": "File icons missing in Windows file explorer due to version-specific hash in file icon directory path",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23007240599,
+  "closedAt": "2026-03-12T04:51:44Z"
+}

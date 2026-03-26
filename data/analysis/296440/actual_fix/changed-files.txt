@@ -1,0 +1,8 @@
+package.json
+package.nls.json
+src/extension/chatSessions/vscode-node/copilotCLIChatSessionsContribution.ts
+src/extension/chatSessions/vscode-node/copilotCLITerminalIntegration.ts
+src/extension/chatSessions/vscode-node/copilotCLITerminalLinkProvider.ts
+src/extension/chatSessions/vscode-node/test/copilotCLITerminalIntegration.spec.ts
+src/extension/chatSessions/vscode-node/test/copilotCLITerminalLinkProvider.spec.ts
+src/platform/configuration/common/configurationService.ts

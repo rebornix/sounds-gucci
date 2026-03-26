@@ -1,0 +1,2 @@
+src/vs/platform/update/common/update.config.contribution.ts
+src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts

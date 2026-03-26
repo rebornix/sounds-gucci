@@ -1,0 +1,11 @@
+src/vs/workbench/contrib/chat/browser/actions/chatContext.ts
+src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugAttachment.ts
+src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts
+src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugLogsView.ts
+src/vs/workbench/contrib/chat/browser/chatSlashCommands.ts
+src/vs/workbench/contrib/chat/browser/widget/input/editor/chatInputCompletions.ts
+src/vs/workbench/contrib/chat/common/actions/chatContextKeys.ts
+src/vs/workbench/contrib/chat/common/chatDebugService.ts
+src/vs/workbench/contrib/chat/common/chatDebugServiceImpl.ts
+src/vs/workbench/contrib/chat/common/tools/builtinTools/resolveDebugEventDetailsTool.ts
+src/vs/workbench/contrib/chat/test/common/chatDebugServiceImpl.test.ts

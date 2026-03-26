@@ -1,0 +1,13 @@
+{
+  "pr": 299610,
+  "prTitle": "Use debug as attachment when clicking debug agent panel button",
+  "mergeCommit": "199e9f97594f3c5ff90fbcd1e8b8c2025583499f",
+  "parentCommit": "",
+  "fileCount": 11,
+  "issue": 299580,
+  "issueTitle": "The sparkle should add an attachment, not a slash command",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 22927111994,
+  "closedAt": "2026-03-06T01:23:32Z"
+}

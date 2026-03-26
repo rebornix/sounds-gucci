@@ -1,0 +1,13 @@
+{
+  "pr": 301543,
+  "prTitle": "constrain questions",
+  "mergeCommit": "a418daa4dcac14928e8b852fc4e0624e595b946a",
+  "parentCommit": "",
+  "fileCount": 1,
+  "issue": 301518,
+  "issueTitle": "New custom MCP tools dialog constrains break the UI",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23061611817,
+  "closedAt": "2026-03-13T21:26:07Z"
+}

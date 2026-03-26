@@ -1,0 +1,3 @@
+src/extension/test/vscode-node/configurations.test.ts
+src/platform/configuration/common/configurationService.ts
+src/platform/configuration/vscode/configurationServiceImpl.ts

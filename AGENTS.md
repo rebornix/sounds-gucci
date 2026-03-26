@@ -72,6 +72,8 @@ The agent will:
 3. Propose a fix based on git history and code analysis
 4. Save output to `<model>-<date>/proposed-fix.md`
 
+**Batches:** Use **one bug-analyzer invocation (subagent) per PR**. Run those invocations **in sequence** when they share one local clone (`CLONE_PATH`), so checkouts never race. Do not run parallel bug-analyzers on the same clone.
+
 ### Fix Validator
 
 Invoke with: `Use fix-validator agent on data/analysis/<pr>`
@@ -130,14 +132,12 @@ Each PR-level `metadata.json`:
 
 ### Running with Different Models
 
-Update the `model:` field in `.github/agents/bug-analyzer.agent.md` and `.github/agents/fix-validator.agent.md` before each experiment run:
+Experiment outputs and Langfuse targeting use the repo-root `.model` file (a short slug, no spaces). The agent definitions no longer carry a `model:` field in frontmatter—pick the model in the IDE, and set `.model` to match the directory prefix you want:
 
 ```bash
-# For opus
-sed -i '' 's/^model:.*/model: claude-opus-4.6/' .github/agents/*.agent.md
-
-# For codex
-sed -i '' 's/^model:.*/model: gpt-5.3-codex/' .github/agents/*.agent.md
+echo "composer-2" > .model
+# or: echo "claude-opus-4.6" > .model
+# or: echo "gpt-5.3-codex" > .model
 ```
 
 ### Setup new PRs
@@ -175,6 +175,7 @@ grep -r "Alignment Score:" data/analysis/*/validation.md
 
 ### For bug-analyzer
 
+- **One PR per subagent** — never batch multiple `data/analysis/<pr>` dirs inside a single bug-analyzer run; queue runs sequentially on a shared `CLONE_PATH`
 - **DO NOT** read anything in `actual_fix/` — these reveal the solution
 - **DO NOT** use GitHub APIs to fetch the PR content
 - **DO NOT** look at commits after the parent commit
@@ -190,18 +191,12 @@ grep -r "Alignment Score:" data/analysis/*/validation.md
 
 ## Quick Start (Running a New Experiment)
 
-### 1. Set the model
+### 1. Set the model slug
 
-Update the `model:` field in both agent files:
-
-```bash
-sed -i '' 's/^model:.*/model: gpt-5.3-codex/' .github/agents/*.agent.md
-```
-
-Also set `.model` for experiment directory naming:
+Set `.model` so new runs write under `data/analysis/<pr>/<slug>-<date>/` and Langfuse can attach traces to the right experiment folder:
 
 ```bash
-echo "gpt-5.3-codex" > .model
+echo "composer-2" > .model
 ```
 
 ### 2. Fetch PRs (if needed)
@@ -231,8 +226,10 @@ Use the `setup-pr-analysis` skill for each PR/issue pair. This creates the PR di
 In VS Code with custom agents:
 
 ```
-For each PR directory in data/analysis/, run @bug-analyzer then @fix-validator.
-Process them sequentially.
+For each PR directory in data/analysis/:
+- Run @bug-analyzer as its own invocation (one PR per run / subagent). Queue these
+  sequentially when using one local clone (CLONE_PATH).
+- Then run @fix-validator (can be parallelized across PRs once proposals exist).
 ```
 
 ### 5. Post-processing

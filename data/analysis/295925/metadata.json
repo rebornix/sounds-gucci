@@ -1,0 +1,13 @@
+{
+  "pr": 297865,
+  "prTitle": "Move status entry to the right and make it more subtle",
+  "mergeCommit": "4aff97add0f297ad97cb6b7de1097e91ac12e419",
+  "parentCommit": "",
+  "fileCount": 2,
+  "issue": 295925,
+  "issueTitle": "workspace.colorCustomizations for the `update baground`",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 22958874748,
+  "closedAt": "2026-02-26T11:43:19Z"
+}

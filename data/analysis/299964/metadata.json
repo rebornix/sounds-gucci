@@ -1,0 +1,13 @@
+{
+  "pr": 300752,
+  "prTitle": "fix: repair folder context menu when only legacy file context menu is present",
+  "mergeCommit": "20a1637cef5c4d51c5a9de8bdfb69aafbbc4279b",
+  "parentCommit": "",
+  "fileCount": 1,
+  "issue": 299964,
+  "issueTitle": "\"Open with Code\" missing from context menu in latest version",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23025551492,
+  "closedAt": "2026-03-13T12:36:54Z"
+}

@@ -1,0 +1,724 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/actions/chatContext.ts b/src/vs/workbench/contrib/chat/browser/actions/chatContext.ts
+index fb17967129bef..6401df034be28 100644
+--- a/src/vs/workbench/contrib/chat/browser/actions/chatContext.ts
++++ b/src/vs/workbench/contrib/chat/browser/actions/chatContext.ts
+@@ -21,11 +21,15 @@ import { FileEditorInput } from '../../../files/browser/editors/fileEditorInput.
+ import { NotebookEditorInput } from '../../../notebook/common/notebookEditorInput.js';
+ import { IChatContextPickService, IChatContextValueItem, IChatContextPickerItem, IChatContextPickerPickItem, IChatContextPicker } from '../attachments/chatContextPickService.js';
+ import { IChatRequestToolEntry, IChatRequestToolSetEntry, IChatRequestVariableEntry, IImageVariableEntry, toToolSetVariableEntry, toToolVariableEntry } from '../../common/attachments/chatVariableEntries.js';
+-import { isToolSet, ToolDataSource } from '../../common/tools/languageModelToolsService.js';
+-import { IChatWidget } from '../chat.js';
++import { ILanguageModelToolsService, isToolSet, ToolDataSource } from '../../common/tools/languageModelToolsService.js';
++import { IChatWidget, IChatWidgetService } from '../chat.js';
+ import { imageToHash, isImage } from '../widget/input/editor/chatPasteProviders.js';
+ import { convertBufferToScreenshotVariable } from '../attachments/chatScreenshotContext.js';
+ import { ChatInstructionsPickerPick } from '../promptSyntax/attachInstructionsAction.js';
++import { createDebugEventsAttachment } from '../chatDebug/chatDebugAttachment.js';
++import { IChatDebugService } from '../../common/chatDebugService.js';
++import { ChatContextKeys } from '../../common/actions/chatContextKeys.js';
++import { IContextKeyService } from '../../../../../platform/contextkey/common/contextkey.js';
+ import { ITerminalService } from '../../../terminal/browser/terminal.js';
+ import { URI } from '../../../../../base/common/uri.js';
+ import { ITerminalCommand, TerminalCapability } from '../../../../../platform/terminal/common/capabilities/capabilities.js';
+@@ -38,9 +42,29 @@ export class ChatContextContributions extends Disposable implements IWorkbenchCo
+ 	constructor(
+ 		@IInstantiationService instantiationService: IInstantiationService,
+ 		@IChatContextPickService contextPickService: IChatContextPickService,
++		@IChatDebugService chatDebugService: IChatDebugService,
++		@IContextKeyService contextKeyService: IContextKeyService,
++		@ILanguageModelToolsService languageModelToolsService: ILanguageModelToolsService,
++		@IChatWidgetService chatWidgetService: IChatWidgetService,
+ 	) {
+ 		super();
+ 
++		// Bind at the global context key service level so the tools service can evaluate it.
++		// Widget-scoped keys are not reliably visible to singleton services during async request processing.
++		const hasAttachedDebugDataKey = ChatContextKeys.chatSessionHasAttachedDebugData.bindTo(contextKeyService);
++		this._store.add(chatWidgetService.onDidChangeFocusedSession(() => {
++			const sessionResource = chatWidgetService.lastFocusedWidget?.viewModel?.sessionResource;
++			hasAttachedDebugDataKey.set(!!sessionResource && chatDebugService.hasAttachedDebugData(sessionResource));
++			languageModelToolsService.flushToolUpdates();
++		}));
++		this._store.add(chatDebugService.onDidAttachDebugData(sessionResource => {
++			const focusedSession = chatWidgetService.lastFocusedWidget?.viewModel?.sessionResource;
++			if (focusedSession && focusedSession.toString() === sessionResource.toString()) {
++				hasAttachedDebugDataKey.set(true);
++				languageModelToolsService.flushToolUpdates();
++			}
++		}));
++
+ 		// ###############################################################################################
+ 		//
+ 		// Default context picks/values which are "native" to chat. This is NOT the complete list
+@@ -54,6 +78,7 @@ export class ChatContextContributions extends Disposable implements IWorkbenchCo
+ 		this._store.add(contextPickService.registerChatContextItem(instantiationService.createInstance(OpenEditorContextValuePick)));
+ 		this._store.add(contextPickService.registerChatContextItem(instantiationService.createInstance(ClipboardImageContextValuePick)));
+ 		this._store.add(contextPickService.registerChatContextItem(instantiationService.createInstance(ScreenshotContextValuePick)));
++		this._store.add(contextPickService.registerChatContextItem(instantiationService.createInstance(DebugEventsSnapshotContextValuePick)));
+ 	}
+ }
+ 
+@@ -285,3 +310,28 @@ class ScreenshotContextValuePick implements IChatContextValueItem {
+ 		return blob && convertBufferToScreenshotVariable(blob);
+ 	}
+ }
++
++class DebugEventsSnapshotContextValuePick implements IChatContextValueItem {
++
++	readonly type = 'valuePick';
++	readonly icon = Codicon.output;
++	readonly label = localize('chatContext.debugEventsSnapshot', 'Debug Events Snapshot');
++	readonly ordinal = -600;
++
++	constructor(
++		@IChatDebugService private readonly _chatDebugService: IChatDebugService,
++	) { }
++
++	isEnabled(widget: IChatWidget): boolean {
++		const sessionResource = widget.viewModel?.sessionResource;
++		return !!sessionResource && this._chatDebugService.getEvents(sessionResource).length > 0;
++	}
++
++	async asAttachment(widget: IChatWidget): Promise<IChatRequestVariableEntry | undefined> {
++		const sessionResource = widget.viewModel?.sessionResource;
++		if (!sessionResource) {
++			return undefined;
++		}
++		return createDebugEventsAttachment(sessionResource, this._chatDebugService);
++	}
++}
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugAttachment.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugAttachment.ts
+new file mode 100644
+index 0000000000000..2d847f283a9e6
+--- /dev/null
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugAttachment.ts
+@@ -0,0 +1,96 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright (c) Microsoft Corporation. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++import { Codicon } from '../../../../../base/common/codicons.js';
++import { URI } from '../../../../../base/common/uri.js';
++import * as nls from '../../../../../nls.js';
++import { IChatDebugEvent, IChatDebugService } from '../../common/chatDebugService.js';
++import { IChatRequestVariableEntry } from '../../common/attachments/chatVariableEntries.js';
++
++/**
++ * Descriptions of each debug event kind for the model. Adding a new event kind
++ * to {@link IChatDebugEvent} without adding an entry here will cause a compile error.
++ */
++const debugEventKindDescriptions: Record<IChatDebugEvent['kind'], string> = {
++	generic: '- generic (category: "discovery"): File discovery for instructions, skills, agents, hooks. Resolving returns a fileList with full file paths, load status, skip reasons, and source folders. Always resolve these for questions about customization files.\n'
++		+ '- generic (other): Miscellaneous logs. Resolving returns additional text details.',
++	toolCall: '- toolCall: A tool invocation. Resolving returns tool name, input, output, status, and duration.',
++	modelTurn: '- modelTurn: An LLM round-trip. Resolving returns model name, token usage, timing, errors, and prompt sections.',
++	subagentInvocation: '- subagentInvocation: A sub-agent spawn. Resolving returns agent name, status, duration, and counts.',
++	userMessage: '- userMessage: The full prompt sent to the model. Resolving returns the complete message and all prompt sections (system prompt, instructions, context). Essential for understanding what the model received.',
++	agentResponse: '- agentResponse: The model\'s response. Resolving returns the full response text and sections.',
++};
++
++function formatDebugEventsForContext(events: readonly IChatDebugEvent[]): string {
++	const lines: string[] = [];
++	for (const event of events) {
++		const ts = event.created.toISOString();
++		const id = event.id ? ` [id=${event.id}]` : '';
++		switch (event.kind) {
++			case 'generic':
++				lines.push(`[${ts}]${id} ${event.level >= 3 ? 'ERROR' : event.level >= 2 ? 'WARN' : 'INFO'}: ${event.name}${event.details ? ' - ' + event.details : ''}${event.category ? ' (category: ' + event.category + ')' : ''}`);
++				break;
++			case 'toolCall':
++				lines.push(`[${ts}]${id} TOOL_CALL: ${event.toolName}${event.result ? ' result=' + event.result : ''}${event.durationInMillis !== undefined ? ' duration=' + event.durationInMillis + 'ms' : ''}`);
++				break;
++			case 'modelTurn':
++				lines.push(`[${ts}]${id} MODEL_TURN: ${event.requestName ?? 'unknown'}${event.model ? ' model=' + event.model : ''}${event.inputTokens !== undefined ? ' tokens(in=' + event.inputTokens + ',out=' + (event.outputTokens ?? '?') + ')' : ''}${event.durationInMillis !== undefined ? ' duration=' + event.durationInMillis + 'ms' : ''}`);
++				break;
++			case 'subagentInvocation':
++				lines.push(`[${ts}]${id} SUBAGENT: ${event.agentName}${event.status ? ' status=' + event.status : ''}${event.durationInMillis !== undefined ? ' duration=' + event.durationInMillis + 'ms' : ''}`);
++				break;
++			case 'userMessage':
++				lines.push(`[${ts}]${id} USER_MESSAGE: ${event.message.substring(0, 200)}${event.message.length > 200 ? '...' : ''} (${event.sections.length} sections)`);
++				break;
++			case 'agentResponse':
++				lines.push(`[${ts}]${id} AGENT_RESPONSE: ${event.message.substring(0, 200)}${event.message.length > 200 ? '...' : ''} (${event.sections.length} sections)`);
++				break;
++			default: {
++				const _: never = event;
++				void _;
++				break;
++			}
++		}
++	}
++	return lines.join('\n');
++}
++
++/**
++ * Creates a debug events attachment for a chat session.
++ * This can be used to attach debug logs to a chat request.
++ */
++export async function createDebugEventsAttachment(
++	sessionResource: URI,
++	chatDebugService: IChatDebugService
++): Promise<IChatRequestVariableEntry> {
++	chatDebugService.markDebugDataAttached(sessionResource);
++	if (!chatDebugService.hasInvokedProviders(sessionResource)) {
++		await chatDebugService.invokeProviders(sessionResource);
++	}
++	const events = chatDebugService.getEvents(sessionResource);
++	const summary = events.length > 0
++		? formatDebugEventsForContext(events)
++		: nls.localize('debugEventsSnapshot.noEvents', "No debug events found for this conversation.");
++
++	return {
++		id: 'chatDebugEvents',
++		name: nls.localize('debugEventsSnapshot.contextName', "Debug Events Snapshot"),
++		icon: Codicon.output,
++		kind: 'debugEvents',
++		snapshotTime: Date.now(),
++		sessionResource,
++		value: summary,
++		modelDescription: 'These are the debug event logs from the current chat conversation. Analyze them to help answer the user\'s troubleshooting question.\n'
++			+ '\n'
++			+ 'CRITICAL INSTRUCTION: You MUST call the resolveDebugEventDetails tool on relevant events BEFORE answering. The log lines below are only summaries — they do NOT contain the actual data (file paths, prompt content, tool I/O, etc.). The real information is only available by resolving events. Never answer based solely on the summary lines. Always resolve first, then answer.\n'
++			+ '\n'
++			+ 'Call resolveDebugEventDetails in parallel on all events that could be relevant to the user\'s question. When in doubt, resolve more events rather than fewer.\n'
++			+ '\n'
++			+ 'IMPORTANT: Do NOT mention event IDs, tool resolution steps, or internal debug mechanics in your response. The user does not know about debug events or event IDs. Present your findings directly and naturally, as if you simply know the answer. Never say things like "I need to resolve events" or show event IDs.\n'
++			+ '\n'
++			+ 'Event types and what resolving them returns:\n'
++			+ Object.values(debugEventKindDescriptions).join('\n'),
++	};
++}
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts
+index ec403b30f956d..8276d701b2a05 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts
+@@ -250,7 +250,9 @@ export class ChatDebugEditor extends EditorPane {
+ 		}
+ 
+ 		this.chatDebugService.activeSessionResource = sessionResource;
+-		this.chatDebugService.invokeProviders(sessionResource);
++		if (!this.chatDebugService.hasInvokedProviders(sessionResource)) {
++			this.chatDebugService.invokeProviders(sessionResource);
++		}
+ 		this.trackSessionModelChanges(sessionResource);
+ 
+ 		this.overviewView?.setSession(sessionResource);
+@@ -327,7 +329,9 @@ export class ChatDebugEditor extends EditorPane {
+ 				this.savedSessionResource = undefined;
+ 				if (sessionResource) {
+ 					this.chatDebugService.activeSessionResource = sessionResource;
+-					this.chatDebugService.invokeProviders(sessionResource);
++					if (!this.chatDebugService.hasInvokedProviders(sessionResource)) {
++						this.chatDebugService.invokeProviders(sessionResource);
++					}
+ 				} else {
+ 					this.showView(ViewState.Home);
+ 				}
+diff --git a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugLogsView.ts b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugLogsView.ts
+index a9bbec0b6d53f..8cbf8c1a90d89 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugLogsView.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugLogsView.ts
+@@ -10,7 +10,7 @@ import { Button } from '../../../../../base/browser/ui/button/button.js';
+ import { IObjectTreeElement } from '../../../../../base/browser/ui/tree/tree.js';
+ import { Codicon } from '../../../../../base/common/codicons.js';
+ import { Emitter } from '../../../../../base/common/event.js';
+-import { Disposable, MutableDisposable } from '../../../../../base/common/lifecycle.js';
++import { combinedDisposable, Disposable, MutableDisposable } from '../../../../../base/common/lifecycle.js';
+ import { autorun } from '../../../../../base/common/observable.js';
+ import { ThemeIcon } from '../../../../../base/common/themables.js';
+ import { URI } from '../../../../../base/common/uri.js';
+@@ -29,6 +29,7 @@ import { setupBreadcrumbKeyboardNavigation, TextBreadcrumbItem, LogsViewMode } f
+ import { ChatDebugFilterState, bindFilterContextKeys } from './chatDebugFilters.js';
+ import { ChatDebugDetailPanel } from './chatDebugDetailPanel.js';
+ import { IChatWidgetService } from '../chat.js';
++import { createDebugEventsAttachment } from './chatDebugAttachment.js';
+ 
+ const $ = DOM.$;
+ 
+@@ -131,9 +132,8 @@ export class ChatDebugLogsView extends Disposable {
+ 			}
+ 			const widget = await this.chatWidgetService.openSession(this.currentSessionResource);
+ 			if (widget) {
+-				const value = '/troubleshoot ';
+-				widget.inputEditor.setValue(value);
+-				widget.inputEditor.setPosition({ lineNumber: 1, column: value.length + 1 });
++				const attachment = await createDebugEventsAttachment(this.currentSessionResource, this.chatDebugService);
++				widget.attachmentModel.addContext(attachment);
+ 				widget.focusInput();
+ 			}
+ 		}));
+@@ -389,12 +389,23 @@ export class ChatDebugLogsView extends Disposable {
+ 
+ 	private loadEvents(): void {
+ 		this.events = [...this.chatDebugService.getEvents(this.currentSessionResource || undefined)];
+-		this.eventListener.value = this.chatDebugService.onDidAddEvent(e => {
++
++		const addEventDisposable = this.chatDebugService.onDidAddEvent(e => {
+ 			if (!this.currentSessionResource || e.sessionResource.toString() === this.currentSessionResource.toString()) {
+ 				this.events.push(e);
+ 				this.refreshList();
+ 			}
+ 		});
++
++		// Reload events when provider events are cleared (before re-invoking providers)
++		const clearEventsDisposable = this.chatDebugService.onDidClearProviderEvents(sessionResource => {
++			if (!this.currentSessionResource || sessionResource.toString() === this.currentSessionResource.toString()) {
++				this.events = [...this.chatDebugService.getEvents(this.currentSessionResource || undefined)];
++				this.refreshList();
++			}
++		});
++
++		this.eventListener.value = combinedDisposable(addEventDisposable, clearEventsDisposable);
+ 		this.updateBreadcrumb();
+ 		this.trackSessionState();
+ 	}
+diff --git a/src/vs/workbench/contrib/chat/browser/chatSlashCommands.ts b/src/vs/workbench/contrib/chat/browser/chatSlashCommands.ts
+index 97e45f0280935..4d183f09c9ec0 100644
+--- a/src/vs/workbench/contrib/chat/browser/chatSlashCommands.ts
++++ b/src/vs/workbench/contrib/chat/browser/chatSlashCommands.ts
+@@ -15,11 +15,9 @@ import { IInstantiationService } from '../../../../platform/instantiation/common
+ import { INotificationService, Severity } from '../../../../platform/notification/common/notification.js';
+ import { IStorageService, StorageScope, StorageTarget } from '../../../../platform/storage/common/storage.js';
+ import { IChatAgentService } from '../common/participants/chatAgents.js';
+-import { IChatDebugEvent, IChatDebugService } from '../common/chatDebugService.js';
+ import { IChatSlashCommandService } from '../common/participants/chatSlashCommands.js';
+-import { ChatRequestQueueKind, IChatService } from '../common/chatService/chatService.js';
++import { IChatService } from '../common/chatService/chatService.js';
+ import { ChatAgentLocation, ChatConfiguration, ChatModeKind } from '../common/constants.js';
+-import { IChatRequestVariableEntry } from '../common/attachments/chatVariableEntries.js';
+ import { ACTION_ID_NEW_CHAT } from './actions/chatActions.js';
+ import { ChatSubmitAction, OpenModePickerAction, OpenModelPickerAction } from './actions/chatExecuteActions.js';
+ import { ManagePluginsAction } from './actions/chatPluginActions.js';
+@@ -34,12 +32,8 @@ import {
+ 	globalAutoApproveDescription,
+ } from './tools/languageModelToolsService.js';
+ import { agentSlashCommandToMarkdown, agentToMarkdown } from './widget/chatContentParts/chatMarkdownDecorationsRenderer.js';
+-import { ILanguageModelToolsService } from '../common/tools/languageModelToolsService.js';
+-import { IContextKeyService } from '../../../../platform/contextkey/common/contextkey.js';
+-import { ChatContextKeys } from '../common/actions/chatContextKeys.js';
+ import { Target } from '../common/promptSyntax/promptTypes.js';
+ import { IWorkbenchEnvironmentService } from '../../../services/environment/common/environmentService.js';
+-import { IChatWidgetService } from './chat.js';
+ 
+ export class ChatSlashCommandsContribution extends Disposable {
+ 
+@@ -52,25 +46,14 @@ export class ChatSlashCommandsContribution extends Disposable {
+ 		@IInstantiationService instantiationService: IInstantiationService,
+ 		@IAgentSessionsService agentSessionsService: IAgentSessionsService,
+ 		@IChatService chatService: IChatService,
+-		@IChatDebugService chatDebugService: IChatDebugService,
+ 		@IConfigurationService configurationService: IConfigurationService,
+ 		@IDialogService dialogService: IDialogService,
+ 		@INotificationService notificationService: INotificationService,
+ 		@IStorageService storageService: IStorageService,
+ 		@IWorkbenchEnvironmentService private readonly environmentService: IWorkbenchEnvironmentService,
+-		@IContextKeyService private readonly contextKeyService: IContextKeyService,
+-		@ILanguageModelToolsService languageModelToolsService: ILanguageModelToolsService,
+-		@IChatWidgetService chatWidgetService: IChatWidgetService,
+ 	) {
+ 		super();
+ 
+-		const troubleshootSessions = new Set<string>();
+-		const hasTroubleshootDataKey = ChatContextKeys.chatSessionHasTroubleshootData.bindTo(this.contextKeyService);
+-		this._store.add(chatWidgetService.onDidChangeFocusedSession(() => {
+-			const sessionResource = chatWidgetService.lastFocusedWidget?.viewModel?.sessionResource;
+-			hasTroubleshootDataKey.set(!!sessionResource && troubleshootSessions.has(sessionResource.toString()));
+-			languageModelToolsService.flushToolUpdates();
+-		}));
+ 		this._store.add(slashCommandService.registerSlashCommand({
+ 			command: 'clear',
+ 			detail: nls.localize('clear', "Start a new chat and archive the current one"),
+@@ -137,54 +120,6 @@ export class ChatSlashCommandsContribution extends Disposable {
+ 				await commandService.executeCommand('github.copilot.debug.showChatLogView');
+ 			}));
+ 		}
+-		this._store.add(slashCommandService.registerSlashCommand({
+-			command: 'troubleshoot',
+-			detail: nls.localize('troubleshoot', "Troubleshoot with a snapshot of debug events from the conversation so far (run again to refresh)"),
+-			sortText: 'z3_troubleshoot',
+-			executeImmediately: false,
+-			silent: true,
+-			locations: [ChatAgentLocation.Chat],
+-		}, async (prompt, _progress, _history, _location, sessionResource, _token, options) => {
+-			troubleshootSessions.add(sessionResource.toString());
+-			hasTroubleshootDataKey.set(true);
+-			languageModelToolsService.flushToolUpdates();
+-			await chatDebugService.invokeProviders(sessionResource);
+-			const events = chatDebugService.getEvents(sessionResource);
+-			const summary = events.length > 0
+-				? formatDebugEventsForContext(events)
+-				: nls.localize('troubleshoot.noEvents', "No debug events found for this conversation.");
+-
+-			const attachedContext: IChatRequestVariableEntry[] = [{
+-				id: 'chatDebugEvents',
+-				name: nls.localize('troubleshoot.contextName', "Debug Events Snapshot"),
+-				kind: 'debugEvents',
+-				snapshotTime: Date.now(),
+-				sessionResource,
+-				value: summary,
+-				modelDescription: 'These are the debug event logs from the current chat conversation. Analyze them to help answer the user\'s troubleshooting question.\n'
+-					+ '\n'
+-					+ 'CRITICAL INSTRUCTION: You MUST call the resolveDebugEventDetails tool on relevant events BEFORE answering. The log lines below are only summaries — they do NOT contain the actual data (file paths, prompt content, tool I/O, etc.). The real information is only available by resolving events. Never answer based solely on the summary lines. Always resolve first, then answer.\n'
+-					+ '\n'
+-					+ 'Call resolveDebugEventDetails in parallel on all events that could be relevant to the user\'s question. When in doubt, resolve more events rather than fewer.\n'
+-					+ '\n'
+-					+ 'IMPORTANT: Do NOT mention event IDs, tool resolution steps, or internal debug mechanics in your response. The user does not know about debug events or event IDs. Present your findings directly and naturally, as if you simply know the answer. Never say things like "I need to resolve events" or show event IDs.\n'
+-					+ '\n'
+-					+ 'Event types and what resolving them returns:\n'
+-					+ '- generic (category: "discovery"): File discovery for instructions, skills, agents, hooks. Resolving returns a fileList with full file paths, load status, skip reasons, and source folders. Always resolve these for questions about customization files.\n'
+-					+ '- userMessage: The full prompt sent to the model. Resolving returns the complete message and all prompt sections (system prompt, instructions, context). Essential for understanding what the model received.\n'
+-					+ '- agentResponse: The model\'s response. Resolving returns the full response text and sections.\n'
+-					+ '- modelTurn: An LLM round-trip. Resolving returns model name, token usage, timing, errors, and prompt sections.\n'
+-					+ '- toolCall: A tool invocation. Resolving returns tool name, input, output, status, and duration.\n'
+-					+ '- subagentInvocation: A sub-agent spawn. Resolving returns agent name, status, duration, and counts.\n'
+-					+ '- generic (other): Miscellaneous logs. Resolving returns additional text details.',
+-			}];
+-
+-			chatService.sendRequest(sessionResource, prompt, {
+-				...options,
+-				queue: ChatRequestQueueKind.Queued,
+-				attachedContext,
+-			});
+-		}));
+ 		this._store.add(slashCommandService.registerSlashCommand({
+ 			command: 'agents',
+ 			detail: nls.localize('agents', "Configure custom agents"),
+@@ -413,38 +348,3 @@ export class ChatSlashCommandsContribution extends Disposable {
+ 		}));
+ 	}
+ }
+-
+-function formatDebugEventsForContext(events: readonly IChatDebugEvent[]): string {
+-	const lines: string[] = [];
+-	for (const event of events) {
+-		const ts = event.created.toISOString();
+-		const id = event.id ? ` [id=${event.id}]` : '';
+-		switch (event.kind) {
+-			case 'generic':
+-				lines.push(`[${ts}]${id} ${event.level >= 3 ? 'ERROR' : event.level >= 2 ? 'WARN' : 'INFO'}: ${event.name}${event.details ? ' - ' + event.details : ''}${event.category ? ' (category: ' + event.category + ')' : ''}`);
+-				break;
+-			case 'toolCall':
+-				lines.push(`[${ts}]${id} TOOL_CALL: ${event.toolName}${event.result ? ' result=' + event.result : ''}${event.durationInMillis !== undefined ? ' duration=' + event.durationInMillis + 'ms' : ''}`);
+-				break;
+-			case 'modelTurn':
+-				lines.push(`[${ts}]${id} MODEL_TURN: ${event.requestName ?? 'unknown'}${event.model ? ' model=' + event.model : ''}${event.inputTokens !== undefined ? ' tokens(in=' + event.inputTokens + ',out=' + (event.outputTokens ?? '?') + ')' : ''}${event.durationInMillis !== undefined ? ' duration=' + event.durationInMillis + 'ms' : ''}`);
+-				break;
+-			case 'subagentInvocation':
+-				lines.push(`[${ts}]${id} SUBAGENT: ${event.agentName}${event.status ? ' status=' + event.status : ''}${event.durationInMillis !== undefined ? ' duration=' + event.durationInMillis + 'ms' : ''}`);
+-				break;
+-			case 'userMessage':
+-				lines.push(`[${ts}]${id} USER_MESSAGE: ${event.message.substring(0, 200)}${event.message.length > 200 ? '...' : ''} (${event.sections.length} sections)`);
+-				break;
+-			case 'agentResponse':
+-				lines.push(`[${ts}]${id} AGENT_RESPONSE: ${event.message.substring(0, 200)}${event.message.length > 200 ? '...' : ''} (${event.sections.length} sections)`);
+-				break;
+-			default: {
+-				const _: never = event;
+-				void _;
+-				break;
+-			}
+-		}
+-	}
+-	return lines.join('\n');
+-}
+-
+diff --git a/src/vs/workbench/contrib/chat/browser/widget/input/editor/chatInputCompletions.ts b/src/vs/workbench/contrib/chat/browser/widget/input/editor/chatInputCompletions.ts
+index ba97afb5e43c7..f72ccab3f56f1 100644
+--- a/src/vs/workbench/contrib/chat/browser/widget/input/editor/chatInputCompletions.ts
++++ b/src/vs/workbench/contrib/chat/browser/widget/input/editor/chatInputCompletions.ts
+@@ -64,6 +64,8 @@ import { IChatWidget, IChatWidgetService } from '../../../chat.js';
+ import { resizeImage } from '../../../chatImageUtils.js';
+ import { ChatDynamicVariableModel } from '../../../attachments/chatDynamicVariables.js';
+ import { IChatService } from '../../../../common/chatService/chatService.js';
++import { IChatDebugService } from '../../../../common/chatDebugService.js';
++import { createDebugEventsAttachment } from '../../../chatDebug/chatDebugAttachment.js';
+ import { getPromptFileType } from '../../../../common/promptSyntax/config/promptFileLocations.js';
+ 
+ /**
+@@ -848,6 +850,7 @@ interface IVariableCompletionsDetails {
+ 
+ class BuiltinDynamicCompletions extends Disposable {
+ 	private static readonly addReferenceCommand = '_addReferenceCmd';
++	private static readonly addDebugEventsSnapshotCommand = '_addDebugEventsSnapshotCmd';
+ 	private static readonly VariableNameDef = new RegExp(`${chatVariableLeader}[\\w:-]*`, 'g'); // MUST be using `g`-flag
+ 
+ 
+@@ -864,6 +867,7 @@ class BuiltinDynamicCompletions extends Disposable {
+ 		@ICodeEditorService private readonly codeEditorService: ICodeEditorService,
+ 		@IChatAgentService private readonly chatAgentService: IChatAgentService,
+ 		@IInstantiationService private readonly instantiationService: IInstantiationService,
++		@IChatDebugService private readonly chatDebugService: IChatDebugService,
+ 	) {
+ 		super();
+ 
+@@ -949,10 +953,46 @@ class BuiltinDynamicCompletions extends Disposable {
+ 			return result;
+ 		});
+ 
++		// Debug Events Snapshot completion
++		this.registerVariableCompletions('debugEventsSnapshot', ({ widget, range }) => {
++			if (widget.location !== ChatAgentLocation.Chat) {
++				return;
++			}
++
++			const sessionResource = widget.viewModel?.sessionResource;
++			if (!sessionResource || this.chatDebugService.getEvents(sessionResource).length === 0) {
++				return;
++			}
++
++			const text = `${chatVariableLeader}debugEventsSnapshot`;
++			const result: CompletionList = { suggestions: [] };
++			result.suggestions.push({
++				label: { label: text, description: localize('debugEventsSnapshot.description', 'Attach debug events snapshot') },
++				filterText: text,
++				insertText: '',
++				range,
++				kind: CompletionItemKind.Text,
++				sortText: 'z',
++				command: {
++					id: BuiltinDynamicCompletions.addDebugEventsSnapshotCommand, title: '', arguments: [widget]
++				}
++			});
++			return result;
++		});
++
+ 		this._register(CommandsRegistry.registerCommand(BuiltinDynamicCompletions.addReferenceCommand, (_services, arg) => {
+ 			assertType(arg instanceof ReferenceArgument);
+ 			return this.cmdAddReference(arg);
+ 		}));
++
++		this._register(CommandsRegistry.registerCommand(BuiltinDynamicCompletions.addDebugEventsSnapshotCommand, async (_services, widget: IChatWidget) => {
++			const sessionResource = widget.viewModel?.sessionResource;
++			if (!sessionResource) {
++				return;
++			}
++			const attachment = await createDebugEventsAttachment(sessionResource, this.chatDebugService);
++			widget.attachmentModel.addContext(attachment);
++		}));
+ 	}
+ 
+ 	private findActiveCodeEditor(): ICodeEditor | undefined {
+diff --git a/src/vs/workbench/contrib/chat/common/actions/chatContextKeys.ts b/src/vs/workbench/contrib/chat/common/actions/chatContextKeys.ts
+index cce18bceca5c9..33f7a4a9f7a9b 100644
+--- a/src/vs/workbench/contrib/chat/common/actions/chatContextKeys.ts
++++ b/src/vs/workbench/contrib/chat/common/actions/chatContextKeys.ts
+@@ -90,7 +90,7 @@ export namespace ChatContextKeys {
+ 	export const chatSessionIsEmpty = new RawContextKey<boolean>('chatSessionIsEmpty', true, { type: 'boolean', description: localize('chatSessionIsEmpty', "True when the current chat session has no requests.") });
+ 	export const hasPendingRequests = new RawContextKey<boolean>('chatHasPendingRequests', false, { type: 'boolean', description: localize('chatHasPendingRequests', "True when there are pending requests in the queue.") });
+ 	export const chatSessionHasDebugData = new RawContextKey<boolean>('chatSessionHasDebugData', false, { type: 'boolean', description: localize('chatSessionHasDebugData', "True when the current chat session has debug log data.") });
+-	export const chatSessionHasTroubleshootData = new RawContextKey<boolean>('chatSessionHasTroubleshootData', false, { type: 'boolean', description: localize('chatSessionHasTroubleshootData', "True when the /troubleshoot slash command has been run in the current chat session.") });
++	export const chatSessionHasAttachedDebugData = new RawContextKey<boolean>('chatSessionHasAttachedDebugData', false, { type: 'boolean', description: localize('chatSessionHasAttachedDebugData', "True when a debug events snapshot has been attached in the current chat session.") });
+ 
+ 	export const remoteJobCreating = new RawContextKey<boolean>('chatRemoteJobCreating', false, { type: 'boolean', description: localize('chatRemoteJobCreating', "True when a remote coding agent job is being created.") });
+ 	export const hasRemoteCodingAgent = new RawContextKey<boolean>('hasRemoteCodingAgent', false, localize('hasRemoteCodingAgent', "Whether any remote coding agent is available"));
+diff --git a/src/vs/workbench/contrib/chat/common/chatDebugService.ts b/src/vs/workbench/contrib/chat/common/chatDebugService.ts
+index a50c09b18a111..a059f0aa836ae 100644
+--- a/src/vs/workbench/contrib/chat/common/chatDebugService.ts
++++ b/src/vs/workbench/contrib/chat/common/chatDebugService.ts
+@@ -125,6 +125,11 @@ export interface IChatDebugService extends IDisposable {
+ 	 */
+ 	readonly onDidAddEvent: Event<IChatDebugEvent>;
+ 
++	/**
++	 * Fired when provider events are cleared for a session (before re-invoking providers).
++	 */
++	readonly onDidClearProviderEvents: Event<URI>;
++
+ 	/**
+ 	 * Log a generic event to the debug service.
+ 	 */
+@@ -167,6 +172,11 @@ export interface IChatDebugService extends IDisposable {
+ 	 */
+ 	registerProvider(provider: IChatDebugLogProvider): IDisposable;
+ 
++	/**
++	 * Check whether providers have already been invoked for a given session.
++	 */
++	hasInvokedProviders(sessionResource: URI): boolean;
++
+ 	/**
+ 	 * Invoke all registered providers for a given session resource.
+ 	 * Called when the Debug View is opened to fetch events from extensions.
+@@ -185,6 +195,21 @@ export interface IChatDebugService extends IDisposable {
+ 	 * Delegates to the registered provider's resolveChatDebugLogEvent.
+ 	 */
+ 	resolveEvent(eventId: string): Promise<IChatDebugResolvedEventContent | undefined>;
++
++	/**
++	 * Fired when debug data is attached to a session.
++	 */
++	readonly onDidAttachDebugData: Event<URI>;
++
++	/**
++	 * Mark a session as having debug data attached.
++	 */
++	markDebugDataAttached(sessionResource: URI): void;
++
++	/**
++	 * Check whether a session has had debug data attached.
++	 */
++	hasAttachedDebugData(sessionResource: URI): boolean;
+ }
+ 
+ /**
+diff --git a/src/vs/workbench/contrib/chat/common/chatDebugServiceImpl.ts b/src/vs/workbench/contrib/chat/common/chatDebugServiceImpl.ts
+index cce684e6d5b81..9cdd711a311ab 100644
+--- a/src/vs/workbench/contrib/chat/common/chatDebugServiceImpl.ts
++++ b/src/vs/workbench/contrib/chat/common/chatDebugServiceImpl.ts
+@@ -25,6 +25,14 @@ export class ChatDebugServiceImpl extends Disposable implements IChatDebugServic
+ 	private readonly _onDidAddEvent = this._register(new Emitter<IChatDebugEvent>());
+ 	readonly onDidAddEvent: Event<IChatDebugEvent> = this._onDidAddEvent.event;
+ 
++	private readonly _onDidClearProviderEvents = this._register(new Emitter<URI>());
++	readonly onDidClearProviderEvents: Event<URI> = this._onDidClearProviderEvents.event;
++
++	private readonly _onDidAttachDebugData = this._register(new Emitter<URI>());
++	readonly onDidAttachDebugData: Event<URI> = this._onDidAttachDebugData.event;
++
++	private readonly _debugDataAttachedSessions = new ResourceMap<boolean>();
++
+ 	private readonly _providers = new Set<IChatDebugLogProvider>();
+ 	private readonly _invocationCts = new ResourceMap<CancellationTokenSource>();
+ 
+@@ -102,6 +110,7 @@ export class ChatDebugServiceImpl extends Disposable implements IChatDebugServic
+ 		this._buffer.fill(undefined);
+ 		this._head = 0;
+ 		this._size = 0;
++		this._debugDataAttachedSessions.clear();
+ 	}
+ 
+ 	registerProvider(provider: IChatDebugLogProvider): IDisposable {
+@@ -121,6 +130,10 @@ export class ChatDebugServiceImpl extends Disposable implements IChatDebugServic
+ 		});
+ 	}
+ 
++	hasInvokedProviders(sessionResource: URI): boolean {
++		return this._invocationCts.has(sessionResource);
++	}
++
+ 	async invokeProviders(sessionResource: URI): Promise<void> {
+ 		if (!LocalChatSessionUri.isLocalSession(sessionResource)) {
+ 			return;
+@@ -180,6 +193,7 @@ export class ChatDebugServiceImpl extends Disposable implements IChatDebugServic
+ 			cts.dispose();
+ 			this._invocationCts.delete(sessionResource);
+ 		}
++		this._debugDataAttachedSessions.delete(sessionResource);
+ 	}
+ 
+ 	private _clearProviderEvents(sessionResource: URI): void {
+@@ -203,6 +217,18 @@ export class ChatDebugServiceImpl extends Disposable implements IChatDebugServic
+ 			this._buffer[(this._head + i) % ChatDebugServiceImpl.MAX_EVENTS] = undefined;
+ 		}
+ 		this._size = write;
++		this._onDidClearProviderEvents.fire(sessionResource);
++	}
++
++	markDebugDataAttached(sessionResource: URI): void {
++		if (!this._debugDataAttachedSessions.has(sessionResource)) {
++			this._debugDataAttachedSessions.set(sessionResource, true);
++			this._onDidAttachDebugData.fire(sessionResource);
++		}
++	}
++
++	hasAttachedDebugData(sessionResource: URI): boolean {
++		return this._debugDataAttachedSessions.has(sessionResource);
+ 	}
+ 
+ 	async resolveEvent(eventId: string): Promise<IChatDebugResolvedEventContent | undefined> {
+diff --git a/src/vs/workbench/contrib/chat/common/tools/builtinTools/resolveDebugEventDetailsTool.ts b/src/vs/workbench/contrib/chat/common/tools/builtinTools/resolveDebugEventDetailsTool.ts
+index b3ff4593a43e7..dbf7e4e7105bd 100644
+--- a/src/vs/workbench/contrib/chat/common/tools/builtinTools/resolveDebugEventDetailsTool.ts
++++ b/src/vs/workbench/contrib/chat/common/tools/builtinTools/resolveDebugEventDetailsTool.ts
+@@ -15,7 +15,7 @@ export const ResolveDebugEventDetailsToolData: IToolData = {
+ 	id: ResolveDebugEventDetailsToolId,
+ 	toolReferenceName: 'resolveDebugEventDetails',
+ 	displayName: localize('resolveDebugEventDetails.displayName', "Resolve Debug Event Details"),
+-	when: ChatContextKeys.chatSessionHasTroubleshootData,
++	when: ChatContextKeys.chatSessionHasAttachedDebugData,
+ 	canBeReferencedInPrompt: false,
+ 	modelDescription: 'Resolves the full details for a specific chat debug event by its event ID. Use this tool to get detailed information about a debug event such as tool call input/output, model turn details, user message sections, or file lists. The event ID can be found in the debug event log summary provided in the conversation context.',
+ 	source: ToolDataSource.Internal,
+diff --git a/src/vs/workbench/contrib/chat/test/common/chatDebugServiceImpl.test.ts b/src/vs/workbench/contrib/chat/test/common/chatDebugServiceImpl.test.ts
+index 5a247eaea99d8..9b9b0aac42a22 100644
+--- a/src/vs/workbench/contrib/chat/test/common/chatDebugServiceImpl.test.ts
++++ b/src/vs/workbench/contrib/chat/test/common/chatDebugServiceImpl.test.ts
+@@ -214,6 +214,44 @@ suite('ChatDebugServiceImpl', () => {
+ 		});
+ 	});
+ 
++	suite('markDebugDataAttached', () => {
++		test('should track attached debug data per session', () => {
++			assert.strictEqual(service.hasAttachedDebugData(sessionGeneric), false);
++
++			const fired: URI[] = [];
++			disposables.add(service.onDidAttachDebugData(uri => fired.push(uri)));
++
++			service.markDebugDataAttached(sessionGeneric);
++			assert.strictEqual(service.hasAttachedDebugData(sessionGeneric), true);
++			assert.strictEqual(fired.length, 1);
++			assert.strictEqual(fired[0].toString(), sessionGeneric.toString());
++
++			// Idempotent — second call should not fire again
++			service.markDebugDataAttached(sessionGeneric);
++			assert.strictEqual(fired.length, 1);
++
++			// Other sessions remain unaffected
++			assert.strictEqual(service.hasAttachedDebugData(sessionA), false);
++		});
++
++		test('should clear attached debug data on endSession', () => {
++			service.markDebugDataAttached(sessionGeneric);
++			assert.strictEqual(service.hasAttachedDebugData(sessionGeneric), true);
++
++			service.endSession(sessionGeneric);
++			assert.strictEqual(service.hasAttachedDebugData(sessionGeneric), false);
++		});
++
++		test('should clear attached debug data on clear', () => {
++			service.markDebugDataAttached(sessionA);
++			service.markDebugDataAttached(sessionB);
++
++			service.clear();
++			assert.strictEqual(service.hasAttachedDebugData(sessionA), false);
++			assert.strictEqual(service.hasAttachedDebugData(sessionB), false);
++		});
++	});
++
+ 	suite('registerProvider', () => {
+ 		test('should register and unregister a provider', async () => {
+ 			const extSession = URI.parse('vscode-chat-session://local/ext-session');
+@@ -312,6 +350,32 @@ suite('ChatDebugServiceImpl', () => {
+ 			assert.strictEqual(firstToken.isCancellationRequested, true);
+ 		});
+ 
++		test('should fire onDidClearProviderEvents when clearing provider events', async () => {
++			const clearedSessions: URI[] = [];
++			disposables.add(service.onDidClearProviderEvents(sessionResource => clearedSessions.push(sessionResource)));
++
++			const provider: IChatDebugLogProvider = {
++				provideChatDebugLog: async (sessionResource) => [{
++					kind: 'generic',
++					sessionResource,
++					created: new Date(),
++					name: 'provider-event',
++					level: ChatDebugLogLevel.Info,
++				}],
++			};
++
++			disposables.add(service.registerProvider(provider));
++
++			// First invocation clears empty set and fires clear event
++			await service.invokeProviders(sessionGeneric);
++			assert.strictEqual(clearedSessions.length, 1, 'Clear event should fire on first invocation');
++
++			// Second invocation clears provider events from first invocation
++			await service.invokeProviders(sessionGeneric);
++			assert.strictEqual(clearedSessions.length, 2, 'Clear event should fire on second invocation');
++			assert.strictEqual(clearedSessions[1].toString(), sessionGeneric.toString());
++		});
++
+ 		test('should not cancel invocations for different sessions', async () => {
+ 			const tokens: Map<string, CancellationToken> = new Map();
+ 

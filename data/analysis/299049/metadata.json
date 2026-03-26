@@ -1,0 +1,13 @@
+{
+  "pr": 300604,
+  "prTitle": "Fix clipped items in AI Customization tree",
+  "mergeCommit": "8a575049c5ff0d1dddf94d4b00bd728de96a43e6",
+  "parentCommit": "",
+  "fileCount": 1,
+  "issue": 299049,
+  "issueTitle": "Bad tree layout in AI customizations",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 22947243640,
+  "closedAt": "2026-03-11T03:37:59Z"
+}

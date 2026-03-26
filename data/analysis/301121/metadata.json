@@ -1,0 +1,13 @@
+{
+  "pr": 301520,
+  "prTitle": "Fix focus issue and turn on update title bar entry for Insiders",
+  "mergeCommit": "5789fa41220cc8a47c4b45dd6d2b7d272573032a",
+  "parentCommit": "",
+  "fileCount": 2,
+  "issue": 301121,
+  "issueTitle": "New 'Update' UI pulls focus",
+  "repo": "microsoft/vscode",
+  "tags": [],
+  "workflowRunId": 23054702267,
+  "closedAt": "2026-03-13T16:11:23Z"
+}

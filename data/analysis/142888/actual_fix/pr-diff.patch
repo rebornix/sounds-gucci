@@ -1,0 +1,24 @@
+diff --git a/src/vs/editor/contrib/parameterHints/browser/parameterHints.css b/src/vs/editor/contrib/parameterHints/browser/parameterHints.css
+index d613456e1626f..31dcb1d38a9d5 100644
+--- a/src/vs/editor/contrib/parameterHints/browser/parameterHints.css
++++ b/src/vs/editor/contrib/parameterHints/browser/parameterHints.css
+@@ -78,6 +78,9 @@
+ .monaco-editor .parameter-hints-widget .docs {
+ 	padding: 0 10px 0 5px;
+ 	white-space: pre-wrap;
++	overflow-wrap: break-word;
++	word-break: break-word;
++	min-width: 0;
+ }
+ 
+ .monaco-editor .parameter-hints-widget .docs.empty {
+@@ -95,6 +98,9 @@
+ 
+ .monaco-editor .parameter-hints-widget .docs .markdown-docs {
+ 	white-space: initial;
++	overflow-wrap: break-word;
++	word-break: break-word;
++	max-width: 100%;
+ }
+ 
+ .monaco-editor .parameter-hints-widget .docs code {

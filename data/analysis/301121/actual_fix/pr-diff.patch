@@ -1,0 +1,52 @@
+diff --git a/src/vs/platform/update/common/update.config.contribution.ts b/src/vs/platform/update/common/update.config.contribution.ts
+index 76cbb644163a3..53e3a783872ff 100644
+--- a/src/vs/platform/update/common/update.config.contribution.ts
++++ b/src/vs/platform/update/common/update.config.contribution.ts
+@@ -7,6 +7,7 @@ import { isWeb, isWindows } from '../../../base/common/platform.js';
+ import { PolicyCategory } from '../../../base/common/policy.js';
+ import { localize } from '../../../nls.js';
+ import { ConfigurationScope, Extensions as ConfigurationExtensions, IConfigurationRegistry } from '../../configuration/common/configurationRegistry.js';
++import product from '../../product/common/product.js';
+ import { Registry } from '../../registry/common/platform.js';
+ 
+ const configurationRegistry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Configuration);
+@@ -93,7 +94,7 @@ configurationRegistry.registerConfiguration({
+ 		'update.titleBar': {
+ 			type: 'string',
+ 			enum: ['none', 'actionable', 'detailed', 'always'],
+-			default: 'none',
++			default: product.quality !== 'stable' ? 'actionable' : 'none',
+ 			scope: ConfigurationScope.APPLICATION,
+ 			tags: ['experimental'],
+ 			experiment: { mode: 'startup' },
+diff --git a/src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts b/src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts
+index be3d7bf73665d..7c8912a27cbbb 100644
+--- a/src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts
++++ b/src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts
+@@ -270,7 +270,7 @@ export class UpdateTitleBarEntry extends BaseActionViewItem {
+ 		}
+ 	}
+ 
+-	public showTooltip() {
++	public showTooltip(focus = false) {
+ 		if (!this.content?.isConnected) {
+ 			this.showTooltipOnRender = true;
+ 			return;
+@@ -288,7 +288,7 @@ export class UpdateTitleBarEntry extends BaseActionViewItem {
+ 			},
+ 			persistence: { sticky: true },
+ 			appearance: { showPointer: true, compact: true },
+-		}, true);
++		}, focus);
+ 	}
+ 
+ 	protected override getHoverContents(): IManagedHoverContent {
+@@ -307,7 +307,7 @@ export class UpdateTitleBarEntry extends BaseActionViewItem {
+ 				this.commandService.executeCommand('update.restart');
+ 				break;
+ 			default:
+-				this.showTooltip();
++				this.showTooltip(true);
+ 				break;
+ 		}
+ 	}

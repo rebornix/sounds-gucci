@@ -1,0 +1,995 @@
+diff --git a/src/vs/platform/update/common/update.config.contribution.ts b/src/vs/platform/update/common/update.config.contribution.ts
+index 76483ca546e46..76cbb644163a3 100644
+--- a/src/vs/platform/update/common/update.config.contribution.ts
++++ b/src/vs/platform/update/common/update.config.contribution.ts
+@@ -92,7 +92,7 @@ configurationRegistry.registerConfiguration({
+ 		},
+ 		'update.titleBar': {
+ 			type: 'string',
+-			enum: ['none', 'actionable', 'detailed'],
++			enum: ['none', 'actionable', 'detailed', 'always'],
+ 			default: 'none',
+ 			scope: ConfigurationScope.APPLICATION,
+ 			tags: ['experimental'],
+@@ -101,7 +101,8 @@ configurationRegistry.registerConfiguration({
+ 			enumDescriptions: [
+ 				localize('titleBarNone', "The title bar entry is never shown."),
+ 				localize('titleBarActionable', "The title bar entry is shown when an action is required (e.g., download, install, or restart)."),
+-				localize('titleBarDetailed', "The title bar entry is shown for all update states including progress.")
++				localize('titleBarDetailed', "The title bar entry is shown for progress and actionable update states, but not for idle or disabled states."),
++				localize('titleBarAlways', "The title bar entry is shown for all update states.")
+ 			]
+ 		}
+ 	}
+diff --git a/src/vs/workbench/contrib/update/browser/media/updateTitleBarEntry.css b/src/vs/workbench/contrib/update/browser/media/updateTitleBarEntry.css
+index eb3ac37b111bb..266a0a4484895 100644
+--- a/src/vs/workbench/contrib/update/browser/media/updateTitleBarEntry.css
++++ b/src/vs/workbench/contrib/update/browser/media/updateTitleBarEntry.css
+@@ -9,7 +9,7 @@
+ 	border-radius: var(--vscode-cornerRadius-medium);
+ 	white-space: nowrap;
+ 	padding: 0px 12px;
+-	height: 24px;
++	height: 22px;
+ 	background-color: transparent;
+ 	border: 1px solid transparent;
+ }
+@@ -46,8 +46,8 @@
+ 	content: '';
+ 	position: absolute;
+ 	left: 0;
+-	bottom: 0;
+-	height: 2px;
++	bottom: 1px;
++	height: 1px;
+ 	border-radius: 1px;
+ }
+ 
+diff --git a/src/vs/workbench/contrib/update/browser/media/updateTooltip.css b/src/vs/workbench/contrib/update/browser/media/updateTooltip.css
+index ab714ea2e0ff3..96e62c029c339 100644
+--- a/src/vs/workbench/contrib/update/browser/media/updateTooltip.css
++++ b/src/vs/workbench/contrib/update/browser/media/updateTooltip.css
+@@ -8,8 +8,8 @@
+ 	flex-direction: column;
+ 	gap: 12px;
+ 	padding: 6px 6px;
+-	min-width: 310px;
+-	max-width: 410px;
++	min-width: 320px;
++	max-width: 320px;
+ 	color: var(--vscode-descriptionForeground);
+ 	font-size: var(--vscode-bodyFontSize-small);
+ }
+@@ -54,6 +54,30 @@
+ 	margin-bottom: 4px;
+ }
+ 
++.update-tooltip .product-version {
++	display: flex;
++	align-items: center;
++	gap: 4px;
++}
++
++.update-tooltip .copy-version-button {
++	cursor: pointer;
++	opacity: 0;
++	color: var(--vscode-descriptionForeground);
++	transition: opacity 0.1s;
++	margin-top: -2px;
++}
++
++.update-tooltip .product-version:hover .copy-version-button,
++.update-tooltip .product-version:focus-within .copy-version-button {
++	opacity: 1;
++}
++
++.update-tooltip .copy-version-button:hover,
++.update-tooltip .copy-version-button:focus-visible {
++	color: var(--vscode-foreground);
++}
++
+ .update-tooltip .release-notes-link {
+ 	color: var(--vscode-textLink-foreground);
+ 	text-decoration: none;
+@@ -113,3 +137,23 @@
+ .update-tooltip .state-message-icon.codicon.codicon-error {
+ 	color: var(--vscode-editorError-foreground);
+ }
++
++/* Markdown */
++.update-tooltip .update-markdown {
++	background: var(--vscode-editor-background);
++	border-radius: var(--vscode-cornerRadius-large);
++	padding: 12px;
++}
++
++.update-tooltip .update-markdown p {
++	margin-bottom: 16px;
++}
++
++.update-tooltip .update-markdown p:last-child {
++	margin-bottom: 0;
++}
++
++.update-tooltip .update-markdown .codicon[class*='codicon-'] {
++	font-size: 16px;
++	vertical-align: text-top;
++}
+diff --git a/src/vs/workbench/contrib/update/browser/update.ts b/src/vs/workbench/contrib/update/browser/update.ts
+index aca3bb3ce278b..36f7d09d2dde1 100644
+--- a/src/vs/workbench/contrib/update/browser/update.ts
++++ b/src/vs/workbench/contrib/update/browser/update.ts
+@@ -233,6 +233,7 @@ export class UpdateContribution extends Disposable implements IWorkbenchContribu
+ 		this.state = updateService.state;
+ 		this.updateStateContextKey = CONTEXT_UPDATE_STATE.bindTo(this.contextKeyService);
+ 		this.majorMinorUpdateAvailableContextKey = MAJOR_MINOR_UPDATE_AVAILABLE.bindTo(this.contextKeyService);
++		this.titleBarEnabled = this.configurationService.getValue<string>('update.titleBar') !== 'none';
+ 
+ 		this._register(updateService.onStateChange(this.onUpdateStateChange, this));
+ 		this.onUpdateStateChange(this.updateService.state);
+@@ -254,7 +255,6 @@ export class UpdateContribution extends Disposable implements IWorkbenchContribu
+ 			this.storageService.remove('update/updateNotificationTime', StorageScope.APPLICATION);
+ 		}
+ 
+-		this.titleBarEnabled = this.configurationService.getValue<string>('update.titleBar') !== 'none';
+ 		this._register(this.configurationService.onDidChangeConfiguration(e => {
+ 			if (e.affectsConfiguration('update.titleBar')) {
+ 				this.titleBarEnabled = this.configurationService.getValue<string>('update.titleBar') !== 'none';
+diff --git a/src/vs/workbench/contrib/update/browser/updateStatusBarEntry.ts b/src/vs/workbench/contrib/update/browser/updateStatusBarEntry.ts
+index 4ed3e130eea28..6a9ea130312e4 100644
+--- a/src/vs/workbench/contrib/update/browser/updateStatusBarEntry.ts
++++ b/src/vs/workbench/contrib/update/browser/updateStatusBarEntry.ts
+@@ -37,7 +37,7 @@ export class UpdateStatusBarContribution extends Disposable implements IWorkbenc
+ 			return; // Electron only
+ 		}
+ 
+-		this.tooltip = this._register(instantiationService.createInstance(UpdateTooltip));
++		this.tooltip = this._register(instantiationService.createInstance(UpdateTooltip, false));
+ 
+ 		this._register(updateService.onStateChange(this.onStateChange.bind(this)));
+ 		this._register(this.configurationService.onDidChangeConfiguration(e => {
+@@ -67,6 +67,7 @@ export class UpdateStatusBarContribution extends Disposable implements IWorkbenc
+ 			this.lastStateType = state.type;
+ 		}
+ 
++		this.tooltip.renderState(state);
+ 		switch (state.type) {
+ 			case StateType.CheckingForUpdates:
+ 				this.updateEntry(
+diff --git a/src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts b/src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts
+index 93be7e3617078..be3d7bf73665d 100644
+--- a/src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts
++++ b/src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts
+@@ -14,21 +14,32 @@ import { IActionViewItemService } from '../../../../platform/actions/browser/act
+ import { Action2, MenuId, registerAction2 } from '../../../../platform/actions/common/actions.js';
+ import { ICommandService } from '../../../../platform/commands/common/commands.js';
+ import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
+-import { IContextKeyService, RawContextKey } from '../../../../platform/contextkey/common/contextkey.js';
++import { IContextKey, IContextKeyService, RawContextKey } from '../../../../platform/contextkey/common/contextkey.js';
+ import { IHoverService } from '../../../../platform/hover/browser/hover.js';
+ import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
+ import { IProductService } from '../../../../platform/product/common/productService.js';
+ import { IStorageService, StorageScope, StorageTarget } from '../../../../platform/storage/common/storage.js';
++import { ITelemetryService } from '../../../../platform/telemetry/common/telemetry.js';
+ import { DisablementReason, IUpdateService, State, StateType } from '../../../../platform/update/common/update.js';
+ import { IWorkbenchContribution } from '../../../common/contributions.js';
+-import { computeProgressPercent, tryParseVersion } from '../common/updateUtils.js';
++import { IHostService } from '../../../services/host/browser/host.js';
++import { computeProgressPercent, isMajorMinorVersionChange } from '../common/updateUtils.js';
+ import './media/updateTitleBarEntry.css';
+ import { UpdateTooltip } from './updateTooltip.js';
+ 
+ const UPDATE_TITLE_BAR_ACTION_ID = 'workbench.actions.updateIndicator';
+ const UPDATE_TITLE_BAR_CONTEXT = new RawContextKey<boolean>('updateTitleBar', false);
+-const LAST_KNOWN_VERSION_KEY = 'updateTitleBar/lastKnownVersion';
++
+ const ACTIONABLE_STATES: readonly StateType[] = [StateType.AvailableForDownload, StateType.Downloaded, StateType.Ready];
++const DETAILED_STATES: readonly StateType[] = [...ACTIONABLE_STATES, StateType.CheckingForUpdates, StateType.Downloading, StateType.Updating, StateType.Overwriting];
++
++const LAST_KNOWN_VERSION_KEY = 'updateTitleBarEntry/lastKnownVersion';
++
++interface ILastKnownVersion {
++	readonly version: string;
++	readonly commit: string | undefined;
++	readonly timestamp: number;
++}
+ 
+ registerAction2(class UpdateIndicatorTitleBarAction extends Action2 {
+ 	constructor() {
+@@ -51,13 +62,22 @@ registerAction2(class UpdateIndicatorTitleBarAction extends Action2 {
+  * Displays update status and actions in the title bar.
+  */
+ export class UpdateTitleBarContribution extends Disposable implements IWorkbenchContribution {
++	private readonly context!: IContextKey<boolean>;
++	private readonly tooltip!: UpdateTooltip;
++	private mode: 'always' | 'detailed' | 'actionable' | 'none' = 'none';
++	private state!: State;
++	private entry: UpdateTitleBarEntry | undefined;
++	private tooltipVisible = false;
++
+ 	constructor(
+ 		@IActionViewItemService actionViewItemService: IActionViewItemService,
+-		@IConfigurationService configurationService: IConfigurationService,
++		@IConfigurationService private readonly configurationService: IConfigurationService,
+ 		@IContextKeyService contextKeyService: IContextKeyService,
++		@IHostService private readonly hostService: IHostService,
+ 		@IInstantiationService instantiationService: IInstantiationService,
+ 		@IProductService private readonly productService: IProductService,
+ 		@IStorageService private readonly storageService: IStorageService,
++		@ITelemetryService private readonly telemetryService: ITelemetryService,
+ 		@IUpdateService updateService: IUpdateService,
+ 	) {
+ 		super();
+@@ -66,80 +86,152 @@ export class UpdateTitleBarContribution extends Disposable implements IWorkbench
+ 			return; // Electron only
+ 		}
+ 
+-		const context = UPDATE_TITLE_BAR_CONTEXT.bindTo(contextKeyService);
++		this.context = UPDATE_TITLE_BAR_CONTEXT.bindTo(contextKeyService);
++		this.tooltip = this._register(instantiationService.createInstance(UpdateTooltip, true));
+ 
+-		const updateContext = () => {
+-			const mode = configurationService.getValue<string>('update.titleBar');
+-			const state = updateService.state.type;
+-			context.set(mode === 'detailed' || mode === 'actionable' && ACTIONABLE_STATES.includes(state));
+-		};
++		this.mode = configurationService.getValue<string>('update.titleBar') as typeof this.mode;
++		this._register(configurationService.onDidChangeConfiguration(e => {
++			if (e.affectsConfiguration('update.titleBar')) {
++				this.mode = configurationService.getValue<string>('update.titleBar') as typeof this.mode;
++				this.onStateChange();
++			}
++		}));
+ 
+-		let entry: UpdateTitleBarEntry | undefined;
+-		let showTooltipOnRender = false;
++		this.state = updateService.state;
++		this._register(updateService.onStateChange((state) => {
++			this.state = state;
++			this.onStateChange();
++		}));
+ 
+ 		this._register(actionViewItemService.register(
+ 			MenuId.CommandCenter,
+ 			UPDATE_TITLE_BAR_ACTION_ID,
+ 			(action, options) => {
+-				entry = instantiationService.createInstance(UpdateTitleBarEntry, action, options, updateContext, showTooltipOnRender);
+-				showTooltipOnRender = false;
+-				return entry;
+-			}
+-		));
+-
+-		const onStateChange = () => {
+-			if (this.shouldShowTooltip(updateService.state)) {
+-				if (context.get()) {
+-					entry?.showTooltip();
+-				} else {
+-					context.set(true);
+-					showTooltipOnRender = true;
++				this.entry = instantiationService.createInstance(UpdateTitleBarEntry, action, options, this.tooltip, () => {
++					this.tooltipVisible = false;
++					this.updateContext();
++				});
++				if (this.tooltipVisible) {
++					this.entry.showTooltip();
+ 				}
+-			} else {
+-				updateContext();
+-			}
+-		};
+-
+-		this._register(updateService.onStateChange(onStateChange));
+-		this._register(configurationService.onDidChangeConfiguration(e => {
+-			if (e.affectsConfiguration('update.titleBar')) {
+-				updateContext();
++				return this.entry;
+ 			}
+-		}));
++		));
+ 
+-		onStateChange();
++		void this.onStateChange(true);
+ 	}
+ 
+-	private shouldShowTooltip(state: State): boolean {
+-		switch (state.type) {
+-			case StateType.Disabled:
+-				return state.reason === DisablementReason.InvalidConfiguration || state.reason === DisablementReason.RunningAsAdmin;
+-			case StateType.Idle:
+-				return !!state.error || state.notAvailable || this.isMajorMinorVersionChange();
+-			case StateType.AvailableForDownload:
+-			case StateType.Downloaded:
+-			case StateType.Ready:
+-				return true;
++	private updateContext() {
++		switch (this.mode) {
++			case 'always':
++				this.context.set(true);
++				break;
++			case 'detailed':
++				this.context.set(DETAILED_STATES.includes(this.state.type));
++				break;
++			case 'actionable':
++				this.context.set(ACTIONABLE_STATES.includes(this.state.type));
++				break;
+ 			default:
+-				return false;
++				this.context.set(false);
++				break;
+ 		}
+ 	}
+ 
+-	private isMajorMinorVersionChange(): boolean {
+-		const currentVersion = this.productService.version;
+-		const lastKnownVersion = this.storageService.get(LAST_KNOWN_VERSION_KEY, StorageScope.APPLICATION);
+-		this.storageService.store(LAST_KNOWN_VERSION_KEY, currentVersion, StorageScope.APPLICATION, StorageTarget.MACHINE);
+-		if (!lastKnownVersion) {
+-			return false;
++	private async onStateChange(detectVersionChange = false) {
++		this.updateContext();
++		if (this.mode === 'none' || this.tooltipVisible || !await this.hostService.hadLastFocus()) {
++			return;
+ 		}
+ 
+-		const current = tryParseVersion(currentVersion);
+-		const last = tryParseVersion(lastKnownVersion);
+-		if (!current || !last) {
++		let showTooltip = detectVersionChange && this.detectVersionChange();
++		if (showTooltip) {
++			this.tooltip.renderPostInstall();
++		} else {
++			this.tooltip.renderState(this.state);
++			switch (this.state.type) {
++				case StateType.Disabled:
++					showTooltip = this.state.reason === DisablementReason.InvalidConfiguration || this.state.reason === DisablementReason.RunningAsAdmin;
++					break;
++				case StateType.Idle:
++					showTooltip = !!this.state.error || !!this.state.notAvailable;
++					break;
++				case StateType.AvailableForDownload:
++				case StateType.Downloaded:
++				case StateType.Ready:
++					showTooltip = true;
++					break;
++			}
++		}
++
++		if (showTooltip) {
++			this.tooltipVisible = true;
++			this.context.set(true);
++			this.entry?.showTooltip();
++		}
++	}
++
++	private detectVersionChange() {
++		let from: ILastKnownVersion | undefined;
++		try {
++			from = this.storageService.getObject(LAST_KNOWN_VERSION_KEY, StorageScope.APPLICATION);
++		} catch { }
++
++		const to: ILastKnownVersion = {
++			version: this.productService.version,
++			commit: this.productService.commit,
++			timestamp: Date.now(),
++		};
++
++		if (from?.commit === to.commit) {
+ 			return false;
+ 		}
+ 
+-		return current.major !== last.major || current.minor !== last.minor;
++		this.storageService.store(LAST_KNOWN_VERSION_KEY, JSON.stringify(to), StorageScope.APPLICATION, StorageTarget.MACHINE);
++
++		if (from) {
++			this.trackVersionChange(from, to);
++			return isMajorMinorVersionChange(from.version, to.version);
++		}
++
++		return false;
++	}
++
++	private trackVersionChange(from: ILastKnownVersion, to: ILastKnownVersion) {
++		type VersionChangeEvent = {
++			fromVersion: string | undefined;
++			fromCommit: string | undefined;
++			fromVersionTime: number | undefined;
++			toVersion: string;
++			toCommit: string | undefined;
++			timeToUpdateMs: number | undefined;
++			updateMode: string | undefined;
++			titleBarMode: string | undefined;
++		};
++
++		type VersionChangeClassification = {
++			owner: 'dmitriv';
++			comment: 'Fired when VS Code detects a version change on startup.';
++			fromVersion: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'The previous version of VS Code.' };
++			fromCommit: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'The commit hash of the previous version.' };
++			fromVersionTime: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'Timestamp when the previous version was first detected.' };
++			toVersion: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'The current version of VS Code.' };
++			toCommit: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'The commit hash of the current version.' };
++			timeToUpdateMs: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; isMeasurement: true; comment: 'Milliseconds between the previous version install and this version install.' };
++			updateMode: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'The update mode configured by the user.' };
++			titleBarMode: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'The title bar update indicator mode configured by the user.' };
++		};
++
++		this.telemetryService.publicLog2<VersionChangeEvent, VersionChangeClassification>('update:versionChanged', {
++			fromVersion: from.version,
++			fromCommit: from.commit,
++			fromVersionTime: from.timestamp,
++			toVersion: to.version,
++			toCommit: to.commit,
++			timeToUpdateMs: from.timestamp !== undefined ? to.timestamp - from.timestamp : undefined,
++			updateMode: this.configurationService.getValue<string>('update.mode'),
++			titleBarMode: this.mode
++		});
+ 	}
+ }
+ 
+@@ -148,24 +240,21 @@ export class UpdateTitleBarContribution extends Disposable implements IWorkbench
+  */
+ export class UpdateTitleBarEntry extends BaseActionViewItem {
+ 	private content: HTMLElement | undefined;
+-	private readonly tooltip: UpdateTooltip;
++	private showTooltipOnRender = false;
+ 
+ 	constructor(
+ 		action: IAction,
+ 		options: IBaseActionViewItemOptions,
+-		private readonly onDisposeTooltip: () => void,
+-		private showTooltipOnRender: boolean,
++		private readonly tooltip: UpdateTooltip,
++		private readonly onUserDismissedTooltip: () => void,
+ 		@ICommandService private readonly commandService: ICommandService,
+ 		@IHoverService private readonly hoverService: IHoverService,
+-		@IInstantiationService instantiationService: IInstantiationService,
+ 		@IUpdateService private readonly updateService: IUpdateService,
+ 	) {
+ 		super(undefined, action, options);
+ 
+ 		this.action.run = () => this.runAction();
+-		this.tooltip = this._register(instantiationService.createInstance(UpdateTooltip));
+-
+-		this._register(this.updateService.onStateChange(state => this.updateContent(state)));
++		this._register(this.updateService.onStateChange(state => this.onStateChange(state)));
+ 	}
+ 
+ 	public override render(container: HTMLElement) {
+@@ -173,7 +262,7 @@ export class UpdateTitleBarEntry extends BaseActionViewItem {
+ 
+ 		this.content = dom.append(container, dom.$('.update-indicator'));
+ 		this.updateTooltip();
+-		this.updateContent(this.updateService.state);
++		this.onStateChange(this.updateService.state);
+ 
+ 		if (this.showTooltipOnRender) {
+ 			this.showTooltipOnRender = false;
+@@ -181,6 +270,27 @@ export class UpdateTitleBarEntry extends BaseActionViewItem {
+ 		}
+ 	}
+ 
++	public showTooltip() {
++		if (!this.content?.isConnected) {
++			this.showTooltipOnRender = true;
++			return;
++		}
++
++		this.hoverService.showInstantHover({
++			content: this.tooltip.domNode,
++			target: {
++				targetElements: [this.content],
++				dispose: () => {
++					if (!!this.content?.isConnected) {
++						this.onUserDismissedTooltip();
++					}
++				}
++			},
++			persistence: { sticky: true },
++			appearance: { showPointer: true, compact: true },
++		}, true);
++	}
++
+ 	protected override getHoverContents(): IManagedHoverContent {
+ 		return this.tooltip.domNode;
+ 	}
+@@ -202,23 +312,7 @@ export class UpdateTitleBarEntry extends BaseActionViewItem {
+ 		}
+ 	}
+ 
+-	public showTooltip() {
+-		if (!this.content?.isConnected) {
+-			return;
+-		}
+-
+-		this.hoverService.showInstantHover({
+-			content: this.tooltip.domNode,
+-			target: {
+-				targetElements: [this.content],
+-				dispose: () => this.onDisposeTooltip(),
+-			},
+-			persistence: { sticky: true },
+-			appearance: { showPointer: true },
+-		}, true);
+-	}
+-
+-	private updateContent(state: State) {
++	private onStateChange(state: State) {
+ 		if (!this.content) {
+ 			return;
+ 		}
+diff --git a/src/vs/workbench/contrib/update/browser/updateTooltip.ts b/src/vs/workbench/contrib/update/browser/updateTooltip.ts
+index ee3c452c3be6d..56e15f6a0cf64 100644
+--- a/src/vs/workbench/contrib/update/browser/updateTooltip.ts
++++ b/src/vs/workbench/contrib/update/browser/updateTooltip.ts
+@@ -6,17 +6,23 @@
+ import * as dom from '../../../../base/browser/dom.js';
+ import { ActionBar } from '../../../../base/browser/ui/actionbar/actionbar.js';
+ import { toAction } from '../../../../base/common/actions.js';
++import { CancellationToken } from '../../../../base/common/cancellation.js';
+ import { Codicon } from '../../../../base/common/codicons.js';
+-import { Disposable } from '../../../../base/common/lifecycle.js';
++import { MarkdownString } from '../../../../base/common/htmlContent.js';
++import { Disposable, MutableDisposable } from '../../../../base/common/lifecycle.js';
+ import { ThemeIcon } from '../../../../base/common/themables.js';
+ import { localize } from '../../../../nls.js';
++import { IClipboardService } from '../../../../platform/clipboard/common/clipboardService.js';
+ import { ICommandService } from '../../../../platform/commands/common/commands.js';
+ import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
+ import { IHoverService, nativeHoverDelegate } from '../../../../platform/hover/browser/hover.js';
++import { IMarkdownRendererService, openLinkFromMarkdown } from '../../../../platform/markdown/browser/markdownRenderer.js';
+ import { IMeteredConnectionService } from '../../../../platform/meteredConnection/common/meteredConnection.js';
++import { IOpenerService } from '../../../../platform/opener/common/opener.js';
+ import { IProductService } from '../../../../platform/product/common/productService.js';
+-import { AvailableForDownload, Disabled, DisablementReason, Downloaded, Downloading, Idle, IUpdate, IUpdateService, Overwriting, Ready, State, StateType, Updating } from '../../../../platform/update/common/update.js';
+-import { computeDownloadSpeed, computeDownloadTimeRemaining, computeProgressPercent, formatBytes, formatDate, formatTimeRemaining, tryParseDate } from '../common/updateUtils.js';
++import { asTextOrError, IRequestService } from '../../../../platform/request/common/request.js';
++import { AvailableForDownload, Disabled, DisablementReason, Downloaded, Downloading, Idle, IUpdate, Overwriting, Ready, State, StateType, Updating } from '../../../../platform/update/common/update.js';
++import { computeDownloadSpeed, computeDownloadTimeRemaining, computeProgressPercent, formatBytes, formatDate, formatTimeRemaining, getUpdateInfoUrl, tryParseDate } from '../common/updateUtils.js';
+ import './media/updateTooltip.css';
+ 
+ /**
+@@ -29,9 +35,12 @@ export class UpdateTooltip extends Disposable {
+ 	private readonly titleNode: HTMLElement;
+ 
+ 	// Product info section
++	private readonly productInfoNode: HTMLElement;
+ 	private readonly productNameNode: HTMLElement;
+ 	private readonly currentVersionNode: HTMLElement;
++	private readonly currentVersionCopyValue: { value: string };
+ 	private readonly latestVersionNode: HTMLElement;
++	private readonly latestVersionCopyValue: { value: string };
+ 	private readonly releaseDateNode: HTMLElement;
+ 	private readonly releaseNotesLink: HTMLAnchorElement;
+ 
+@@ -46,18 +55,26 @@ export class UpdateTooltip extends Disposable {
+ 	private readonly timeRemainingNode: HTMLElement;
+ 	private readonly speedInfoNode: HTMLElement;
+ 
++	// Update markdown section
++	private readonly markdownContainer: HTMLElement;
++	private readonly markdown = this._register(new MutableDisposable());
++
+ 	// State-specific message
+ 	private readonly messageNode: HTMLElement;
+ 
+ 	private releaseNotesVersion: string | undefined;
+ 
+ 	constructor(
++		private readonly hostedByTitleBar: boolean,
++		@IClipboardService private readonly clipboardService: IClipboardService,
+ 		@ICommandService private readonly commandService: ICommandService,
+ 		@IConfigurationService private readonly configurationService: IConfigurationService,
+ 		@IHoverService private readonly hoverService: IHoverService,
++		@IMarkdownRendererService private readonly markdownRendererService: IMarkdownRendererService,
+ 		@IMeteredConnectionService private readonly meteredConnectionService: IMeteredConnectionService,
++		@IOpenerService private readonly openerService: IOpenerService,
+ 		@IProductService private readonly productService: IProductService,
+-		@IUpdateService updateService: IUpdateService,
++		@IRequestService private readonly requestService: IRequestService,
+ 	) {
+ 		super();
+ 
+@@ -76,19 +93,25 @@ export class UpdateTooltip extends Disposable {
+ 		}), { icon: true, label: false });
+ 
+ 		// Product info section
+-		const productInfo = dom.append(this.domNode, dom.$('.product-info'));
++		this.productInfoNode = dom.append(this.domNode, dom.$('.product-info'));
+ 
+-		const logoContainer = dom.append(productInfo, dom.$('.product-logo'));
++		const logoContainer = dom.append(this.productInfoNode, dom.$('.product-logo'));
+ 		logoContainer.setAttribute('role', 'img');
+ 		logoContainer.setAttribute('aria-label', this.productService.nameLong);
+ 
+-		const details = dom.append(productInfo, dom.$('.product-details'));
++		const details = dom.append(this.productInfoNode, dom.$('.product-details'));
+ 
+ 		this.productNameNode = dom.append(details, dom.$('.product-name'));
+ 		this.productNameNode.textContent = this.productService.nameLong;
+ 
+-		this.currentVersionNode = dom.append(details, dom.$('.product-version'));
+-		this.latestVersionNode = dom.append(details, dom.$('.product-version'));
++		const currentVersionRow = this.createVersionRow(details);
++		this.currentVersionNode = currentVersionRow.label;
++		this.currentVersionCopyValue = currentVersionRow.copyValue;
++
++		const latestVersionRow = this.createVersionRow(details);
++		this.latestVersionNode = latestVersionRow.label;
++		this.latestVersionCopyValue = latestVersionRow.copyValue;
++
+ 		this.releaseDateNode = dom.append(details, dom.$('.product-release-date'));
+ 
+ 		this.releaseNotesLink = dom.append(details, dom.$('a.release-notes-link')) as HTMLAnchorElement;
+@@ -115,15 +138,14 @@ export class UpdateTooltip extends Disposable {
+ 		this.timeRemainingNode = dom.append(this.downloadStatsContainer, dom.$('.time-remaining'));
+ 		this.speedInfoNode = dom.append(this.downloadStatsContainer, dom.$('.speed-info'));
+ 
++		// Update markdown section
++		this.markdownContainer = dom.append(this.domNode, dom.$('.update-markdown'));
++
+ 		// State-specific message
+ 		this.messageNode = dom.append(this.domNode, dom.$('.state-message'));
+ 
+ 		// Populate static product info
+ 		this.updateCurrentVersion();
+-
+-		// Subscribe to state changes
+-		this._register(updateService.onStateChange(state => this.onStateChange(state)));
+-		this.onStateChange(updateService.state);
+ 	}
+ 
+ 	private updateCurrentVersion() {
+@@ -133,18 +155,25 @@ export class UpdateTooltip extends Disposable {
+ 			this.currentVersionNode.textContent = currentCommitId
+ 				? localize('updateTooltip.currentVersionLabelWithCommit', "Current Version: {0} ({1})", productVersion, currentCommitId)
+ 				: localize('updateTooltip.currentVersionLabel', "Current Version: {0}", productVersion);
+-			this.currentVersionNode.style.display = '';
++			this.currentVersionCopyValue.value = currentCommitId ? `${productVersion} (${this.productService.commit})` : productVersion;
++			this.currentVersionNode.parentElement!.style.display = '';
+ 		} else {
+-			this.currentVersionNode.style.display = 'none';
++			this.currentVersionNode.parentElement!.style.display = 'none';
+ 		}
+ 	}
+ 
+-	private onStateChange(state: State) {
++	private hideAll() {
++		this.productInfoNode.style.display = '';
+ 		this.progressContainer.style.display = 'none';
+ 		this.speedInfoNode.textContent = '';
+ 		this.timeRemainingNode.textContent = '';
+ 		this.messageNode.style.display = 'none';
++		this.markdownContainer.style.display = 'none';
++		this.markdown.clear();
++	}
+ 
++	public renderState(state: State) {
++		this.hideAll();
+ 		switch (state.type) {
+ 			case StateType.Uninitialized:
+ 				this.renderUninitialized();
+@@ -181,44 +210,44 @@ export class UpdateTooltip extends Disposable {
+ 
+ 	private renderUninitialized() {
+ 		this.renderTitleAndInfo(localize('updateTooltip.initializingTitle', "Initializing"));
+-		this.showMessage(localize('updateTooltip.initializingMessage', "Initializing update service..."));
++		this.renderMessage(localize('updateTooltip.initializingMessage', "Initializing update service..."));
+ 	}
+ 
+ 	private renderDisabled({ reason }: Disabled) {
+ 		this.renderTitleAndInfo(localize('updateTooltip.updatesDisabledTitle', "Updates Disabled"));
+ 		switch (reason) {
+ 			case DisablementReason.NotBuilt:
+-				this.showMessage(
++				this.renderMessage(
+ 					localize('updateTooltip.disabledNotBuilt', "Updates are not available for this build."),
+ 					Codicon.info);
+ 				break;
+ 			case DisablementReason.DisabledByEnvironment:
+-				this.showMessage(
++				this.renderMessage(
+ 					localize('updateTooltip.disabledByEnvironment', "Updates are disabled by the --disable-updates command line flag."),
+ 					Codicon.warning);
+ 				break;
+ 			case DisablementReason.ManuallyDisabled:
+-				this.showMessage(
++				this.renderMessage(
+ 					localize('updateTooltip.disabledManually', "Updates are manually disabled. Change the \"update.mode\" setting to enable."),
+ 					Codicon.warning);
+ 				break;
+ 			case DisablementReason.Policy:
+-				this.showMessage(
++				this.renderMessage(
+ 					localize('updateTooltip.disabledByPolicy', "Updates are disabled by organization policy."),
+ 					Codicon.info);
+ 				break;
+ 			case DisablementReason.MissingConfiguration:
+-				this.showMessage(
++				this.renderMessage(
+ 					localize('updateTooltip.disabledMissingConfig', "Updates are disabled because no update URL is configured."),
+ 					Codicon.info);
+ 				break;
+ 			case DisablementReason.InvalidConfiguration:
+-				this.showMessage(
++				this.renderMessage(
+ 					localize('updateTooltip.disabledInvalidConfig', "Updates are disabled because the update URL is invalid."),
+ 					Codicon.error);
+ 				break;
+ 			case DisablementReason.RunningAsAdmin:
+-				this.showMessage(
++				this.renderMessage(
+ 					localize(
+ 						'updateTooltip.disabledRunningAsAdmin',
+ 						"Updates are not available when running a user install of {0} as administrator.",
+@@ -226,7 +255,7 @@ export class UpdateTooltip extends Disposable {
+ 					Codicon.warning);
+ 				break;
+ 			default:
+-				this.showMessage(localize('updateTooltip.disabledGeneric', "Updates are disabled."), Codicon.warning);
++				this.renderMessage(localize('updateTooltip.disabledGeneric', "Updates are disabled."), Codicon.warning);
+ 				break;
+ 		}
+ 	}
+@@ -234,34 +263,34 @@ export class UpdateTooltip extends Disposable {
+ 	private renderIdle({ error, notAvailable }: Idle) {
+ 		if (error) {
+ 			this.renderTitleAndInfo(localize('updateTooltip.updateErrorTitle', "Update Error"));
+-			this.showMessage(error, Codicon.error);
++			this.renderMessage(error, Codicon.error);
+ 			return;
+ 		}
+ 
+ 		if (notAvailable) {
+ 			this.renderTitleAndInfo(localize('updateTooltip.noUpdateAvailableTitle', "No Update Available"));
+-			this.showMessage(localize('updateTooltip.noUpdateAvailableMessage', "There are no updates currently available."), Codicon.info);
++			this.renderMessage(localize('updateTooltip.noUpdateAvailableMessage', "There are no updates currently available."), Codicon.info);
+ 			return;
+ 		}
+ 
+ 		this.renderTitleAndInfo(localize('updateTooltip.upToDateTitle', "Up to Date"));
+ 		switch (this.configurationService.getValue<string>('update.mode')) {
+ 			case 'none':
+-				this.showMessage(localize('updateTooltip.autoUpdateNone', "Automatic updates are disabled."), Codicon.warning);
++				this.renderMessage(localize('updateTooltip.autoUpdateNone', "Automatic updates are disabled."), Codicon.warning);
+ 				break;
+ 			case 'manual':
+-				this.showMessage(localize('updateTooltip.autoUpdateManual', "Automatic updates will be checked but not installed automatically."));
++				this.renderMessage(localize('updateTooltip.autoUpdateManual', "Automatic updates will be checked but not installed automatically."));
+ 				break;
+ 			case 'start':
+-				this.showMessage(localize('updateTooltip.autoUpdateStart', "Updates will be applied on restart."));
++				this.renderMessage(localize('updateTooltip.autoUpdateStart', "Updates will be applied on restart."));
+ 				break;
+ 			case 'default':
+ 				if (this.meteredConnectionService.isConnectionMetered) {
+-					this.showMessage(
++					this.renderMessage(
+ 						localize('updateTooltip.meteredConnectionMessage', "Automatic updates are paused because the network connection is metered."),
+ 						Codicon.radioTower);
+ 				} else {
+-					this.showMessage(
++					this.renderMessage(
+ 						localize('updateTooltip.autoUpdateDefault', "Automatic updates are enabled. Happy Coding!"),
+ 						Codicon.smiley);
+ 				}
+@@ -271,11 +300,14 @@ export class UpdateTooltip extends Disposable {
+ 
+ 	private renderCheckingForUpdates() {
+ 		this.renderTitleAndInfo(localize('updateTooltip.checkingForUpdatesTitle', "Checking for Updates"));
+-		this.showMessage(localize('updateTooltip.checkingPleaseWait', "Checking for updates, please wait..."));
++		this.renderMessage(localize('updateTooltip.checkingPleaseWait', "Checking for updates, please wait..."));
+ 	}
+ 
+ 	private renderAvailableForDownload({ update }: AvailableForDownload) {
+ 		this.renderTitleAndInfo(localize('updateTooltip.updateAvailableTitle', "Update Available"), update);
++		if (this.hostedByTitleBar) {
++			this.renderMessage(localize('updateTooltip.clickToDownload', "Click the Update button to download."));
++		}
+ 	}
+ 
+ 	private renderDownloading(state: Downloading) {
+@@ -301,12 +333,15 @@ export class UpdateTooltip extends Disposable {
+ 
+ 			this.downloadStatsContainer.style.display = '';
+ 		} else {
+-			this.showMessage(localize('updateTooltip.downloadingPleaseWait', "Downloading update, please wait..."));
++			this.renderMessage(localize('updateTooltip.downloadingPleaseWait', "Downloading update, please wait..."));
+ 		}
+ 	}
+ 
+ 	private renderDownloaded({ update }: Downloaded) {
+ 		this.renderTitleAndInfo(localize('updateTooltip.updateReadyTitle', "Update is Ready to Install"), update);
++		if (this.hostedByTitleBar) {
++			this.renderMessage(localize('updateTooltip.clickToInstall', "Click the Update button to install."));
++		}
+ 	}
+ 
+ 	private renderUpdating({ update, currentProgress, maxProgress }: Updating) {
+@@ -319,17 +354,61 @@ export class UpdateTooltip extends Disposable {
+ 			this.progressSizeNode.textContent = '';
+ 			this.progressContainer.style.display = '';
+ 		} else {
+-			this.showMessage(localize('updateTooltip.installingPleaseWait', "Installing update, please wait..."));
++			this.renderMessage(localize('updateTooltip.installingPleaseWait', "Installing update, please wait..."));
+ 		}
+ 	}
+ 
+ 	private renderReady({ update }: Ready) {
+ 		this.renderTitleAndInfo(localize('updateTooltip.updateInstalledTitle', "Update Installed"), update);
++		if (this.hostedByTitleBar) {
++			this.renderMessage(localize('updateTooltip.clickToRestart', "Click the Update button to restart and apply."));
++		}
+ 	}
+ 
+ 	private renderOverwriting({ update }: Overwriting) {
+ 		this.renderTitleAndInfo(localize('updateTooltip.downloadingNewerUpdateTitle', "Downloading Newer Update"), update);
+-		this.showMessage(localize('updateTooltip.downloadingNewerPleaseWait', "A newer update was released. Downloading, please wait..."));
++		this.renderMessage(localize('updateTooltip.downloadingNewerPleaseWait', "A newer update was released. Downloading, please wait..."));
++	}
++
++	public async renderPostInstall() {
++		this.hideAll();
++		this.renderTitleAndInfo(localize('updateTooltip.installedDefaultTitle', "New Update Installed"));
++		this.renderMessage(
++			localize('updateTooltip.installedDefaultMessage', "See release notes for details on what's new in this release."),
++			Codicon.info);
++
++		let text = null;
++		try {
++			const url = getUpdateInfoUrl(this.productService.version);
++			const context = await this.requestService.request({ url, callSite: 'updateTooltip' }, CancellationToken.None);
++			text = await asTextOrError(context);
++		} catch { }
++
++		if (!text) {
++			return;
++		}
++
++		this.titleNode.textContent = localize('updateTooltip.installedTitle', "New in {0}", this.productService.version);
++		this.productInfoNode.style.display = 'none';
++		this.messageNode.style.display = 'none';
++
++		const rendered = this.markdownRendererService.render(
++			new MarkdownString(text, {
++				isTrusted: true,
++				supportHtml: true,
++				supportThemeIcons: true,
++			}),
++			{
++				actionHandler: (link, mdStr) => {
++					openLinkFromMarkdown(this.openerService, link, mdStr.isTrusted);
++					this.hoverService.hideHover(true);
++				},
++			});
++
++		this.markdown.value = rendered;
++		dom.clearNode(this.markdownContainer);
++		this.markdownContainer.appendChild(rendered.element);
++		this.markdownContainer.style.display = '';
+ 	}
+ 
+ 	private renderTitleAndInfo(title: string, update?: IUpdate) {
+@@ -342,9 +421,10 @@ export class UpdateTooltip extends Disposable {
+ 			this.latestVersionNode.textContent = updateCommitId
+ 				? localize('updateTooltip.latestVersionLabelWithCommit', "Latest Version: {0} ({1})", version, updateCommitId)
+ 				: localize('updateTooltip.latestVersionLabel', "Latest Version: {0}", version);
+-			this.latestVersionNode.style.display = '';
++			this.latestVersionCopyValue.value = updateCommitId ? `${version} (${update.version})` : version;
++			this.latestVersionNode.parentElement!.style.display = '';
+ 		} else {
+-			this.latestVersionNode.style.display = 'none';
++			this.latestVersionNode.parentElement!.style.display = 'none';
+ 		}
+ 
+ 		// Release date
+@@ -361,7 +441,7 @@ export class UpdateTooltip extends Disposable {
+ 		this.releaseNotesLink.style.display = this.releaseNotesVersion ? '' : 'none';
+ 	}
+ 
+-	private showMessage(message: string, icon?: ThemeIcon) {
++	private renderMessage(message: string, icon?: ThemeIcon) {
+ 		dom.clearNode(this.messageNode);
+ 		if (icon) {
+ 			const iconNode = dom.append(this.messageNode, dom.$('.state-message-icon'));
+@@ -371,6 +451,31 @@ export class UpdateTooltip extends Disposable {
+ 		this.messageNode.style.display = '';
+ 	}
+ 
++	private createVersionRow(parent: HTMLElement): { label: HTMLElement; copyValue: { value: string } } {
++		const row = dom.append(parent, dom.$('.product-version'));
++		const label = dom.append(row, dom.$('span'));
++		const copyValue = { value: '' };
++
++		const copyButton = dom.append(row, dom.$('a.copy-version-button'));
++		copyButton.setAttribute('role', 'button');
++		copyButton.setAttribute('tabindex', '0');
++		const title = localize('updateTooltip.copyVersion', "Copy");
++		copyButton.title = title;
++		copyButton.setAttribute('aria-label', title);
++
++		const copyIcon = dom.append(copyButton, dom.$('.copy-icon'));
++		copyIcon.classList.add(...ThemeIcon.asClassNameArray(Codicon.copy));
++		this._register(dom.addDisposableListener(copyButton, 'click', e => {
++			e.preventDefault();
++			e.stopPropagation();
++			if (copyValue.value) {
++				this.clipboardService.writeText(copyValue.value);
++			}
++		}));
++
++		return { label, copyValue };
++	}
++
+ 	private runCommandAndClose(command: string, ...args: unknown[]) {
+ 		this.commandService.executeCommand(command, ...args);
+ 		this.hoverService.hideHover(true);
+diff --git a/src/vs/workbench/contrib/update/common/updateUtils.ts b/src/vs/workbench/contrib/update/common/updateUtils.ts
+index 3060873d29e19..ae1c66e88122d 100644
+--- a/src/vs/workbench/contrib/update/common/updateUtils.ts
++++ b/src/vs/workbench/contrib/update/common/updateUtils.ts
+@@ -216,3 +216,12 @@ export function preprocessError(error?: string): string | undefined {
+ 		'This might mean the application was put on quarantine by macOS. See [this link](https://github.com/microsoft/vscode/issues/7426#issuecomment-425093469) for more information'
+ 	);
+ }
++
++/**
++ * Determines whether there is a major or minor version change between two versions.
++ */
++export function isMajorMinorVersionChange(previousVersion?: string, newVersion?: string): boolean {
++	const previous = tryParseVersion(previousVersion);
++	const current = tryParseVersion(newVersion);
++	return !!previous && !!current && (previous.major !== current.major || previous.minor !== current.minor);
++}
+diff --git a/src/vs/workbench/contrib/update/test/common/updateUtils.test.ts b/src/vs/workbench/contrib/update/test/common/updateUtils.test.ts
+index cfeb6123415a7..b6d7cf0ff9b55 100644
+--- a/src/vs/workbench/contrib/update/test/common/updateUtils.test.ts
++++ b/src/vs/workbench/contrib/update/test/common/updateUtils.test.ts
+@@ -7,7 +7,7 @@ import assert from 'assert';
+ import * as sinon from 'sinon';
+ import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../../base/test/common/utils.js';
+ import { Downloading, StateType } from '../../../../../platform/update/common/update.js';
+-import { computeDownloadSpeed, computeDownloadTimeRemaining, computeProgressPercent, computeUpdateInfoVersion, formatBytes, formatDate, formatTimeRemaining, getUpdateInfoUrl, tryParseDate } from '../../common/updateUtils.js';
++import { computeDownloadSpeed, computeDownloadTimeRemaining, computeProgressPercent, computeUpdateInfoVersion, formatBytes, formatDate, formatTimeRemaining, getUpdateInfoUrl, isMajorMinorVersionChange, tryParseDate } from '../../common/updateUtils.js';
+ 
+ suite('UpdateUtils', () => {
+ 	ensureNoDisposablesAreLeakedInTestSuite();
+@@ -245,4 +245,39 @@ suite('UpdateUtils', () => {
+ 			assert.ok(result.includes('2024'));
+ 		});
+ 	});
++
++	suite('isMajorMinorVersionChange', () => {
++		test('returns true for major version change', () => {
++			assert.strictEqual(isMajorMinorVersionChange('1.90.0', '2.0.0'), true);
++		});
++
++		test('returns true for minor version change', () => {
++			assert.strictEqual(isMajorMinorVersionChange('1.90.0', '1.91.0'), true);
++		});
++
++		test('returns false for patch-only change', () => {
++			assert.strictEqual(isMajorMinorVersionChange('1.90.0', '1.90.1'), false);
++		});
++
++		test('returns false for identical versions', () => {
++			assert.strictEqual(isMajorMinorVersionChange('1.90.0', '1.90.0'), false);
++		});
++
++		test('returns false when previous version is undefined', () => {
++			assert.strictEqual(isMajorMinorVersionChange(undefined, '1.90.0'), false);
++		});
++
++		test('returns false when new version is undefined', () => {
++			assert.strictEqual(isMajorMinorVersionChange('1.90.0', undefined), false);
++		});
++
++		test('returns false when both versions are undefined', () => {
++			assert.strictEqual(isMajorMinorVersionChange(undefined, undefined), false);
++		});
++
++		test('returns false for unparseable versions', () => {
++			assert.strictEqual(isMajorMinorVersionChange('invalid', '1.90.0'), false);
++			assert.strictEqual(isMajorMinorVersionChange('1.90.0', 'invalid'), false);
++		});
++	});
+ });

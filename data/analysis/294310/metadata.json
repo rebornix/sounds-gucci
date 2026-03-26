@@ -1,0 +1,13 @@
+{
+  "pr": 4391,
+  "prTitle": "Have ExitPlanMode tool NOT follow auto-approve",
+  "mergeCommit": "bce996f801a6a6befe90a0ae523137ea634e01ec",
+  "parentCommit": "",
+  "fileCount": 4,
+  "issue": 294310,
+  "issueTitle": "Claude Agent: Auto Switch to Edit mode from PLAN/Ask to edit mode without user prompt",
+  "repo": "microsoft/vscode-copilot-chat",
+  "tags": [],
+  "workflowRunId": 22986147282,
+  "closedAt": "2026-03-13T02:03:37Z"
+}

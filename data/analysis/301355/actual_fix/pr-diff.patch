@@ -1,0 +1,203 @@
+diff --git a/src/extension/chatSessions/vscode-node/copilotCLIChatSessionsContribution.ts b/src/extension/chatSessions/vscode-node/copilotCLIChatSessionsContribution.ts
+index ec46fadef..93468dfb5 100644
+--- a/src/extension/chatSessions/vscode-node/copilotCLIChatSessionsContribution.ts
++++ b/src/extension/chatSessions/vscode-node/copilotCLIChatSessionsContribution.ts
+@@ -20,7 +20,7 @@ import { IPromptsService, ParsedPromptFile } from '../../../platform/promptFiles
+ import { ITelemetryService } from '../../../platform/telemetry/common/telemetry';
+ import { IWorkspaceService } from '../../../platform/workspace/common/workspaceService';
+ import { isUri } from '../../../util/common/types';
+-import { DeferredPromise, IntervalTimer, SequencerByKey } from '../../../util/vs/base/common/async';
++import { DeferredPromise, disposableTimeout, IntervalTimer, SequencerByKey } from '../../../util/vs/base/common/async';
+ import { CancellationToken } from '../../../util/vs/base/common/cancellation';
+ import { isCancellationError } from '../../../util/vs/base/common/errors';
+ import { Emitter, Event } from '../../../util/vs/base/common/event';
+@@ -58,6 +58,7 @@ const LAST_USED_ISOLATION_OPTION_KEY = 'github.copilot.cli.lastUsedIsolationOpti
+ const OPEN_REPOSITORY_COMMAND_ID = 'github.copilot.cli.sessions.openRepository';
+ const OPEN_IN_COPILOT_CLI_COMMAND_ID = 'github.copilot.cli.openInCopilotCLI';
+ const MAX_MRU_ENTRIES = 10;
++const CHECK_FOR_STEERING_DELAY = 100; // ms
+ 
+ // When we start new sessions, we don't have the real session id, we have a temporary untitled id.
+ // We also need this when we open a session and later run it.
+@@ -1020,6 +1021,14 @@ export class CopilotCLIChatSessionParticipant extends Disposable {
+ 
+ 	private readonly contextForRequest = new Map<string, { prompt: string; attachments: Attachment[] }>();
+ 
++	/**
++	 * Map to track pending requests for untitled sessions.
++	 * Key = Untitled Session Id
++	 * Vlaue = Map of Request Id to the Promise of the request being handled
++	 * So if we have multiple requests (can happen when steering) for the same untitled session.
++	 */
++	private readonly pendingRequestsForUntitledSessions = new Map<string, Map<string, Promise<vscode.ChatResult | void>>>();
++
+ 	/**
+ 	 * Outer request handler that supports *yielding* for session steering.
+ 	 *
+@@ -1045,13 +1054,24 @@ export class CopilotCLIChatSessionParticipant extends Disposable {
+ 		const disposables = new DisposableStore();
+ 		try {
+ 			const handled = this.handleRequestImpl(request, context, stream, token);
++			if (context.chatSessionContext && !this.useController) {
++				const { chatSessionContext } = context;
++				const { resource } = chatSessionContext.chatSessionItem;
++				const id = SessionIdForCLI.parse(resource);
++				const isUntitled = this.sessionItemProvider.isNewSession(id);
++				if (isUntitled) {
++					const promises = this.pendingRequestsForUntitledSessions.get(id) ?? new Map<string, Promise<vscode.ChatResult | void>>();
++					promises.set(request.id, handled);
++					this.pendingRequestsForUntitledSessions.set(id, promises);
++				}
++			}
+ 			const interval = disposables.add(new IntervalTimer());
+ 			const yielded = new DeferredPromise<void>();
+ 			interval.cancelAndSet(() => {
+ 				if (context.yieldRequested) {
+ 					yielded.complete();
+ 				}
+-			}, 500);
++			}, CHECK_FOR_STEERING_DELAY);
+ 
+ 			return await Promise.race([yielded.p, handled]);
+ 		} finally {
+@@ -1241,6 +1261,19 @@ export class CopilotCLIChatSessionParticipant extends Disposable {
+ 			}
+ 
+ 			if (isUntitled && !token.isCancellationRequested) {
++				// Its possible the user tried steering, in that case, we should NOT swap the session item because the session.
++				// Else the messages may get lost (wait CHECK_FOR_STEERING_DELAYms to check if we have pending steering requests)
++				await new Promise<void>(resolve => disposableTimeout(() => resolve(), CHECK_FOR_STEERING_DELAY, this._store));
++				const pendingRequests = this.pendingRequestsForUntitledSessions.get(id);
++				if (pendingRequests) {
++					pendingRequests.delete(request.id);
++					// If we have more requests, that means we had the original request as well as at least one another steering request.
++					// Lets not swap anything here, until all pending requests have been completed.
++					if (pendingRequests.size > 0) {
++						return;
++					}
++				}
++
+ 				// Delete old information stored for untitled session id.
+ 				_sessionBranch.delete(id);
+ 				_sessionIsolation.delete(id);
+diff --git a/src/extension/chatSessions/vscode-node/test/copilotCLIChatSessionParticipant.spec.ts b/src/extension/chatSessions/vscode-node/test/copilotCLIChatSessionParticipant.spec.ts
+index b294916b2..1a2bc2a2d 100644
+--- a/src/extension/chatSessions/vscode-node/test/copilotCLIChatSessionParticipant.spec.ts
++++ b/src/extension/chatSessions/vscode-node/test/copilotCLIChatSessionParticipant.spec.ts
+@@ -215,8 +215,12 @@ function createChatContext(sessionId: string, isUntitled: boolean): vscode.ChatC
+ class TestCopilotCLISession extends CopilotCLISession {
+ 	public requests: Array<{ input: CopilotCLISessionInput; attachments: Attachment[]; modelId: string | undefined; authInfo: NonNullable<SessionOptions['authInfo']>; token: vscode.CancellationToken }> = [];
+ 	public static nextHandleRequestResult: Promise<void> | undefined;
++	public static handleRequestHook: ((request: { id: string; toolInvocationToken: vscode.ChatParticipantToolToken }, input: CopilotCLISessionInput) => Promise<void>) | undefined;
+ 	override handleRequest(request: { id: string; toolInvocationToken: vscode.ChatParticipantToolToken }, input: CopilotCLISessionInput, attachments: Attachment[], modelId: string | undefined, authInfo: NonNullable<SessionOptions['authInfo']>, token: vscode.CancellationToken): Promise<void> {
+ 		this.requests.push({ input, attachments, modelId, authInfo, token });
++		if (TestCopilotCLISession.handleRequestHook) {
++			return TestCopilotCLISession.handleRequestHook(request, input);
++		}
+ 		return TestCopilotCLISession.nextHandleRequestResult ?? Promise.resolve();
+ 	}
+ }
+@@ -265,6 +269,7 @@ describe('CopilotCLIChatSessionParticipant.handleRequest', () => {
+ 	beforeEach(async () => {
+ 		cliSessions.length = 0;
+ 		TestCopilotCLISession.nextHandleRequestResult = undefined;
++		TestCopilotCLISession.handleRequestHook = undefined;
+ 		// By default, simulate the command not being available so that
+ 		// handleDelegationFromAnotherChat falls into its catch block and
+ 		// calls handleRequest directly. The workaround tests override this.
+@@ -536,6 +541,95 @@ describe('CopilotCLIChatSessionParticipant.handleRequest', () => {
+ 		await handlerPromise;
+ 	});
+ 
++	it('defers untitled session swap while a steering request is still pending', async () => {
++		(itemProvider.isNewSession as ReturnType<typeof vi.fn>).mockImplementation((sessionId: string) => sessionId.startsWith('untitled:'));
++		let resolveFirstRequest!: () => void;
++		const firstRequestDeferred = new Promise<void>(resolve => {
++			resolveFirstRequest = resolve;
++		});
++		let resolveSteeringRequest1!: () => void;
++		const steeringRequestDeferred1 = new Promise<void>(resolve => {
++			resolveSteeringRequest1 = resolve;
++		});
++		let resolveSteeringRequest2!: () => void;
++		const steeringRequestDeferred2 = new Promise<void>(resolve => {
++			resolveSteeringRequest2 = resolve;
++		});
++		let resolveSteeringRequest3!: () => void;
++		const steeringRequestDeferred3 = new Promise<void>(resolve => {
++			resolveSteeringRequest3 = resolve;
++		});
++		TestCopilotCLISession.handleRequestHook = vi.fn((_request, input) => {
++			if (input.prompt === 'First request') {
++				return firstRequestDeferred;
++			}
++			if (input.prompt === 'Steering request 1') {
++				return steeringRequestDeferred1;
++			}
++			if (input.prompt === 'Steering request 2') {
++				return steeringRequestDeferred2;
++			}
++			if (input.prompt === 'Steering request 3') {
++				return steeringRequestDeferred3;
++			}
++			return Promise.resolve();
++		});
++
++		const context = createChatContext('untitled:temp-steering', true);
++		const stream = new MockChatResponseStream();
++
++		const firstRequest = new TestChatRequest('First request');
++		const firstToken = disposables.add(new CancellationTokenSource()).token;
++		const firstPromise = participant.createHandler()(firstRequest, context, stream, firstToken);
++
++		const secondRequest = new TestChatRequest('Steering request 1');
++		const secondToken = disposables.add(new CancellationTokenSource()).token;
++		const secondPromise = participant.createHandler()(secondRequest, context, stream, secondToken);
++
++		const thirdRequest = new TestChatRequest('Steering request 2');
++		const thirdToken = disposables.add(new CancellationTokenSource()).token;
++		const thirdPromise = participant.createHandler()(thirdRequest, context, stream, thirdToken);
++
++		const fourthRequest = new TestChatRequest('Steering request 3');
++		const fourthToken = disposables.add(new CancellationTokenSource()).token;
++		const fourthPromise = participant.createHandler()(fourthRequest, context, stream, fourthToken);
++
++		resolveFirstRequest();
++		await firstPromise;
++
++		expect(itemProvider.swap).not.toHaveBeenCalled();
++
++		resolveSteeringRequest1();
++		await secondPromise;
++
++		expect(itemProvider.swap).not.toHaveBeenCalled();
++
++		resolveSteeringRequest2();
++		await thirdPromise;
++
++		expect(itemProvider.swap).not.toHaveBeenCalled();
++
++		const otherSessionId = 'existing-unblocked-session';
++		manager.sessions.set(otherSessionId, new MockCliSdkSession(otherSessionId, new Date()));
++		const otherContext = createChatContext(otherSessionId, false);
++		const otherRequest = new TestChatRequest('Request from other session');
++		const otherStream = new MockChatResponseStream();
++		const otherToken = disposables.add(new CancellationTokenSource()).token;
++		const otherRequestPromise = participant.createHandler()(otherRequest, otherContext, otherStream, otherToken);
++		const otherResult = await Promise.race([
++			Promise.resolve(otherRequestPromise).then(() => 'done'),
++			new Promise<'timeout'>(resolve => setTimeout(() => resolve('timeout'), 75))
++		]);
++		expect(otherResult).toBe('done');
++
++		expect(itemProvider.swap).not.toHaveBeenCalled();
++
++		resolveSteeringRequest3();
++		await fourthPromise;
++
++		expect(itemProvider.swap).toHaveBeenCalledTimes(1);
++	});
++
+ 	it('hydrates invalid sessions from partial history and blocks follow-up requests', async () => {
+ 		const sessionId = 'invalid-session';
+ 		const invalidSessionService = new class extends FakeCopilotCLISessionService {
