@@ -1,0 +1,2 @@
+src/vs/platform/actionWidget/browser/actionList.ts
+src/vs/workbench/contrib/chat/browser/widget/input/chatModelPicker.ts

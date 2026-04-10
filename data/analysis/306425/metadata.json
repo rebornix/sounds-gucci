@@ -1,0 +1,14 @@
+{
+  "pr": 306435,
+  "prTitle": "sessions: fix Show All Sessions filter out of sync with view on reload",
+  "mergeCommit": "39a50d8d3f4cb82f8d23f6ed762d8feda0a8032f",
+  "parentCommit": "2924b6cf31bca9a2296af760209a088907def726",
+  "fileCount": 1,
+  "issue": 306425,
+  "issueTitle": "Sessions filtering not in sync with whats shown: show all vs recent",
+  "issueAuthor": "bpasero",
+  "commentCount": 2,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

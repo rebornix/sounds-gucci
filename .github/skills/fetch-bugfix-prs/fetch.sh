@@ -2,10 +2,11 @@
 set -euo pipefail
 
 # Fetch bug-fix PRs with linked issues from a GitHub repository
-# Usage: ./fetch.sh --author <user> --repo <owner/repo> --since <date> --until <date> [--output <file>]
+# Usage: ./fetch.sh --repo <owner/repo> --since <date> --until <date> [--author <user>] [--issue-label <label>] [--output <file>]
 
 # Default values
 OUTPUT_FILE="data/prs-with-issues.md"
+ISSUE_LABEL_FILTERS=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -14,18 +15,27 @@ while [[ $# -gt 0 ]]; do
     --repo) REPO="$2"; shift 2 ;;
     --since) SINCE="$2"; shift 2 ;;
     --until) UNTIL="$2"; shift 2 ;;
+    --issue-label) ISSUE_LABEL_FILTERS="$2"; shift 2 ;;
     --output) OUTPUT_FILE="$2"; shift 2 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
 
 # Validate required arguments
-if [[ -z "${AUTHOR:-}" || -z "${REPO:-}" || -z "${SINCE:-}" || -z "${UNTIL:-}" ]]; then
-  echo "Usage: $0 --author <user> --repo <owner/repo> --since <YYYY-MM-DD> --until <YYYY-MM-DD> [--output <file>]"
+if [[ -z "${REPO:-}" || -z "${SINCE:-}" || -z "${UNTIL:-}" ]]; then
+  echo "Usage: $0 --repo <owner/repo> --since <YYYY-MM-DD> --until <YYYY-MM-DD> [--author <user>] [--issue-label <label>] [--output <file>]"
   exit 1
 fi
 
-echo "Fetching PRs from $REPO by $AUTHOR between $SINCE and $UNTIL..."
+SEARCH_SCOPE="all authors"
+if [[ -n "${AUTHOR:-}" ]]; then
+  SEARCH_SCOPE="author $AUTHOR"
+fi
+
+echo "Fetching PRs from $REPO for $SEARCH_SCOPE between $SINCE and $UNTIL..."
+if [[ -n "$ISSUE_LABEL_FILTERS" ]]; then
+  echo "Filtering linked issues by label match: $ISSUE_LABEL_FILTERS"
+fi
 
 # Create output directory if needed
 mkdir -p "$(dirname "$OUTPUT_FILE")"
@@ -53,15 +63,45 @@ get_timeline_linked_issues() {
     sort -u || true
 }
 
+# Function to check whether issue labels match any requested filters
+issue_matches_label_filters() {
+  local labels_csv="$1"
+
+  if [[ -z "$ISSUE_LABEL_FILTERS" ]]; then
+    return 0
+  fi
+
+  local labels_lower
+  labels_lower=$(echo "$labels_csv" | tr '[:upper:]' '[:lower:]')
+
+  while IFS= read -r filter; do
+    [[ -n "$filter" ]] || continue
+    local filter_lower
+    filter_lower=$(echo "$filter" | tr '[:upper:]' '[:lower:]')
+    if [[ "$labels_lower" == *"$filter_lower"* ]]; then
+      return 0
+    fi
+  done < <(echo "$ISSUE_LABEL_FILTERS" | tr ',' '\n')
+
+  return 1
+}
+
 # Search for PRs by author in date range
 echo "Searching for PRs..."
-PRS=$(gh pr list \
-  --repo "$REPO" \
-  --author "$AUTHOR" \
-  --state merged \
-  --search "merged:${SINCE}..${UNTIL}" \
-  --json number,title,body,labels,mergeCommit,mergedAt,createdAt \
-  --limit 500)
+GH_PR_LIST_ARGS=(
+  pr list
+  --repo "$REPO"
+  --state merged
+  --search "merged:${SINCE}..${UNTIL}"
+  --json number,title,body,labels,mergeCommit,mergedAt,createdAt
+  --limit 500
+)
+
+if [[ -n "${AUTHOR:-}" ]]; then
+  GH_PR_LIST_ARGS+=(--author "$AUTHOR")
+fi
+
+PRS=$(gh "${GH_PR_LIST_ARGS[@]}")
 
 # Filter for bug-fix PRs
 echo "Filtering for bug-fix PRs..."
@@ -80,8 +120,8 @@ if [[ ! -f "$OUTPUT_FILE" ]] || [[ ! -s "$OUTPUT_FILE" ]]; then
 
 Generated on: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
 
-| PR # | PR Title | Issue # | Issue Title | PR Created | Issue Created | Valid | Merge Commit | Parent Commit |
-|------|----------|---------|-------------|------------|---------------|-------|--------------|---------------|
+| PR # | PR Title | Issue # | Issue Title | Issue Labels | PR Created | Issue Created | Valid | Merge Commit | Parent Commit |
+|------|----------|---------|-------------|--------------|------------|---------------|-------|--------------|---------------|
 EOF
   echo "Created new output file: $OUTPUT_FILE"
 else
@@ -153,6 +193,12 @@ while read -r pr; do
     ISSUE_TITLE=$(echo "$ISSUE_DATA" | jq -r '.title // "N/A"' | sed 's/|/\\|/g')
     ISSUE_CREATED=$(echo "$ISSUE_DATA" | jq -r '.created_at // "N/A"')
     ISSUE_CREATED_SHORT="${ISSUE_CREATED:0:10}"
+    ISSUE_LABELS=$(echo "$ISSUE_DATA" | jq -r '[.labels[].name] | join(", ")' | sed 's/|/\\|/g')
+
+    if ! issue_matches_label_filters "$ISSUE_LABELS"; then
+      echo "  Skipping #$ISSUE_NUM (issue labels '$ISSUE_LABELS' do not match filter)"
+      continue
+    fi
     
     # Check if issue was created before PR (valid for analysis)
     IS_VALID="❌"
@@ -168,7 +214,7 @@ while read -r pr; do
     SHORT_PARENT="${PARENT_COMMIT:0:7}"
     
     # Append to output with new columns
-    echo "| [#$PR_NUM](https://github.com/$REPO/pull/$PR_NUM) | $PR_TITLE | [#$ISSUE_NUM](https://github.com/$REPO/issues/$ISSUE_NUM) | $ISSUE_TITLE | $PR_CREATED_SHORT | $ISSUE_CREATED_SHORT | $IS_VALID | \`$SHORT_MERGE\` | \`$SHORT_PARENT\` |" >> "$OUTPUT_FILE"
+    echo "| [#$PR_NUM](https://github.com/$REPO/pull/$PR_NUM) | $PR_TITLE | [#$ISSUE_NUM](https://github.com/$REPO/issues/$ISSUE_NUM) | $ISSUE_TITLE | $ISSUE_LABELS | $PR_CREATED_SHORT | $ISSUE_CREATED_SHORT | $IS_VALID | \`$SHORT_MERGE\` | \`$SHORT_PARENT\` |" >> "$OUTPUT_FILE"
     
     echo "  Added issue #$ISSUE_NUM: $ISSUE_TITLE (Valid: $IS_VALID)"
     ((ADDED_COUNT++)) || true

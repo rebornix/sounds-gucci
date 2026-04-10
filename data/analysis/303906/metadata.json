@@ -1,0 +1,14 @@
+{
+  "pr": 303910,
+  "prTitle": "Fix enter key behavior in integrated browser",
+  "mergeCommit": "117e3e6304840ba8ce8a82ee050c6fe0594b2a83",
+  "parentCommit": "0aaf631fd943a286525f4c6ed7c0848d062e2aec",
+  "fileCount": 2,
+  "issue": 303906,
+  "issueTitle": "Enter key broken in some integrated browser scenarios",
+  "issueAuthor": "kycutler",
+  "commentCount": 1,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

@@ -1,0 +1,13 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts
+index da42cf8d77b00..acaff32875a2d 100644
+--- a/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts
++++ b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts
+@@ -1292,7 +1292,7 @@ class ChatTerminalToolOutputSection extends Disposable {
+ 
+ 	private async _renderSnapshotOutput(snapshot: NonNullable<IChatTerminalToolInvocationData['terminalCommandOutput']>): Promise<void> {
+ 		if (this._snapshotMirror) {
+-			this._layoutOutput(snapshot.lineCount ?? 0);
++			this._layoutOutput(snapshot.lineCount ?? this._lastRenderedLineCount ?? 0);
+ 			return;
+ 		}
+ 		if (this._store.isDisposed) {

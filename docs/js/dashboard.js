@@ -76,7 +76,7 @@ function renderSingleStats(withScores) {
     statsSection.innerHTML = `
         <div class="stat-card">
             <div class="stat-value">${withScores.length}</div>
-            <div class="stat-label">PRs Analyzed</div>
+            <div class="stat-label">Analyses</div>
         </div>
         <div class="stat-card">
             <div class="stat-value">${withScores.length > 0 ? (withScores.reduce((s,d) => s+d.score, 0) / withScores.length).toFixed(1) : '-'}</div>
@@ -317,10 +317,10 @@ function renderSingleTable(data, thead, tbody) {
     tbody.innerHTML = data.map(d => {
         const tags = (d.tags || []).map(t => `<span class="tag-badge">${escapeHtml(t)}</span>`).join(' ');
         return `
-        <tr onclick="window.location='analysis.html?pr=${d.pr}&experiment=${d.experimentId}'">
+        <tr onclick="window.location='${getAnalysisHref(d)}'">
             <td><a href="https://github.com/${d.repo}/pull/${d.pr}" target="_blank" onclick="event.stopPropagation()">#${d.pr}</a></td>
             <td>${d.issue ? `<a href="https://github.com/${d.repo}/issues/${d.issue}" target="_blank" onclick="event.stopPropagation()">#${d.issue}</a>` : '-'}</td>
-            <td>${escapeHtml(truncate(d.prTitle || d.issueTitle, 60))}</td>
+            <td>${escapeHtml(truncate(getDisplayTitle(d), 60))}</td>
             <td>${renderScoreBadge(d.score)}</td>
             <td>${tags}</td>
             <td>${d.model || '-'}</td>
@@ -337,25 +337,34 @@ function renderComparisonTable(data, thead, tbody) {
     thead.innerHTML = '<th>PR</th><th>Issue</th><th>Title</th><th>Tags</th>' + 
         modelLabels.map(m => `<th>${escapeHtml(m)}</th>`).join('');
     
-    // Group by PR
-    const byPR = new Map();
+    // Group by analysis key so issue-keyed datasets do not collapse into one PR row.
+    const byAnalysis = new Map();
     data.forEach(d => {
-        if (!byPR.has(d.pr)) {
-            byPR.set(d.pr, { pr: d.pr, issue: d.issue, repo: d.repo, title: d.prTitle || d.issueTitle, tags: d.tags || [], scores: {} });
+        const analysisId = getAnalysisKey(d);
+        if (!byAnalysis.has(analysisId)) {
+            byAnalysis.set(analysisId, {
+                analysisId,
+                pr: d.pr,
+                issue: d.issue,
+                repo: d.repo,
+                title: getDisplayTitle(d),
+                tags: d.tags || [],
+                scores: {}
+            });
         }
-        byPR.get(d.pr).scores[d.experimentId] = d;
+        byAnalysis.get(analysisId).scores[d.experimentId] = d;
     });
     
-    tbody.innerHTML = [...byPR.values()].map(row => {
+    tbody.innerHTML = [...byAnalysis.values()].map(row => {
         const firstExp = experiments.find(e => row.scores[e]) || experiments[0];
         const tags = (row.tags || []).map(t => `<span class="tag-badge">${escapeHtml(t)}</span>`).join(' ');
         const scoreCells = experiments.map(exp => {
             const d = row.scores[exp];
             if (!d) return '<td>-</td>';
-            return `<td onclick="event.stopPropagation(); window.location='analysis.html?pr=${row.pr}&experiment=${exp}'" style="cursor:pointer">${renderScoreBadge(d.score)}</td>`;
+            return `<td onclick="event.stopPropagation(); window.location='${getAnalysisHref(d, exp)}'" style="cursor:pointer">${renderScoreBadge(d.score)}</td>`;
         }).join('');
         return `
-        <tr onclick="window.location='analysis.html?pr=${row.pr}&experiment=${firstExp}'" style="cursor:pointer">
+        <tr onclick="window.location='analysis.html?analysis=${row.analysisId}&experiment=${firstExp}'" style="cursor:pointer">
             <td><a href="https://github.com/${row.repo}/pull/${row.pr}" target="_blank" onclick="event.stopPropagation()">#${row.pr}</a></td>
             <td>${row.issue ? `<a href="https://github.com/${row.repo}/issues/${row.issue}" target="_blank" onclick="event.stopPropagation()">#${row.issue}</a>` : '-'}</td>
             <td>${escapeHtml(truncate(row.title, 60))}</td>
@@ -423,6 +432,21 @@ function escapeHtml(text) {
 function truncate(str, len) {
     if (!str) return '';
     return str.length > len ? str.substring(0, len) + '...' : str;
+}
+
+function getAnalysisKey(data) {
+    return String(data.analysisId || data.pr);
+}
+
+function getAnalysisHref(data, experimentId = data.experimentId) {
+    return `analysis.html?analysis=${getAnalysisKey(data)}&experiment=${experimentId}`;
+}
+
+function getDisplayTitle(data) {
+    if (data.issueTitle && getAnalysisKey(data) !== String(data.pr)) {
+        return data.issueTitle;
+    }
+    return data.prTitle || data.issueTitle || '';
 }
 
 // Init

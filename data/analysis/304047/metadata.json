@@ -1,0 +1,14 @@
+{
+  "pr": 304080,
+  "prTitle": "Fixes https://github.com/microsoft/vscode/issues/304047",
+  "mergeCommit": "7073d277429f7f9f4ccde96f23a75b3a1e9ff862",
+  "parentCommit": "13d5f73773a8b66626e1d89149a73018a02664d7",
+  "fileCount": 1,
+  "issue": 304047,
+  "issueTitle": "Artifacts Tool - artifact list is not cleared",
+  "issueAuthor": "lszomoru",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

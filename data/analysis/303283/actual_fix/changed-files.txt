@@ -1,0 +1,2 @@
+src/vs/workbench/contrib/chat/browser/chatTipService.ts
+src/vs/workbench/contrib/chat/test/browser/chatTipService.test.ts

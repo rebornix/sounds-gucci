@@ -1,0 +1,14 @@
+{
+  "pr": 306553,
+  "prTitle": "Remote agent host: fix model picker on new session page",
+  "mergeCommit": "d13d7c7add720c958308ba619e02cd37caffad76",
+  "parentCommit": "9a11a08c75a1d8821b34f8eebd9bcb5b13ecac7b",
+  "fileCount": 2,
+  "issue": 305345,
+  "issueTitle": "Sessions: Model choice changes when new session starts",
+  "issueAuthor": "bamurtaugh",
+  "commentCount": 7,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

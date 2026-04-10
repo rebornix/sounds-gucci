@@ -1,0 +1,14 @@
+{
+  "pr": 305656,
+  "prTitle": "fix: improve fallback title localization for single and plural steps",
+  "mergeCommit": "1553cc3badea3bd4b737ec76302bc83ceb14c5aa",
+  "parentCommit": "93cc2b1a69b3aa3708c3206d9895a80ec0059d66",
+  "fileCount": 1,
+  "issue": 305654,
+  "issueTitle": "[zh-hans] Copilot Chat shows “已完成 n 步骤s” in Chinese UI",
+  "issueAuthor": "dunxuan",
+  "commentCount": 2,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

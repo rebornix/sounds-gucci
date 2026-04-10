@@ -1,0 +1,14 @@
+{
+  "pr": 304327,
+  "prTitle": "fix: correct terminal sandbox icon in thinking dropdown",
+  "mergeCommit": "5d82d8ab1edcdd6bb4bf4df0ade8f486759f346a",
+  "parentCommit": "0f66161e3623cf3b58e7484d1c89e231936a1c0e",
+  "fileCount": 2,
+  "issue": 303505,
+  "issueTitle": "Background commands don't get their output massaged with sandbox info",
+  "issueAuthor": "isidorn",
+  "commentCount": 4,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

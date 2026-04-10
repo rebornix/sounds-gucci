@@ -16,15 +16,16 @@ entries="[]"
 for pr_dir in "$ANALYSIS_DIR"/*/; do
     [ -d "$pr_dir" ] || continue
     
-    pr_number=$(basename "$pr_dir")
+    analysis_id=$(basename "$pr_dir")
     # Skip non-numeric directories
-    [[ "$pr_number" =~ ^[0-9]+$ ]] || continue
+    [[ "$analysis_id" =~ ^[0-9]+$ ]] || continue
     
     # PR-level metadata
     metadata_file="${pr_dir}metadata.json"
     [ -f "$metadata_file" ] || continue
     
     # Read PR-level metadata
+    pr_number=$(jq -r --arg analysisId "$analysis_id" '.pr // $analysisId' "$metadata_file")
     pr_title=$(jq -r '.prTitle // ""' "$metadata_file" | sed 's/"/\\"/g')
     pr_merge_commit=$(jq -r '.mergeCommit // ""' "$metadata_file")
     issue_number=$(jq -r '.issue // ""' "$metadata_file")
@@ -74,6 +75,7 @@ for pr_dir in "$ANALYSIS_DIR"/*/; do
         
         # Build JSON entry using jq for proper escaping
         entry=$(jq -n \
+            --argjson analysisId "$analysis_id" \
             --argjson pr "$pr_number" \
             --arg prTitle "$pr_title" \
             --arg prMergeCommit "$pr_merge_commit" \
@@ -92,6 +94,7 @@ for pr_dir in "$ANALYSIS_DIR"/*/; do
             --arg traceUrl "$trace_url" \
             --argjson tags "$tags" \
             '{
+                analysisId: $analysisId,
                 pr: $pr,
                 prTitle: $prTitle,
                 prMergeCommit: $prMergeCommit,

@@ -1,0 +1,2 @@
+src/vs/platform/browserView/electron-main/browserView.ts
+src/vs/workbench/contrib/browserView/electron-browser/features/browserEditorChatFeatures.ts

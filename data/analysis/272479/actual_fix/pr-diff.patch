@@ -1,0 +1,18 @@
+diff --git a/extensions/typescript-language-features/src/languageFeatures/fileConfigurationManager.ts b/extensions/typescript-language-features/src/languageFeatures/fileConfigurationManager.ts
+index 915de13e13cf4..adac2436edfaa 100644
+--- a/extensions/typescript-language-features/src/languageFeatures/fileConfigurationManager.ts
++++ b/extensions/typescript-language-features/src/languageFeatures/fileConfigurationManager.ts
+@@ -53,10 +53,9 @@ export default class FileConfigurationManager extends Disposable {
+ 		document: vscode.TextDocument,
+ 		token: vscode.CancellationToken
+ 	): Promise<void> {
+-		const formattingOptions = this.getFormattingOptions(document);
+-		if (formattingOptions) {
+-			return this.ensureConfigurationOptions(document, formattingOptions, token);
+-		}
++		const formattingOptions = this.getFormattingOptions(document)
++			?? { tabSize: undefined, insertSpaces: undefined };
++		return this.ensureConfigurationOptions(document, formattingOptions, token);
+ 	}
+ 
+ 	private getFormattingOptions(document: vscode.TextDocument): FormattingOptions | undefined {

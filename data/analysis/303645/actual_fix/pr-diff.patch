@@ -1,0 +1,41 @@
+diff --git a/src/vs/workbench/contrib/chat/test/browser/chatImageCarouselService.test.ts b/src/vs/workbench/contrib/chat/test/browser/chatImageCarouselService.test.ts
+index 4facfe453df75..3c738da909868 100644
+--- a/src/vs/workbench/contrib/chat/test/browser/chatImageCarouselService.test.ts
++++ b/src/vs/workbench/contrib/chat/test/browser/chatImageCarouselService.test.ts
+@@ -282,6 +282,22 @@ suite('ChatImageCarouselService helpers', () => {
+ 			assert.strictEqual(result.length, 1);
+ 			assert.strictEqual(result[0].images.length, 3);
+ 		});
++
++		test('image data is a plain Uint8Array usable by Blob constructor', async () => {
++			const request = makeRequest('req-1', [
++				makeImageVariableEntry({ value: new Uint8Array([1, 2, 3]) }),
++			], 'Screenshot request');
++			const response = makeResponse('req-1');
++
++			const result = await collectCarouselSections([request, response], async () => new Uint8Array());
++
++			assert.strictEqual(result.length, 1);
++			const data = result[0].images[0].data;
++			// data must be a Uint8Array (not VSBuffer or ArrayBuffer) so that
++			// new Blob([data]) in the carousel editor works correctly.
++			assert.ok(data instanceof Uint8Array, 'image data should be Uint8Array');
++			assert.deepStrictEqual([...data], [1, 2, 3]);
++		});
+ 	});
+ 
+ });
+diff --git a/src/vs/workbench/contrib/imageCarousel/browser/imageCarouselEditor.ts b/src/vs/workbench/contrib/imageCarousel/browser/imageCarouselEditor.ts
+index 854f5deca2602..06274338eec5b 100644
+--- a/src/vs/workbench/contrib/imageCarousel/browser/imageCarouselEditor.ts
++++ b/src/vs/workbench/contrib/imageCarousel/browser/imageCarouselEditor.ts
+@@ -389,7 +389,8 @@ export class ImageCarouselEditor extends EditorPane {
+ 
+ 		let buffer: Uint8Array;
+ 		if (image.data) {
+-			buffer = image.data.buffer;
++			// Handle both VSBuffer (has .buffer property) and raw Uint8Array from chat attachments
++			buffer = image.data instanceof Uint8Array ? image.data : image.data.buffer;
+ 		} else if (image.uri) {
+ 			const content = await this._fileService.readFile(image.uri);
+ 			buffer = content.value.buffer;

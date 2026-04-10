@@ -1,0 +1,2 @@
+src/vs/sessions/browser/media/style.css
+src/vs/workbench/contrib/chat/browser/agentSessions/media/agentsessionsviewer.css

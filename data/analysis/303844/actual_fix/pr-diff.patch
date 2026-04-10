@@ -1,0 +1,330 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts
+index 8484113db9414..da42cf8d77b00 100644
+--- a/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts
++++ b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts
+@@ -5,7 +5,7 @@
+ 
+ import { h } from '../../../../../../../base/browser/dom.js';
+ import { ActionBar } from '../../../../../../../base/browser/ui/actionbar/actionbar.js';
+-import { escapeMarkdownSyntaxTokens, isMarkdownString, MarkdownString } from '../../../../../../../base/common/htmlContent.js';
++import { isMarkdownString, MarkdownString } from '../../../../../../../base/common/htmlContent.js';
+ import { IConfigurationService } from '../../../../../../../platform/configuration/common/configuration.js';
+ import { IInstantiationService } from '../../../../../../../platform/instantiation/common/instantiation.js';
+ import { ChatConfiguration } from '../../../../common/constants.js';
+@@ -1624,7 +1624,7 @@ export class ContinueInBackgroundAction extends Action implements IAction {
+ 	}
+ }
+ 
+-class ChatTerminalThinkingCollapsibleWrapper extends ChatCollapsibleContentPart {
++export class ChatTerminalThinkingCollapsibleWrapper extends ChatCollapsibleContentPart {
+ 	private readonly _terminalContentElement: HTMLElement;
+ 	private readonly _commandText: string;
+ 	private readonly _isSandboxWrapped: boolean;
+@@ -1640,11 +1640,13 @@ class ChatTerminalThinkingCollapsibleWrapper extends ChatCollapsibleContentPart
+ 		@IHoverService hoverService: IHoverService,
+ 		@IConfigurationService configurationService: IConfigurationService,
+ 	) {
+-		const title = isComplete ? `Ran \`${escapeMarkdownSyntaxTokens(commandText)}\`` : `Running \`${escapeMarkdownSyntaxTokens(commandText)}\``;
++		const title = isComplete
++			? localize('chat.terminal.ran.plain', "Ran {0}", commandText)
++			: localize('chat.terminal.running.plain', "Running {0}", commandText);
+ 		super(title, context, undefined, hoverService, configurationService);
+ 
+ 		this._terminalContentElement = contentElement;
+-		this._commandText = escapeMarkdownSyntaxTokens(commandText);
++		this._commandText = commandText;
+ 		this._isSandboxWrapped = isSandboxWrapped;
+ 		this._isComplete = isComplete;
+ 
+@@ -1663,16 +1665,22 @@ class ChatTerminalThinkingCollapsibleWrapper extends ChatCollapsibleContentPart
+ 			return;
+ 		}
+ 
++		const labelElement = this._collapseButton.labelElement;
++		labelElement.textContent = '';
++
+ 		if (this._isSandboxWrapped) {
+-			this._collapseButton.label = new MarkdownString(this._isComplete
+-				? localize('chat.terminal.ranInSandbox', "Ran `{0}` in sandbox", this._commandText)
+-				: localize('chat.terminal.runningInSandbox', "Running `{0}` in sandbox", this._commandText));
++			const prefixText = this._isComplete
++				? localize('chat.terminal.ranInSandbox.prefix', "Ran ")
++				: localize('chat.terminal.runningInSandbox.prefix', "Running ");
++			const suffixText = localize('chat.terminal.sandbox.suffix', " in sandbox");
++			labelElement.appendChild(document.createTextNode(prefixText));
++			const codeElement = document.createElement('code');
++			codeElement.textContent = this._commandText;
++			labelElement.appendChild(codeElement);
++			labelElement.appendChild(document.createTextNode(suffixText));
+ 			return;
+ 		}
+ 
+-		const labelElement = this._collapseButton.labelElement;
+-		labelElement.textContent = '';
+-
+ 		const prefixText = this._isComplete
+ 			? localize('chat.terminal.ran.prefix', "Ran ")
+ 			: localize('chat.terminal.running.prefix', "Running ");
+diff --git a/src/vs/workbench/test/browser/componentFixtures/chatTerminalCollapsible.fixture.ts b/src/vs/workbench/test/browser/componentFixtures/chatTerminalCollapsible.fixture.ts
+new file mode 100644
+index 0000000000000..d4a8c16439dff
+--- /dev/null
++++ b/src/vs/workbench/test/browser/componentFixtures/chatTerminalCollapsible.fixture.ts
+@@ -0,0 +1,95 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright (c) Microsoft Corporation. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++import * as dom from '../../../../base/browser/dom.js';
++import { Event } from '../../../../base/common/event.js';
++import { observableValue } from '../../../../base/common/observable.js';
++import { mock, upcastPartial } from '../../../../base/test/common/mock.js';
++import type { IChatContentPartRenderContext, InlineTextModelCollection } from '../../../contrib/chat/browser/widget/chatContentParts/chatContentParts.js';
++import type { IChatResponseViewModel } from '../../../contrib/chat/common/model/chatViewModel.js';
++import { ChatTerminalThinkingCollapsibleWrapper } from '../../../contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.js';
++import { ComponentFixtureContext, createEditorServices, defineComponentFixture, defineThemedFixtureGroup } from './fixtureUtils.js';
++
++import '../../../contrib/chat/browser/widget/media/chat.css';
++
++function createMockContext(): IChatContentPartRenderContext {
++	return {
++		element: new class extends mock<IChatResponseViewModel>() { }(),
++		elementIndex: 0,
++		container: document.createElement('div'),
++		content: [],
++		contentIndex: 0,
++		editorPool: undefined!,
++		codeBlockStartIndex: 0,
++		treeStartIndex: 0,
++		diffEditorPool: undefined!,
++		codeBlockModelCollection: undefined!,
++		currentWidth: observableValue('currentWidth', 400),
++		onDidChangeVisibility: Event.None,
++		inlineTextModels: upcastPartial<InlineTextModelCollection>({}),
++	};
++}
++
++function renderCollapsible(context: ComponentFixtureContext, commandText: string, isSandboxWrapped: boolean, isComplete: boolean): void {
++	const { container, disposableStore } = context;
++
++	const instantiationService = createEditorServices(disposableStore, {
++		colorTheme: context.theme,
++	});
++
++	container.style.width = '500px';
++	container.style.padding = '8px';
++	container.classList.add('monaco-workbench');
++
++	const session = dom.$('.interactive-session');
++	container.appendChild(session);
++
++	const contentElement = dom.$('.chat-terminal-output-placeholder');
++	contentElement.textContent = '(terminal output would appear here)';
++	contentElement.style.padding = '8px';
++	contentElement.style.color = 'var(--vscode-descriptionForeground)';
++
++	const wrapper = disposableStore.add(instantiationService.createInstance(
++		ChatTerminalThinkingCollapsibleWrapper,
++		commandText,
++		isSandboxWrapped,
++		contentElement,
++		createMockContext(),
++		false,
++		isComplete,
++	));
++
++	session.appendChild(wrapper.domNode);
++}
++
++export default defineThemedFixtureGroup({ path: 'chat/terminalCollapsible/' }, {
++	'Ran - simple command': defineComponentFixture({
++		render: ctx => renderCollapsible(ctx, 'ls -lh', false, true),
++	}),
++	'Running - simple command': defineComponentFixture({
++		render: ctx => renderCollapsible(ctx, 'ls -lh', false, false),
++	}),
++	'Ran sandbox - simple command': defineComponentFixture({
++		render: ctx => renderCollapsible(ctx, 'ls -lh', true, true),
++	}),
++	'Running sandbox - simple command': defineComponentFixture({
++		render: ctx => renderCollapsible(ctx, 'ls -lh', true, false),
++	}),
++	'Ran - special chars': defineComponentFixture({
++		render: ctx => renderCollapsible(ctx, 'grep -rn "hello" ./src --include="*.ts"', false, true),
++	}),
++	'Ran sandbox - special chars': defineComponentFixture({
++		render: ctx => renderCollapsible(ctx, 'grep -rn "hello" ./src --include="*.ts"', true, true),
++	}),
++	'Ran - backticks': defineComponentFixture({
++		render: ctx => renderCollapsible(ctx, 'echo `date` && echo `hostname`', false, true),
++	}),
++	'Ran sandbox - backticks': defineComponentFixture({
++		render: ctx => renderCollapsible(ctx, 'echo `date` && echo `hostname`', true, true),
++	}),
++	'Ran sandbox - powershell backticks': defineComponentFixture({
++		render: ctx => renderCollapsible(ctx, 'Get-Process | Where-Object {$_.Name -eq `"notepad`"}', true, true),
++	}),
++});
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - backticks/Dark.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - backticks/Dark.png
+new file mode 100644
+index 0000000000000..85c40d12f6b59
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - backticks/Dark.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:0ae8dab0fa799afaadf186c93436bca9ac39c36b99b8f9846ed0d7284494be93
++size 2288
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - backticks/Light.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - backticks/Light.png
+new file mode 100644
+index 0000000000000..cfb849214eaef
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - backticks/Light.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:89f27caedd1e45d22e90243691bcc0153195d121dc2c2bc58be4a1d50ace828f
++size 2229
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - simple command/Dark.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - simple command/Dark.png
+new file mode 100644
+index 0000000000000..539388c741bef
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - simple command/Dark.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:793aa216b116d5b028adf16db5e8780f7b844bfbdd38657f943c6427de3e320b
++size 945
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - simple command/Light.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - simple command/Light.png
+new file mode 100644
+index 0000000000000..e2b960147c1bd
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - simple command/Light.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:6500291e4787ee83dbe70cf44c1b6cb0c5c96f4311cf865cba26ce86a92581b4
++size 938
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - special chars/Dark.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - special chars/Dark.png
+new file mode 100644
+index 0000000000000..3b72ed4acaaf6
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - special chars/Dark.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:4e88d70bf076040be9311a96a39717699e59e2bd86a9b2ca7e32b2424bfbf273
++size 2442
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - special chars/Light.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - special chars/Light.png
+new file mode 100644
+index 0000000000000..0abd61d3e4ed1
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - special chars/Light.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:f267b5737a1cbfeddd000065fa66735c058cdaa090b60445f583db282eb4787d
++size 2359
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - backticks/Dark.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - backticks/Dark.png
+new file mode 100644
+index 0000000000000..a37c755179fb6
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - backticks/Dark.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:ae563a7c9f939d3fefa4a30e91e1a514ae0de7b881813827110b62def6bd05ef
++size 3061
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - backticks/Light.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - backticks/Light.png
+new file mode 100644
+index 0000000000000..7d27474905c17
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - backticks/Light.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:1d87074216734a0e6a15683060271590bb6ec594dca7ca84c6ae3b0180df2a66
++size 2988
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - powershell backticks/Dark.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - powershell backticks/Dark.png
+new file mode 100644
+index 0000000000000..77d8e86be2265
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - powershell backticks/Dark.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:dce5773e95961f082c034816bc63fbf79b8cedecaec9750840fe483d4855f32f
++size 4476
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - powershell backticks/Light.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - powershell backticks/Light.png
+new file mode 100644
+index 0000000000000..04745d736241f
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - powershell backticks/Light.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:3a05a111b62dbdd2f355f31f08a2c5c6d3731a1ce9607d95e66c42e092a1f099
++size 4354
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - simple command/Dark.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - simple command/Dark.png
+new file mode 100644
+index 0000000000000..9eb5f8b26b139
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - simple command/Dark.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:eda8e2a9eeb0b53fee694039861e868d40b711c4f26b95748605f0a14a8a7811
++size 1759
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - simple command/Light.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - simple command/Light.png
+new file mode 100644
+index 0000000000000..8abf08a272884
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - simple command/Light.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:d71509185136eced7961758fde339f267f38966a4e35939c8fa11fde64e641e2
++size 1757
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - special chars/Dark.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - special chars/Dark.png
+new file mode 100644
+index 0000000000000..975089fc9b60b
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - special chars/Dark.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:a2a089a8a290b9ccb52d42cdd987ca8ccccdbb0a47394e82f0d6e40b447663a7
++size 3156
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - special chars/Light.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - special chars/Light.png
+new file mode 100644
+index 0000000000000..71f232f4d62ae
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - special chars/Light.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:927527224e48e702d81b44beedc1a2395c638dbaaf952d1a1c926d576d2bf15f
++size 3152
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running - simple command/Dark.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running - simple command/Dark.png
+new file mode 100644
+index 0000000000000..263fa55733ec2
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running - simple command/Dark.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:3647c8c57337952dd845f9151b3ddfbb074857e4036d76dd6c7d7beda734c676
++size 1170
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running - simple command/Light.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running - simple command/Light.png
+new file mode 100644
+index 0000000000000..04b6944c1a240
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running - simple command/Light.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:c0008e3885e2e6bf569757ace983c635feb9da86d470f2455e4a6884d7d22b6e
++size 1139
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running sandbox - simple command/Dark.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running sandbox - simple command/Dark.png
+new file mode 100644
+index 0000000000000..760ab24627db8
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running sandbox - simple command/Dark.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:a1f340aaeaa112ab63fa6a6048fc76618097114ffbf9ada8a4e8f7736df5c5dd
++size 1932
+diff --git a/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running sandbox - simple command/Light.png b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running sandbox - simple command/Light.png
+new file mode 100644
+index 0000000000000..7f869c9bceb0c
+--- /dev/null
++++ b/test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running sandbox - simple command/Light.png	
+@@ -0,0 +1,3 @@
++version https://git-lfs.github.com/spec/v1
++oid sha256:f3a5c44027dd8659083344aa7f15acd02d2e59d53913b4ca58e5345204470f0d
++size 1893

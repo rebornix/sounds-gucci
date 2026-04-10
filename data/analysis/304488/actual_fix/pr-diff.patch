@@ -1,0 +1,67 @@
+diff --git a/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/basicExecuteStrategy.ts b/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/basicExecuteStrategy.ts
+index c99f166ad627f..ca3df9218d0b2 100644
+--- a/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/basicExecuteStrategy.ts
++++ b/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/basicExecuteStrategy.ts
+@@ -16,6 +16,7 @@ import type { IMarker as IXtermMarker } from '@xterm/xterm';
+ import { ITerminalInstance } from '../../../../terminal/browser/terminal.js';
+ import { createAltBufferPromise, setupRecreatingStartMarker, stripCommandEchoAndPrompt } from './strategyHelpers.js';
+ import { TerminalChatAgentToolsSettingId } from '../../common/terminalChatAgentToolsConfiguration.js';
++import { isMacintosh } from '../../../../../../base/common/platform.js';
+ 
+ /**
+  * This strategy is used when shell integration is enabled, but rich command detection was not
+@@ -129,7 +130,8 @@ export class BasicExecuteStrategy extends Disposable implements ITerminalExecute
+ 			// occurs.
+ 			this._log(`Executing command line \`${commandLine}\``);
+ 			markerRecreation.dispose();
+-			this._instance.sendText(commandLine, true, true);
++			const forceBracketedPasteMode = isMacintosh;
++			this._instance.sendText(commandLine, true, forceBracketedPasteMode);
+ 
+ 			// Wait for the next end execution event - note that this may not correspond to the actual
+ 			// execution requested
+diff --git a/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/noneExecuteStrategy.ts b/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/noneExecuteStrategy.ts
+index c1f1b210253b7..95fb2c701b059 100644
+--- a/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/noneExecuteStrategy.ts
++++ b/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/noneExecuteStrategy.ts
+@@ -14,6 +14,7 @@ import type { IMarker as IXtermMarker } from '@xterm/xterm';
+ import { ITerminalInstance } from '../../../../terminal/browser/terminal.js';
+ import { createAltBufferPromise, setupRecreatingStartMarker, stripCommandEchoAndPrompt } from './strategyHelpers.js';
+ import { TerminalChatAgentToolsSettingId } from '../../common/terminalChatAgentToolsConfiguration.js';
++import { isMacintosh } from '../../../../../../base/common/platform.js';
+ 
+ /**
+  * This strategy is used when no shell integration is available. There are very few extension APIs
+@@ -84,7 +85,8 @@ export class NoneExecuteStrategy extends Disposable implements ITerminalExecuteS
+ 			this._log(`Executing command line \`${commandLine}\``);
+ 			markerRecreation.dispose();
+ 			const startLine = this._startMarker.value?.line;
+-			this._instance.sendText(commandLine, true, true);
++			const forceBracketedPasteMode = isMacintosh;
++			this._instance.sendText(commandLine, true, forceBracketedPasteMode);
+ 
+ 			// Wait for the cursor to move past the command line before
+ 			// starting idle detection. Without this, the idle poll may
+diff --git a/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/richExecuteStrategy.ts b/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/richExecuteStrategy.ts
+index cd8ac8edaf218..f68ba82f268d8 100644
+--- a/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/richExecuteStrategy.ts
++++ b/src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/richExecuteStrategy.ts
+@@ -9,7 +9,7 @@ import { Emitter, Event } from '../../../../../../base/common/event.js';
+ import { Disposable, DisposableStore, MutableDisposable } from '../../../../../../base/common/lifecycle.js';
+ import { isNumber } from '../../../../../../base/common/types.js';
+ import { IConfigurationService } from '../../../../../../platform/configuration/common/configuration.js';
+-import { isCI } from '../../../../../../base/common/platform.js';
++import { isCI, isMacintosh } from '../../../../../../base/common/platform.js';
+ import type { ICommandDetectionCapability } from '../../../../../../platform/terminal/common/capabilities/capabilities.js';
+ import { ITerminalLogService } from '../../../../../../platform/terminal/common/terminal.js';
+ import type { ITerminalInstance } from '../../../../terminal/browser/terminal.js';
+@@ -85,7 +85,8 @@ export class RichExecuteStrategy extends Disposable implements ITerminalExecuteS
+ 			// Execute the command
+ 			this._log(`Executing command line \`${commandLine}\``);
+ 			markerRecreation.dispose();
+-			this._instance.runCommand(commandLine, true, commandId, true);
++			const forceBracketedPasteMode = isMacintosh;
++			this._instance.runCommand(commandLine, true, commandId, forceBracketedPasteMode);
+ 
+ 			// Wait for the terminal to idle
+ 			this._log('Waiting for done event');

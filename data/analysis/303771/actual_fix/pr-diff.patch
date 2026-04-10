@@ -1,0 +1,25 @@
+diff --git a/src/vs/workbench/contrib/imageCarousel/browser/media/imageCarousel.css b/src/vs/workbench/contrib/imageCarousel/browser/media/imageCarousel.css
+index 48194e0238b00..35926b8e7b297 100644
+--- a/src/vs/workbench/contrib/imageCarousel/browser/media/imageCarousel.css
++++ b/src/vs/workbench/contrib/imageCarousel/browser/media/imageCarousel.css
+@@ -121,6 +121,10 @@
+ 	opacity: 0.8;
+ }
+ 
++.image-carousel-editor .slideshow-container:hover .nav-arrow:disabled {
++	opacity: 0.3;
++}
++
+ .image-carousel-editor .nav-arrow:hover:not(:disabled) {
+ 	opacity: 1 !important;
+ 	background: var(--vscode-toolbar-activeBackground);
+@@ -134,9 +138,7 @@
+ }
+ 
+ .image-carousel-editor .nav-arrow:disabled {
+-	opacity: 0 !important;
+ 	cursor: default;
+-	pointer-events: none;
+ }
+ 
+ .image-carousel-editor .nav-arrow.prev-arrow {

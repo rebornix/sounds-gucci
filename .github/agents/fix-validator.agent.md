@@ -2,7 +2,7 @@
 name: fix-validator
 model: GPT-5.3-Codex (copilot)
 description: Cross-check a proposed bug fix against the actual PR changes. Use this agent after bug-analyzer has proposed a fix to see how well it aligns with the real solution.
-argument-hint: Path to the analysis directory (e.g., "data/analysis/12345") containing the proposal and actual_fix/pr-diff.patch
+argument-hint: Path to the analysis directory (for example "data/analysis/12345") containing the proposal and actual_fix/pr-diff.patch
 tools: ['execute', 'read', 'agent', 'edit', 'search', 'web', 'github/*', 'todo']
 ---
 
@@ -19,7 +19,7 @@ You must evaluate how well the proposal aligns with the real solution.
 ## Directory Structure
 
 ```
-data/analysis/<pr>/
+data/analysis/<analysis-id>/
 ├── metadata.json      # PR-level info
 ├── issue.md           # Bug issue description
 ├── actual_fix/        # The real solution

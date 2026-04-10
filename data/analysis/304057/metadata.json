@@ -1,0 +1,14 @@
+{
+  "pr": 304163,
+  "prTitle": "fix get task output for watch tasks",
+  "mergeCommit": "1e5df648f58f749457087694efdbba1f84bd2b94",
+  "parentCommit": "64d4465e27ced28556429d06f1ea6eb4a94e94e8",
+  "fileCount": 1,
+  "issue": 304057,
+  "issueTitle": "Copilot Task output tool always comes back empty",
+  "issueAuthor": "PEZ",
+  "commentCount": 2,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

@@ -1,0 +1,14 @@
+{
+  "pr": 304872,
+  "prTitle": "prompt files: only show problems for files open in editor",
+  "mergeCommit": "6648ece501f958a8fcf9092583e7541818992258",
+  "parentCommit": "6eee457e0cce931884eec375c0fe665f0d9f9a15",
+  "fileCount": 4,
+  "issue": 302880,
+  "issueTitle": "Problems panel showing problems from Copilot configuration files",
+  "issueAuthor": "RobertOstermann",
+  "commentCount": 48,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

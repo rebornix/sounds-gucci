@@ -1,0 +1,14 @@
+{
+  "pr": 303770,
+  "prTitle": "Fix terminal sandbox tmp dir scoping",
+  "mergeCommit": "ae0f754c98e99986c4ffcb8a26b7f442579024a2",
+  "parentCommit": "bb217020c07e2a549c432ca3894fa2b1ce617105",
+  "fileCount": 2,
+  "issue": 299224,
+  "issueTitle": "When running sandbox, Copilot cannot access tmp",
+  "issueAuthor": "pierceboggan",
+  "commentCount": 16,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

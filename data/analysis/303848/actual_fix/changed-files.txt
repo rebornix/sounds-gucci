@@ -1,0 +1,8 @@
+.github/skills/fix-ci-failures/SKILL.md
+extensions/vscode-api-tests/src/singlefolder-tests/chat.runInTerminal.test.ts
+src/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
+src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/executeStrategy/richExecuteStrategy.ts
+src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/tools/commandLinePresenter/sandboxedCommandLinePresenter.ts
+src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/tools/commandLineRewriter/commandLineSandboxRewriter.ts
+src/vs/workbench/contrib/terminalContrib/chatAgentTools/browser/tools/runInTerminalTool.ts
+src/vs/workbench/contrib/terminalContrib/chatAgentTools/test/browser/sandboxedCommandLinePresenter.test.ts

@@ -1,0 +1,2 @@
+src/vs/sessions/contrib/copilotChatSessions/browser/copilotChatSessionsActions.ts
+src/vs/sessions/contrib/remoteAgentHost/browser/remoteAgentHost.contribution.ts

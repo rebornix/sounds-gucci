@@ -1,0 +1,14 @@
+{
+  "pr": 304720,
+  "prTitle": "Can't read archived sessions in light mode (fix #304294)",
+  "mergeCommit": "224a1e164c93941b000dce04cf1caae951f2d0fd",
+  "parentCommit": "7b9578c95159aaf4990d343b1813ee5014a647e6",
+  "fileCount": 2,
+  "issue": 304294,
+  "issueTitle": "Can't read archived sessions in light mode",
+  "issueAuthor": "roblourens",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

@@ -1,0 +1,14 @@
+{
+  "pr": 304037,
+  "prTitle": "Fix dragging editor tab issue with truncated filenames",
+  "mergeCommit": "a12f5440566ac22bfcdb0be2130844d3592ca232",
+  "parentCommit": "46c65bcd055092c2926afa77508ae24a799df2f7",
+  "fileCount": 1,
+  "issue": 301779,
+  "issueTitle": "Dragging editor tab when filename is truncated also drags part of the tab header UI",
+  "issueAuthor": "umarsdq",
+  "commentCount": 3,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

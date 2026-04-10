@@ -1,0 +1,68 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/aiCustomization/mcpListWidget.ts b/src/vs/workbench/contrib/chat/browser/aiCustomization/mcpListWidget.ts
+index f809954da8aec..4122a399a4ea5 100644
+--- a/src/vs/workbench/contrib/chat/browser/aiCustomization/mcpListWidget.ts
++++ b/src/vs/workbench/contrib/chat/browser/aiCustomization/mcpListWidget.ts
+@@ -382,6 +382,8 @@ export class McpListWidget extends Disposable {
+ 	private galleryServers: IWorkbenchMcpServer[] = [];
+ 	private searchQuery: string = '';
+ 	private browseMode: boolean = false;
++	private lastHeight: number = 0;
++	private lastWidth: number = 0;
+ 	private readonly collapsedGroups = new Set<string>();
+ 	private galleryCts: CancellationTokenSource | undefined;
+ 	private readonly delayedFilter = new Delayer<void>(200);
+@@ -608,6 +610,11 @@ export class McpListWidget extends Disposable {
+ 			this.galleryServers = [];
+ 			this.filterServers();
+ 		}
++
++		// Re-layout to account for the back link height change
++		if (this.lastHeight > 0) {
++			this.layout(this.lastHeight, this.lastWidth);
++		}
+ 	}
+ 
+ 	private async queryGallery(): Promise<void> {
+@@ -882,6 +889,8 @@ export class McpListWidget extends Disposable {
+ 	 * Layouts the widget.
+ 	 */
+ 	layout(height: number, width: number): void {
++		this.lastHeight = height;
++		this.lastWidth = width;
+ 		const sectionFooterHeight = this.sectionHeader.offsetHeight || 0;
+ 		const searchBarHeight = this.searchAndButtonContainer.offsetHeight || 52;
+ 		const backLinkHeight = this.browseMode ? (this.backLink.offsetHeight || 28) : 0;
+diff --git a/src/vs/workbench/contrib/chat/browser/aiCustomization/pluginListWidget.ts b/src/vs/workbench/contrib/chat/browser/aiCustomization/pluginListWidget.ts
+index 98223af757bfa..3920cfa35f671 100644
+--- a/src/vs/workbench/contrib/chat/browser/aiCustomization/pluginListWidget.ts
++++ b/src/vs/workbench/contrib/chat/browser/aiCustomization/pluginListWidget.ts
+@@ -298,6 +298,8 @@ export class PluginListWidget extends Disposable {
+ 	private marketplaceItems: IMarketplacePluginItem[] = [];
+ 	private searchQuery: string = '';
+ 	private browseMode: boolean = false;
++	private lastHeight: number = 0;
++	private lastWidth: number = 0;
+ 	private readonly collapsedGroups = new Set<string>();
+ 	private marketplaceCts: CancellationTokenSource | undefined;
+ 	private readonly delayedFilter = new Delayer<void>(200);
+@@ -519,6 +521,11 @@ export class PluginListWidget extends Disposable {
+ 			this.marketplaceItems = [];
+ 			this.filterPlugins();
+ 		}
++
++		// Re-layout to account for the back link height change
++		if (this.lastHeight > 0) {
++			this.layout(this.lastHeight, this.lastWidth);
++		}
+ 	}
+ 
+ 	private async queryMarketplace(): Promise<void> {
+@@ -692,6 +699,8 @@ export class PluginListWidget extends Disposable {
+ 	}
+ 
+ 	layout(height: number, width: number): void {
++		this.lastHeight = height;
++		this.lastWidth = width;
+ 		const sectionFooterHeight = this.sectionHeader.offsetHeight || 0;
+ 		const searchBarHeight = this.searchAndButtonContainer.offsetHeight || 52;
+ 		const backLinkHeight = this.browseMode ? (this.backLink.offsetHeight || 28) : 0;

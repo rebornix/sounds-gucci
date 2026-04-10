@@ -48,7 +48,7 @@ echo "Clone path: $CLONE_PATH"
 echo "Output dir: $OUTPUT_DIR"
 
 # Validate clone path exists
-if [[ ! -d "$CLONE_PATH/.git" ]]; then
+if [[ ! -e "$CLONE_PATH/.git" ]]; then
   echo "Error: No git repository found at $CLONE_PATH"
   exit 1
 fi

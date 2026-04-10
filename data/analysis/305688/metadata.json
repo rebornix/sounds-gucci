@@ -1,0 +1,14 @@
+{
+  "pr": 306008,
+  "prTitle": "sessions - fix permissions rendering in list",
+  "mergeCommit": "c38a4a4a4b4304ef2ee0caec971389e08ed4320f",
+  "parentCommit": "c389bd92a06b63b41edc301b17529fe06b50fc2d",
+  "fileCount": 1,
+  "issue": 305688,
+  "issueTitle": "Sessions: approvals rendering glitch",
+  "issueAuthor": "bpasero",
+  "commentCount": 1,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

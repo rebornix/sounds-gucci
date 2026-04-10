@@ -1,0 +1,14 @@
+{
+  "pr": 306454,
+  "prTitle": "sessions: fix welcome page chat input collapsing on first keystroke",
+  "mergeCommit": "4ebc211cda9e32010ab4770859156e9a95583559",
+  "parentCommit": "abea71e2b7c1daecf68232d5d2a96efe3a6bc7f0",
+  "fileCount": 1,
+  "issue": 304544,
+  "issueTitle": "Can't type in new welcome page",
+  "issueAuthor": "bamurtaugh",
+  "commentCount": 5,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

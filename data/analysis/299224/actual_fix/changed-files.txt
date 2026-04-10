@@ -1,0 +1,2 @@
+src/vs/workbench/contrib/terminalContrib/chatAgentTools/common/terminalSandboxService.ts
+src/vs/workbench/contrib/terminalContrib/chatAgentTools/test/browser/terminalSandboxService.test.ts

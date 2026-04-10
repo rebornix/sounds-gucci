@@ -1,0 +1,14 @@
+{
+  "pr": 304105,
+  "prTitle": "fix #304013",
+  "mergeCommit": "dbe6a13e9c8e8ab98d8c27a82d298f903d562f9e",
+  "parentCommit": "ee7a0d347587b596371ff0dde7096d2531bd3212",
+  "fileCount": 1,
+  "issue": 304013,
+  "issueTitle": "Unexpected hover text",
+  "issueAuthor": "jrieken",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

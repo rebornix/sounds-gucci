@@ -1,0 +1,14 @@
+{
+  "pr": 304790,
+  "prTitle": "Add New Chat entry point in the title bar menu (fix #304774)",
+  "mergeCommit": "db9c3692a120a7772a3542b70bddf6b71afda443",
+  "parentCommit": "6a12c4553b4fa16d6ff344682b3bdca0ce0fcbf2",
+  "fileCount": 1,
+  "issue": 304774,
+  "issueTitle": "Add New Chat entry point in the title bar menu",
+  "issueAuthor": "cwebster-99",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

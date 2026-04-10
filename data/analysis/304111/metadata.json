@@ -1,0 +1,14 @@
+{
+  "pr": 306251,
+  "prTitle": "Update UI bug fixes and improvements",
+  "mergeCommit": "00356ebc69d09b93830f05eb4eabf872d425abdd",
+  "parentCommit": "4003d390fb8747be92b4e66c280584cf92579d16",
+  "fileCount": 16,
+  "issue": 304111,
+  "issueTitle": "Update widget bubble origination isn't in center of button",
+  "issueAuthor": "pierceboggan",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

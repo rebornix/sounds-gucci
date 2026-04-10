@@ -1,0 +1,14 @@
+{
+  "pr": 304510,
+  "prTitle": "bring back fix for accessible view links",
+  "mergeCommit": "334b6709af48ece028faa569807b9b4be91f634d",
+  "parentCommit": "c136539a3fcf42c5b98a6aefd7640199ccee783f",
+  "fileCount": 2,
+  "issue": 301564,
+  "issueTitle": "Accessible View should include file paths when presenting file references",
+  "issueAuthor": "meganrogge",
+  "commentCount": 5,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

@@ -1,0 +1,14 @@
+{
+  "pr": 304513,
+  "prTitle": "Fix PowerShell chained output in run_in_terminal",
+  "mergeCommit": "12998a85a1939848f7ee07b2cac93d443233c0ce",
+  "parentCommit": "34361c9626509fbd8dea833f0128bb4f35e76857",
+  "fileCount": 3,
+  "issue": 304488,
+  "issueTitle": "integration test failure: `chat - run_in_terminal`",
+  "issueAuthor": "jrieken",
+  "commentCount": 4,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

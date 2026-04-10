@@ -1,0 +1,14 @@
+{
+  "pr": 304543,
+  "prTitle": "Fix subagent hook",
+  "mergeCommit": "be51e1fd8f65c5b5fbdb057eb42764896dee75ac",
+  "parentCommit": "f42f9b10eafc2646fa89ea7951414725f1c181d8",
+  "fileCount": 1,
+  "issue": 300854,
+  "issueTitle": "Error invoking subagent: Cannot read properties of undefined (reading 'length')",
+  "issueAuthor": "digitarald",
+  "commentCount": 3,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

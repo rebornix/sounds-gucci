@@ -1,0 +1,25 @@
+diff --git a/src/vs/platform/browserView/electron-main/browserView.ts b/src/vs/platform/browserView/electron-main/browserView.ts
+index 085229a7c5dbe..4113a4e7b36e9 100644
+--- a/src/vs/platform/browserView/electron-main/browserView.ts
++++ b/src/vs/platform/browserView/electron-main/browserView.ts
+@@ -683,7 +683,6 @@ export class BrowserView extends Disposable implements ICDPTarget {
+ 
+ 		const isArrowKey = keyCode >= KeyCode.LeftArrow && keyCode <= KeyCode.DownArrow;
+ 		const isNonEditingKey =
+-			keyCode === KeyCode.Enter ||
+ 			keyCode === KeyCode.Escape ||
+ 			keyCode >= KeyCode.F1 && keyCode <= KeyCode.F24 ||
+ 			keyCode >= KeyCode.AudioVolumeMute;
+diff --git a/src/vs/workbench/contrib/browserView/electron-browser/features/browserEditorChatFeatures.ts b/src/vs/workbench/contrib/browserView/electron-browser/features/browserEditorChatFeatures.ts
+index f962e57395fb5..b44e966f2db58 100644
+--- a/src/vs/workbench/contrib/browserView/electron-browser/features/browserEditorChatFeatures.ts
++++ b/src/vs/workbench/contrib/browserView/electron-browser/features/browserEditorChatFeatures.ts
+@@ -464,7 +464,7 @@ class AddFocusedElementToChatAction extends Action2 {
+ 			precondition: CONTEXT_BROWSER_FOCUSED,
+ 			keybinding: {
+ 				weight: KeybindingWeight.WorkbenchContrib + 50,
+-				primary: KeyCode.Enter,
++				primary: KeyMod.CtrlCmd | KeyCode.Enter,
+ 				when: CONTEXT_BROWSER_ELEMENT_SELECTION_ACTIVE
+ 			}
+ 		});

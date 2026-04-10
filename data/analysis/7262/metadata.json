@@ -1,0 +1,14 @@
+{
+  "pr": 306467,
+  "prTitle": "Fix over requesting of MCP registry",
+  "mergeCommit": "7836a50b5765a5f3a62e6a5ea4e4dbe64584d266",
+  "parentCommit": "61e3ba6f0478142386500e4d17fc04ee319c8dcd",
+  "fileCount": 1,
+  "issue": 7262,
+  "issueTitle": "Function breakpoints should have glyphs",
+  "issueAuthor": "edumunoz",
+  "commentCount": 3,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

@@ -1,0 +1,14 @@
+{
+  "pr": 306337,
+  "prTitle": "actionWidget: fix submenu group label rendered as item description (#306327)",
+  "mergeCommit": "9d3144bf84f54ab1e886fca20608dd3ddc296f64",
+  "parentCommit": "ee6bfc559a9089feb8b73962fd4fb5a306821ef4",
+  "fileCount": 2,
+  "issue": 306250,
+  "issueTitle": "\"Thinking effort\" broken rendering",
+  "issueAuthor": "isidorn",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

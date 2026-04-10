@@ -1,0 +1,20 @@
+src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts
+src/vs/workbench/test/browser/componentFixtures/chatTerminalCollapsible.fixture.ts
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - backticks/Dark.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - backticks/Light.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - simple command/Dark.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - simple command/Light.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - special chars/Dark.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran - special chars/Light.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - backticks/Dark.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - backticks/Light.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - powershell backticks/Dark.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - powershell backticks/Light.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - simple command/Dark.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - simple command/Light.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - special chars/Dark.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Ran sandbox - special chars/Light.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running - simple command/Dark.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running - simple command/Light.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running sandbox - simple command/Dark.png
+test/componentFixtures/.screenshots/baseline/chat/terminalCollapsible/chatTerminalCollapsible/Running sandbox - simple command/Light.png

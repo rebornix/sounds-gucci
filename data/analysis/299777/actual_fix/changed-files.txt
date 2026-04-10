@@ -1,0 +1,2 @@
+src/vs/platform/browserView/electron-main/browserView.ts
+src/vs/platform/browserView/electron-main/browserViewElementInspector.ts

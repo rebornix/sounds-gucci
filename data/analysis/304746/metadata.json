@@ -1,0 +1,14 @@
+{
+  "pr": 305641,
+  "prTitle": "fix #304746",
+  "mergeCommit": "d64acf25ce933b6451bea8ab188c0d374e679540",
+  "parentCommit": "0471cfb7147bb10aceb35b2ea7c8d4f74fb57c5b",
+  "fileCount": 1,
+  "issue": 304746,
+  "issueTitle": "Chat pickers no longer work in floating windows",
+  "issueAuthor": "BastiCL",
+  "commentCount": 6,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

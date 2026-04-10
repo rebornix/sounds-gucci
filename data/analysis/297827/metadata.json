@@ -1,0 +1,14 @@
+{
+  "pr": 304686,
+  "prTitle": "Fix wrapped title spacing on the agent sessions welcome page",
+  "mergeCommit": "6a12c4553b4fa16d6ff344682b3bdca0ce0fcbf2",
+  "parentCommit": "783e24aa1fe8c38f2083863b27aa36dba1e1ba48",
+  "fileCount": 1,
+  "issue": 297827,
+  "issueTitle": "Copilot Welcome Page: Title line height is too small",
+  "issueAuthor": "jruales",
+  "commentCount": 4,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

@@ -1,0 +1,14 @@
+{
+  "pr": 305270,
+  "prTitle": "fix accessibility issues with action list, specifically `Other Models` action list",
+  "mergeCommit": "4cdcd4f3451602ebd0cc109b2186ae497f1dbe81",
+  "parentCommit": "5a3846c8cec217176fb72e816898e76696eea1f2",
+  "fileCount": 2,
+  "issue": 302212,
+  "issueTitle": "Other Models experience in model dialog not a delightful screen reader experience (ctrl+alt+.).",
+  "issueAuthor": "accesswatch",
+  "commentCount": 2,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

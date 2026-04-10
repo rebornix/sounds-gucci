@@ -1,0 +1,216 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/accessibility/chatResponseAccessibleView.ts b/src/vs/workbench/contrib/chat/browser/accessibility/chatResponseAccessibleView.ts
+index f20aabab9961d..022cac26d5b54 100644
+--- a/src/vs/workbench/contrib/chat/browser/accessibility/chatResponseAccessibleView.ts
++++ b/src/vs/workbench/contrib/chat/browser/accessibility/chatResponseAccessibleView.ts
+@@ -8,6 +8,7 @@ import { Emitter, Event } from '../../../../../base/common/event.js';
+ import { IMarkdownString, isMarkdownString } from '../../../../../base/common/htmlContent.js';
+ import { stripIcons } from '../../../../../base/common/iconLabels.js';
+ import { Disposable, DisposableStore } from '../../../../../base/common/lifecycle.js';
++import { basename } from '../../../../../base/common/resources.js';
+ import { URI } from '../../../../../base/common/uri.js';
+ import { localize } from '../../../../../nls.js';
+ import { AccessibleViewProviderId, AccessibleViewType, IAccessibleViewContentProvider } from '../../../../../platform/accessibility/browser/accessibleView.js';
+@@ -21,7 +22,7 @@ import { IChatExtensionsContent, IChatModifiedFilesConfirmationData, IChatPullRe
+ import { isResponseVM } from '../../common/model/chatViewModel.js';
+ import { IToolResultInputOutputDetails, IToolResultOutputDetails, isToolResultInputOutputDetails, isToolResultOutputDetails, toolContentToA11yString } from '../../common/tools/languageModelToolsService.js';
+ import { ChatTreeItem, IChatWidget, IChatWidgetService } from '../chat.js';
+-import { Location } from '../../../../../editor/common/languages.js';
++import { isLocation, Location } from '../../../../../editor/common/languages.js';
+ 
+ export class ChatResponseAccessibleView implements IAccessibleViewImplementation {
+ 	readonly priority = 100;
+@@ -299,6 +300,25 @@ class ChatResponseAccessibleProvider extends Disposable implements IAccessibleVi
+ 					}
+ 					break;
+ 				}
++				case 'inlineReference': {
++					const ref = part.inlineReference;
++					let text: string;
++					if (URI.isUri(ref)) {
++						const name = part.name || basename(ref);
++						const path = ref.scheme === 'file' ? ref.path : ref.toString(true);
++						text = name !== path ? `${name} (${path})` : path;
++					} else if (isLocation(ref)) {
++						const name = part.name || basename(ref.uri);
++						const path = ref.uri.scheme === 'file' ? ref.uri.path : ref.uri.toString(true);
++						text = `${name} (${path}:${ref.range.startLineNumber})`;
++					} else {
++						// IWorkspaceSymbol
++						const path = ref.location.uri.scheme === 'file' ? (ref.location.uri.fsPath || ref.location.uri.path) : ref.location.uri.toString(true);
++						text = `${ref.name} (${path}:${ref.location.range.startLineNumber})`;
++					}
++					contentParts.push(text);
++					break;
++				}
+ 				case 'elicitation2':
+ 				case 'elicitationSerialized': {
+ 					const title = part.title;
+diff --git a/src/vs/workbench/contrib/chat/test/browser/accessibility/chatResponseAccessibleView.test.ts b/src/vs/workbench/contrib/chat/test/browser/accessibility/chatResponseAccessibleView.test.ts
+index ba7821dd3585a..adc69194c26c6 100644
+--- a/src/vs/workbench/contrib/chat/test/browser/accessibility/chatResponseAccessibleView.test.ts
++++ b/src/vs/workbench/contrib/chat/test/browser/accessibility/chatResponseAccessibleView.test.ts
+@@ -486,5 +486,164 @@ suite('ChatResponseAccessibleView', () => {
+ 			assert.ok(content.includes('Response content'));
+ 			assert.ok(content.includes('Thinking: Reasoning'));
+ 		});
++
++		test('includes file path for URI inline references', () => {
++			const instantiationService = store.add(new TestInstantiationService());
++			const storageService = store.add(new TestStorageService());
++
++			const inlineReferenceUri = URI.file('/path/to/index.ts');
++			const responseItem = {
++				response: {
++					value: [
++						{ kind: 'markdownContent', content: new MarkdownString('See file ') },
++						{ kind: 'inlineReference', inlineReference: inlineReferenceUri, name: 'index.ts' },
++						{ kind: 'markdownContent', content: new MarkdownString(' for details') }
++					]
++				},
++				model: { onDidChange: Event.None },
++				setVote: () => undefined
++			};
++			const items = [responseItem];
++			let focusedItem: unknown = responseItem;
++
++			const widget = {
++				hasInputFocus: () => false,
++				focusResponseItem: () => { focusedItem = responseItem; },
++				getFocus: () => focusedItem,
++				focus: (item: unknown) => { focusedItem = item; },
++				viewModel: { getItems: () => items }
++			} as unknown as IChatWidget;
++
++			const widgetService = {
++				_serviceBrand: undefined,
++				lastFocusedWidget: widget,
++				onDidAddWidget: Event.None,
++				onDidBackgroundSession: Event.None,
++				reveal: async () => true,
++				revealWidget: async () => widget,
++				getAllWidgets: () => [widget],
++				getWidgetByInputUri: () => widget,
++				openSession: async () => widget,
++				getWidgetBySessionResource: () => widget
++			} as unknown as IChatWidgetService;
++
++			instantiationService.stub(IChatWidgetService, widgetService);
++			instantiationService.stub(IStorageService, storageService);
++
++			const accessibleView = new ChatResponseAccessibleView();
++			const provider = instantiationService.invokeFunction(accessor => accessibleView.getProvider(accessor));
++			assert.ok(provider);
++			store.add(provider);
++			const content = provider.provideContent();
++			assert.ok(content.includes('index.ts'));
++			assert.ok(content.includes(inlineReferenceUri.path));
++			assert.ok(content.includes('See file'));
++			assert.ok(content.includes('for details'));
++		});
++
++		test('includes file path and line number for Location inline references', () => {
++			const instantiationService = store.add(new TestInstantiationService());
++			const storageService = store.add(new TestStorageService());
++
++			const fileLocation: Location = {
++				uri: URI.file('/src/app/main.ts'),
++				range: new Range(42, 1, 42, 20)
++			};
++
++			const responseItem = {
++				response: {
++					value: [
++						{ kind: 'markdownContent', content: new MarkdownString('Error at ') },
++						{ kind: 'inlineReference', inlineReference: fileLocation, name: 'main.ts' }
++					]
++				},
++				model: { onDidChange: Event.None },
++				setVote: () => undefined
++			};
++			const items = [responseItem];
++			let focusedItem: unknown = responseItem;
++
++			const widget = {
++				hasInputFocus: () => false,
++				focusResponseItem: () => { focusedItem = responseItem; },
++				getFocus: () => focusedItem,
++				focus: (item: unknown) => { focusedItem = item; },
++				viewModel: { getItems: () => items }
++			} as unknown as IChatWidget;
++
++			const widgetService = {
++				_serviceBrand: undefined,
++				lastFocusedWidget: widget,
++				onDidAddWidget: Event.None,
++				onDidBackgroundSession: Event.None,
++				reveal: async () => true,
++				revealWidget: async () => widget,
++				getAllWidgets: () => [widget],
++				getWidgetByInputUri: () => widget,
++				openSession: async () => widget,
++				getWidgetBySessionResource: () => widget
++			} as unknown as IChatWidgetService;
++
++			instantiationService.stub(IChatWidgetService, widgetService);
++			instantiationService.stub(IStorageService, storageService);
++
++			const accessibleView = new ChatResponseAccessibleView();
++			const provider = instantiationService.invokeFunction(accessor => accessibleView.getProvider(accessor));
++			assert.ok(provider);
++			store.add(provider);
++			const content = provider.provideContent();
++			assert.ok(content.includes('main.ts'));
++			assert.ok(content.includes(`${fileLocation.uri.path}:42`));
++		});
++
++		test('uses basename as name for URI inline references without explicit name', () => {
++			const instantiationService = store.add(new TestInstantiationService());
++			const storageService = store.add(new TestStorageService());
++
++			const inlineReferenceUri = URI.file('/workspace/src/utils.ts');
++			const responseItem = {
++				response: {
++					value: [
++						{ kind: 'inlineReference', inlineReference: inlineReferenceUri }
++					]
++				},
++				model: { onDidChange: Event.None },
++				setVote: () => undefined
++			};
++			const items = [responseItem];
++			let focusedItem: unknown = responseItem;
++
++			const widget = {
++				hasInputFocus: () => false,
++				focusResponseItem: () => { focusedItem = responseItem; },
++				getFocus: () => focusedItem,
++				focus: (item: unknown) => { focusedItem = item; },
++				viewModel: { getItems: () => items }
++			} as unknown as IChatWidget;
++
++			const widgetService = {
++				_serviceBrand: undefined,
++				lastFocusedWidget: widget,
++				onDidAddWidget: Event.None,
++				onDidBackgroundSession: Event.None,
++				reveal: async () => true,
++				revealWidget: async () => widget,
++				getAllWidgets: () => [widget],
++				getWidgetByInputUri: () => widget,
++				openSession: async () => widget,
++				getWidgetBySessionResource: () => widget
++			} as unknown as IChatWidgetService;
++
++			instantiationService.stub(IChatWidgetService, widgetService);
++			instantiationService.stub(IStorageService, storageService);
++
++			const accessibleView = new ChatResponseAccessibleView();
++			const provider = instantiationService.invokeFunction(accessor => accessibleView.getProvider(accessor));
++			assert.ok(provider);
++			store.add(provider);
++			const content = provider.provideContent();
++			assert.ok(content.includes('utils.ts'));
++			assert.ok(content.includes(inlineReferenceUri.path));
++		});
+ 	});
+ });

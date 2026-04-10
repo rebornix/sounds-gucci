@@ -1,0 +1,2 @@
+src/vs/platform/actionWidget/browser/actionList.ts
+src/vs/sessions/contrib/chat/browser/sessionWorkspacePicker.ts

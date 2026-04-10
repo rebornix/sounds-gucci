@@ -1,0 +1,37 @@
+diff --git a/src/vs/workbench/contrib/extensions/browser/extensionEditor.ts b/src/vs/workbench/contrib/extensions/browser/extensionEditor.ts
+index 2842ef3b7d2bd..9ca8f603041af 100644
+--- a/src/vs/workbench/contrib/extensions/browser/extensionEditor.ts
++++ b/src/vs/workbench/contrib/extensions/browser/extensionEditor.ts
+@@ -985,7 +985,7 @@ export class ExtensionEditor extends EditorPane {
+ 		this.contentDisposables.add(toDisposable(removeLayoutParticipant));
+ 
+ 		this.contentDisposables.add(dependenciesTree);
+-		scrollableContent.scanDomNode();
++		depLayout();
+ 
+ 		return Promise.resolve({ focus() { dependenciesTree.domFocus(); } });
+ 	}
+diff --git a/src/vs/workbench/contrib/extensions/browser/media/extensionEditor.css b/src/vs/workbench/contrib/extensions/browser/media/extensionEditor.css
+index 8daf6dc94270d..7b5cb760b3a53 100644
+--- a/src/vs/workbench/contrib/extensions/browser/media/extensionEditor.css
++++ b/src/vs/workbench/contrib/extensions/browser/media/extensionEditor.css
+@@ -417,7 +417,8 @@
+ 	background: url('loading.svg') center center no-repeat;
+ }
+ 
+-.extension-editor > .body > .content > .monaco-scrollable-element {
++.extension-editor > .body > .content > .monaco-scrollable-element,
++.extension-editor > .body > .content > .details > .content-container > .monaco-scrollable-element {
+ 	height: 100%;
+ }
+ 
+@@ -592,7 +593,8 @@
+ 	box-sizing: border-box;
+ }
+ 
+-.extension-editor > .body > .content > .monaco-scrollable-element > .subcontent {
++.extension-editor > .body > .content > .monaco-scrollable-element > .subcontent,
++.extension-editor > .body > .content > .details > .content-container > .monaco-scrollable-element > .subcontent {
+ 	height: 100%;
+ 	padding: 20px;
+ 	overflow-y: scroll;

@@ -1,0 +1,14 @@
+{
+  "pr": 303888,
+  "prTitle": "FIX #301645",
+  "mergeCommit": "9cd29be9b6f4fffc3f07b5c4d1895fe62036066e",
+  "parentCommit": "1a8cf5b9586b9e1d89914f9c74cf3d69fb7e763a",
+  "fileCount": 1,
+  "issue": 301645,
+  "issueTitle": "Built-in Profile template \"Python\" fails to create — Create button disabled",
+  "issueAuthor": "LiaoGuoYin",
+  "commentCount": 1,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

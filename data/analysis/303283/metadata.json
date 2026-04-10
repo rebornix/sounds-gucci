@@ -1,0 +1,14 @@
+{
+  "pr": 304899,
+  "prTitle": "fix for chat tips",
+  "mergeCommit": "3bafa7dc2a2e035e832f4c0a21e20dfcf2be8f81",
+  "parentCommit": "6afe980a82f8b85e63aba9c4ca428044b02e2e3d",
+  "fileCount": 2,
+  "issue": 303283,
+  "issueTitle": "Chat tip shows again in a session after taking action on a previous chat",
+  "issueAuthor": "cwebster-99",
+  "commentCount": 1,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

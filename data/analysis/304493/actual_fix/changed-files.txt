@@ -1,0 +1,2 @@
+src/vs/workbench/contrib/browserView/common/browserEditorInput.ts
+src/vs/workbench/contrib/browserView/electron-browser/browserView.contribution.ts

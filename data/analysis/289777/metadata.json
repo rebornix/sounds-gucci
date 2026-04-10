@@ -1,0 +1,14 @@
+{
+  "pr": 304938,
+  "prTitle": "docs: add error construction analysis guidance to fix-errors skill and prompt",
+  "mergeCommit": "ddc44da46fc929cab661c9a1839c2596e922f4a3",
+  "parentCommit": "84f7ab5aa01c31d5352c7db89051e8c391fd9ae1",
+  "fileCount": 2,
+  "issue": 289777,
+  "issueTitle": "[Unhandled Error] [172] potential listener LEAK detected, having 184 listeners already. MOST frequent listener (4):",
+  "issueAuthor": "bryanchen-d",
+  "commentCount": 1,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

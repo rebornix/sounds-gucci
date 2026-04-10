@@ -12,7 +12,7 @@ This skill fetches pull requests that are bug fixes with linked issues from a Gi
 Run the `fetch.sh` script with the following parameters:
 
 ```bash
-./fetch.sh --repo <owner/repo> --since <YYYY-MM-DD> --until <YYYY-MM-DD> [--author <username>] [--output <path>]
+./fetch.sh --repo <owner/repo> --since <YYYY-MM-DD> --until <YYYY-MM-DD> [--author <username>] [--issue-label <label>[,<label>...]] [--output <path>]
 ```
 
 ### Parameters
@@ -20,6 +20,7 @@ Run the `fetch.sh` script with the following parameters:
 | Parameter | Required | Description | Example |
 |-----------|----------|-------------|---------|
 | `--author` | No | GitHub username of the PR author | `osortega` |
+| `--issue-label` | No | Only keep linked issues whose labels contain one of these values | `bug` |
 | `--repo` | Yes | Repository in `owner/repo` format | `microsoft/vscode` |
 | `--since` | Yes | Start date (inclusive) | `2025-12-02` |
 | `--until` | Yes | End date (inclusive) | `2026-02-02` |
@@ -40,14 +41,22 @@ Run the `fetch.sh` script with the following parameters:
    --repo microsoft/vscode \
    --since 2025-12-02 \
    --until 2026-02-02
+
+# Fetch all March PRs linked to bug-labeled issues
+./.github/skills/fetch-bugfix-prs/fetch.sh \
+   --repo microsoft/vscode \
+   --since 2026-03-01 \
+   --until 2026-03-31 \
+   --issue-label bug \
+   --output data/prs-with-issues-2026-03.md
 ```
 
 ## Output Format
 
 The script generates a markdown file with a table:
 
-| PR # | PR Title | Issue # | Issue Title | Merge Commit | Parent Commit | Labels |
-|------|----------|---------|-------------|--------------|---------------|--------|
+| PR # | PR Title | Issue # | Issue Title | Issue Labels | PR Created | Issue Created | Valid | Merge Commit | Parent Commit |
+|------|----------|---------|-------------|--------------|------------|---------------|-------|--------------|---------------|
 
 ## How It Works
 
@@ -59,7 +68,7 @@ The script generates a markdown file with a table:
    - PR title (e.g., "Fixes #12345")
    - PR body (GitHub issue references)
    - Timeline events (linked issues via GitHub UI)
-4. Fetches issue details for each linked issue
+4. Fetches issue details for each linked issue and optionally filters by issue labels
 5. Gets merge commit and its parent for each PR
 
 ## Prerequisites

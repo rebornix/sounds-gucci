@@ -1,0 +1,14 @@
+{
+  "pr": 304083,
+  "prTitle": "Fix chat overflow toolbar",
+  "mergeCommit": "8fd03e3bd1ef736cf9d0e041e994968277c46816",
+  "parentCommit": "38c26afe7466b57a9c97d31de7c575d5b8d575e8",
+  "fileCount": 1,
+  "issue": 296060,
+  "issueTitle": "Chat input toolbar issues",
+  "issueAuthor": "roblourens",
+  "commentCount": 12,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

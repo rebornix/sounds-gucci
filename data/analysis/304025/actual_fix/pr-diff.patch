@@ -1,0 +1,158 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/aiCustomization/aiCustomizationListWidget.ts b/src/vs/workbench/contrib/chat/browser/aiCustomization/aiCustomizationListWidget.ts
+index 014615bd6ed43..f0587f7f68c44 100644
+--- a/src/vs/workbench/contrib/chat/browser/aiCustomization/aiCustomizationListWidget.ts
++++ b/src/vs/workbench/contrib/chat/browser/aiCustomization/aiCustomizationListWidget.ts
+@@ -60,7 +60,7 @@ import { evaluateApplyToPattern } from '../../common/promptSyntax/computeAutomat
+ import { IProductService } from '../../../../../platform/product/common/productService.js';
+ import { ExtensionIdentifier } from '../../../../../platform/extensions/common/extensions.js';
+ 
+-export { truncateToFirstSentence } from './aiCustomizationListWidgetUtils.js';
++export { truncateToFirstLine } from './aiCustomizationListWidgetUtils.js';
+ 
+ const $ = DOM.$;
+ 
+diff --git a/src/vs/workbench/contrib/chat/browser/aiCustomization/aiCustomizationListWidgetUtils.ts b/src/vs/workbench/contrib/chat/browser/aiCustomization/aiCustomizationListWidgetUtils.ts
+index dbe55af4e7785..ec6730aefac6d 100644
+--- a/src/vs/workbench/contrib/chat/browser/aiCustomization/aiCustomizationListWidgetUtils.ts
++++ b/src/vs/workbench/contrib/chat/browser/aiCustomization/aiCustomizationListWidgetUtils.ts
+@@ -6,15 +6,13 @@
+ import { PromptsType } from '../../common/promptSyntax/promptTypes.js';
+ 
+ /**
+- * Truncates a description string to the first sentence, with a maximum character fallback.
++ * Truncates a description string to the first line.
++ * The UI applies CSS text-overflow ellipsis for width overflow.
+  */
+-export function truncateToFirstSentence(text: string, maxChars = 120): string {
+-	const match = text.match(/^[^.!?]*[.!?]/);
+-	if (match && match[0].length <= maxChars) {
+-		return match[0];
+-	}
+-	if (text.length > maxChars) {
+-		return text.substring(0, maxChars).trimEnd() + '\u2026';
++export function truncateToFirstLine(text: string): string {
++	const newlineIndex = text.search(/[\r\n]/);
++	if (newlineIndex !== -1) {
++		return text.substring(0, newlineIndex);
+ 	}
+ 	return text;
+ }
+@@ -27,5 +25,5 @@ export function getCustomizationSecondaryText(description: string | undefined, f
+ 		return filename;
+ 	}
+ 
+-	return promptType === PromptsType.hook ? description : truncateToFirstSentence(description);
++	return promptType === PromptsType.hook ? description : truncateToFirstLine(description);
+ }
+diff --git a/src/vs/workbench/contrib/chat/browser/aiCustomization/mcpListWidget.ts b/src/vs/workbench/contrib/chat/browser/aiCustomization/mcpListWidget.ts
+index f809954da8aec..3ccfc1cc3ff74 100644
+--- a/src/vs/workbench/contrib/chat/browser/aiCustomization/mcpListWidget.ts
++++ b/src/vs/workbench/contrib/chat/browser/aiCustomization/mcpListWidget.ts
+@@ -34,7 +34,7 @@ import { LocalMcpServerScope } from '../../../../services/mcp/common/mcpWorkbenc
+ import { IAgentPluginService } from '../../common/plugins/agentPluginService.js';
+ import { IDialogService } from '../../../../../platform/dialogs/common/dialogs.js';
+ import { workspaceIcon, userIcon, mcpServerIcon, builtinIcon, pluginIcon, extensionIcon } from './aiCustomizationIcons.js';
+-import { formatDisplayName, truncateToFirstSentence } from './aiCustomizationListWidget.js';
++import { formatDisplayName, truncateToFirstLine } from './aiCustomizationListWidget.js';
+ import { getDefaultHoverDelegate } from '../../../../../base/browser/ui/hover/hoverDelegateFactory.js';
+ import { IHoverService } from '../../../../../platform/hover/browser/hover.js';
+ import { IAICustomizationWorkspaceService } from '../../common/aiCustomizationWorkspaceService.js';
+@@ -174,7 +174,7 @@ class McpServerItemRenderer implements IListRenderer<IMcpServerItemEntry | IMcpB
+ 			templateData.container.classList.add('builtin');
+ 			templateData.name.textContent = formatDisplayName(element.label);
+ 			if (element.description) {
+-				templateData.description.textContent = truncateToFirstSentence(element.description);
++				templateData.description.textContent = truncateToFirstLine(element.description);
+ 				templateData.description.style.display = '';
+ 			} else {
+ 				templateData.description.style.display = 'none';
+@@ -201,7 +201,7 @@ class McpServerItemRenderer implements IListRenderer<IMcpServerItemEntry | IMcpB
+ 		templateData.container.classList.remove('builtin');
+ 		templateData.name.textContent = formatDisplayName(element.server.label);
+ 		if (element.server.description) {
+-			templateData.description.textContent = truncateToFirstSentence(element.server.description);
++			templateData.description.textContent = truncateToFirstLine(element.server.description);
+ 			templateData.description.style.display = '';
+ 		} else {
+ 			templateData.description.style.display = 'none';
+diff --git a/src/vs/workbench/contrib/chat/browser/aiCustomization/pluginListWidget.ts b/src/vs/workbench/contrib/chat/browser/aiCustomization/pluginListWidget.ts
+index 98223af757bfa..fbf150720f279 100644
+--- a/src/vs/workbench/contrib/chat/browser/aiCustomization/pluginListWidget.ts
++++ b/src/vs/workbench/contrib/chat/browser/aiCustomization/pluginListWidget.ts
+@@ -34,7 +34,7 @@ import { IMarketplacePlugin, IPluginMarketplaceService } from '../../common/plug
+ import { IPluginInstallService } from '../../common/plugins/pluginInstallService.js';
+ import { AgentPluginItemKind, IAgentPluginItem, IInstalledPluginItem, IMarketplacePluginItem } from '../agentPluginEditor/agentPluginItems.js';
+ import { pluginIcon } from './aiCustomizationIcons.js';
+-import { formatDisplayName, truncateToFirstSentence } from './aiCustomizationListWidget.js';
++import { formatDisplayName, truncateToFirstLine } from './aiCustomizationListWidget.js';
+ import { ILabelService } from '../../../../../platform/label/common/label.js';
+ import { CustomizationGroupHeaderRenderer, ICustomizationGroupHeaderEntry, CUSTOMIZATION_GROUP_HEADER_HEIGHT, CUSTOMIZATION_GROUP_HEADER_HEIGHT_WITH_SEPARATOR } from './customizationGroupHeaderRenderer.js';
+ 
+@@ -133,7 +133,7 @@ class PluginInstalledItemRenderer implements IListRenderer<IPluginInstalledItemE
+ 		templateData.name.textContent = formatDisplayName(element.item.name);
+ 
+ 		if (element.item.description) {
+-			templateData.description.textContent = truncateToFirstSentence(element.item.description);
++			templateData.description.textContent = truncateToFirstLine(element.item.description);
+ 			templateData.description.style.display = '';
+ 		} else {
+ 			templateData.description.style.display = 'none';
+diff --git a/src/vs/workbench/contrib/chat/test/browser/aiCustomization/aiCustomizationListWidget.test.ts b/src/vs/workbench/contrib/chat/test/browser/aiCustomization/aiCustomizationListWidget.test.ts
+index 5723ae0a159a0..806712bb3541d 100644
+--- a/src/vs/workbench/contrib/chat/test/browser/aiCustomization/aiCustomizationListWidget.test.ts
++++ b/src/vs/workbench/contrib/chat/test/browser/aiCustomization/aiCustomizationListWidget.test.ts
+@@ -5,25 +5,31 @@
+ 
+ import assert from 'assert';
+ import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../../../base/test/common/utils.js';
+-import { getCustomizationSecondaryText, truncateToFirstSentence } from '../../../browser/aiCustomization/aiCustomizationListWidgetUtils.js';
++import { getCustomizationSecondaryText, truncateToFirstLine } from '../../../browser/aiCustomization/aiCustomizationListWidgetUtils.js';
+ import { PromptsType } from '../../../common/promptSyntax/promptTypes.js';
+ 
+ suite('aiCustomizationListWidget', () => {
+ 	ensureNoDisposablesAreLeakedInTestSuite();
+ 
+-	suite('truncateToFirstSentence', () => {
+-		test('keeps first sentence when within max chars', () => {
++	suite('truncateToFirstLine', () => {
++		test('keeps first line when text has multiple lines', () => {
+ 			assert.strictEqual(
+-				truncateToFirstSentence('First sentence. Second sentence.'),
+-				'First sentence.'
++				truncateToFirstLine('First line\nSecond line'),
++				'First line'
+ 			);
+ 		});
+ 
+-		test('falls back to max chars when no sentence boundary is found', () => {
+-			const longText = 'a'.repeat(140);
++		test('returns full text when no newline is present', () => {
+ 			assert.strictEqual(
+-				truncateToFirstSentence(longText),
+-				`${'a'.repeat(120)}\u2026`
++				truncateToFirstLine('No newline here. Even with sentences.'),
++				'No newline here. Even with sentences.'
++			);
++		});
++
++		test('handles carriage return line endings', () => {
++			assert.strictEqual(
++				truncateToFirstLine('First line\r\nSecond line'),
++				'First line'
+ 			);
+ 		});
+ 	});
+@@ -36,10 +42,10 @@ suite('aiCustomizationListWidget', () => {
+ 			);
+ 		});
+ 
+-		test('truncates non-hook descriptions to the first sentence', () => {
++		test('truncates non-hook descriptions to the first line', () => {
+ 			assert.strictEqual(
+-				getCustomizationSecondaryText('Show the first sentence. Hide the rest.', 'prompt.md', PromptsType.prompt),
+-				'Show the first sentence.'
++				getCustomizationSecondaryText('Show the first line.\nHide the rest.', 'prompt.md', PromptsType.prompt),
++				'Show the first line.'
+ 			);
+ 		});
+ 

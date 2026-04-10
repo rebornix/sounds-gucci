@@ -1,0 +1,1 @@
+extensions/typescript-language-features/src/languageFeatures/fileConfigurationManager.ts

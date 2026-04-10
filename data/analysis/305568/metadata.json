@@ -1,0 +1,14 @@
+{
+  "pr": 306742,
+  "prTitle": "Sessions goes black on Reload (fix #305568)",
+  "mergeCommit": "0e2d1c5a1d03946b425393857b7da304bc9de40b",
+  "parentCommit": "e98b050ee08512272d74f9af093d646f1e373ce5",
+  "fileCount": 1,
+  "issue": 305568,
+  "issueTitle": "Sessions goes black on Reload",
+  "issueAuthor": "joaomoreno",
+  "commentCount": 1,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

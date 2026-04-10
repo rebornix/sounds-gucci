@@ -1,0 +1,14 @@
+{
+  "pr": 303856,
+  "prTitle": "fix: remove backslash escaping from terminal command labels",
+  "mergeCommit": "a7e3a4e1e5468c745382150985a870ee554f64c5",
+  "parentCommit": "12e343fccb9f671e594590e0c0a26cee6e5aca84",
+  "fileCount": 20,
+  "issue": 303844,
+  "issueTitle": "Command labels use annoying backslashes e.g. `ls \\-lh`",
+  "issueAuthor": "alexdima",
+  "commentCount": 4,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

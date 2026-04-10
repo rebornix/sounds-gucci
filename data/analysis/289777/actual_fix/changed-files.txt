@@ -1,0 +1,2 @@
+.github/prompts/fix-error.prompt.md
+.github/skills/fix-errors/SKILL.md

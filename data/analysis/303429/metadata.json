@@ -1,0 +1,14 @@
+{
+  "pr": 304235,
+  "prTitle": "fixes window.title",
+  "mergeCommit": "2dec0ace830afbeb79b1480cf04f7375e82e2700",
+  "parentCommit": "85ba79cf0226ebf10f7abf28b86a5ed1b27a1c00",
+  "fileCount": 1,
+  "issue": 303429,
+  "issueTitle": "Window title variable resolution not working in new command center",
+  "issueAuthor": "benibenj",
+  "commentCount": 3,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

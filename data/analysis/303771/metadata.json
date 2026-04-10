@@ -1,0 +1,14 @@
+{
+  "pr": 304253,
+  "prTitle": "release: fix #303771 ",
+  "mergeCommit": "62e6a492b9b09cb8e3002c6e8b3124657ceb7ff2",
+  "parentCommit": "02ddda819c1f2885b6092823cc4f0bc6fe345509",
+  "fileCount": 1,
+  "issue": 303771,
+  "issueTitle": "Last image in image carousel is being zoomed",
+  "issueAuthor": "kieferrm",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

@@ -1,16 +1,16 @@
 // Analysis page JavaScript - loads and displays individual PR analysis
 
 let allAnalyses = [];
-let currentPR = null;
+let currentAnalysisId = null;
 let currentExperiment = null;
 
 async function init() {
     const params = new URLSearchParams(window.location.search);
-    currentPR = params.get('pr');
+    currentAnalysisId = params.get('analysis') || params.get('pr');
     currentExperiment = params.get('experiment');
     
-    if (!currentPR) {
-        showError('No PR specified. Go back to dashboard.');
+    if (!currentAnalysisId) {
+        showError('No analysis specified. Go back to dashboard.');
         return;
     }
     
@@ -19,10 +19,10 @@ async function init() {
         const indexResponse = await fetch('data/index.json');
         allAnalyses = await indexResponse.json();
         
-        // Find analyses for this PR
-        const prAnalyses = allAnalyses.filter(a => a.pr == currentPR);
+        // Find analyses for this analysis directory.
+        const prAnalyses = allAnalyses.filter(a => String(a.analysisId || a.pr) === String(currentAnalysisId));
         if (prAnalyses.length === 0) {
-            showError(`Analysis for PR #${currentPR} not found.`);
+            showError(`Analysis ${currentAnalysisId} not found.`);
             return;
         }
         
@@ -42,7 +42,7 @@ async function init() {
         }
         
         // Load content files
-        await loadContent(currentPR, currentExperiment);
+        await loadContent(currentAnalysisId, currentExperiment);
         
         // Setup navigation
         setupNavigation();
@@ -55,8 +55,10 @@ async function init() {
 }
 
 function renderHeader(analysis) {
-    document.getElementById('page-title').textContent = `PR #${analysis.pr}: ${analysis.prTitle || 'Analysis'}`;
-    document.title = `PR #${analysis.pr} - Analysis`;
+    const title = getDisplayTitle(analysis);
+    const titlePrefix = analysis.issue ? `Issue #${analysis.issue} / PR #${analysis.pr}` : `PR #${analysis.pr}`;
+    document.getElementById('page-title').textContent = `${titlePrefix}: ${title || 'Analysis'}`;
+    document.title = `${titlePrefix} - Analysis`;
     
     document.getElementById('pr-link').innerHTML = 
         `<a href="https://github.com/${analysis.repo}/pull/${analysis.pr}" target="_blank">View PR ↗</a>`;
@@ -99,6 +101,7 @@ function renderExperimentSelector(analyses, selected) {
         currentExperiment = e.target.value;
         const url = new URL(window.location);
         url.searchParams.set('experiment', currentExperiment);
+        url.searchParams.set('analysis', currentAnalysisId);
         // Preserve active tab
         const activePanel = document.querySelector('.nav-btn.active')?.dataset.panel;
         if (activePanel) url.searchParams.set('tab', activePanel);
@@ -106,8 +109,8 @@ function renderExperimentSelector(analyses, selected) {
     });
 }
 
-async function loadContent(pr, experimentId) {
-    const basePath = `data/analysis/${pr}`;
+async function loadContent(analysisId, experimentId) {
+    const basePath = `data/analysis/${analysisId}`;
     const expPath = `${basePath}/${experimentId}`;
     
     // Load experiment-specific files (proposal, validation) from experiment subdirectory
@@ -333,7 +336,7 @@ function setupNavigation() {
 
 function setupPrevNext() {
     const sameExp = allAnalyses.filter(a => a.experimentId === currentExperiment);
-    const currentIndex = sameExp.findIndex(a => a.pr == currentPR);
+    const currentIndex = sameExp.findIndex(a => String(a.analysisId || a.pr) === String(currentAnalysisId));
     const activeTab = new URLSearchParams(window.location.search).get('tab') || '';
     const tabParam = activeTab ? `&tab=${activeTab}` : '';
     
@@ -342,19 +345,33 @@ function setupPrevNext() {
     
     if (currentIndex > 0) {
         const prev = sameExp[currentIndex - 1];
-        prevLink.href = `analysis.html?pr=${prev.pr}&experiment=${currentExperiment}${tabParam}`;
-        prevLink.textContent = `← PR #${prev.pr}`;
+        prevLink.href = `analysis.html?analysis=${prev.analysisId || prev.pr}&experiment=${currentExperiment}${tabParam}`;
+        prevLink.textContent = `← ${getNavLabel(prev)}`;
     } else {
         prevLink.classList.add('disabled');
     }
     
     if (currentIndex < sameExp.length - 1) {
         const next = sameExp[currentIndex + 1];
-        nextLink.href = `analysis.html?pr=${next.pr}&experiment=${currentExperiment}${tabParam}`;
-        nextLink.textContent = `PR #${next.pr} →`;
+        nextLink.href = `analysis.html?analysis=${next.analysisId || next.pr}&experiment=${currentExperiment}${tabParam}`;
+        nextLink.textContent = `${getNavLabel(next)} →`;
     } else {
         nextLink.classList.add('disabled');
     }
+}
+
+function getDisplayTitle(analysis) {
+    if (analysis.issueTitle && String(analysis.analysisId || analysis.pr) !== String(analysis.pr)) {
+        return analysis.issueTitle;
+    }
+    return analysis.prTitle || analysis.issueTitle || '';
+}
+
+function getNavLabel(analysis) {
+    if (analysis.issue && String(analysis.analysisId || analysis.pr) === String(analysis.issue)) {
+        return `Issue #${analysis.issue}`;
+    }
+    return `PR #${analysis.pr}`;
 }
 
 function showError(message) {

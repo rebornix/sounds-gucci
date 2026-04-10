@@ -1,0 +1,14 @@
+{
+  "pr": 304770,
+  "prTitle": "fixes https://github.com/microsoft/vscode/issues/304034",
+  "mergeCommit": "7ab1a49c8dcae05732d60317ee16982df6e94d9e",
+  "parentCommit": "d5370dfd468f3d10216e5fb2fb5c8696fca6254f",
+  "fileCount": 2,
+  "issue": 304034,
+  "issueTitle": "When sandbox is on, add a link to learn more about this feature",
+  "issueAuthor": "DonJayamanne",
+  "commentCount": 4,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

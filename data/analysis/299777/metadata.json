@@ -1,0 +1,14 @@
+{
+  "pr": 305831,
+  "prTitle": "Fix \"add element to chat\" while debugging",
+  "mergeCommit": "fe491c0c105715c305a467ff169ab4954d213ee0",
+  "parentCommit": "c17175997af5a6d895aa3206614240db3e03e341",
+  "fileCount": 2,
+  "issue": 299777,
+  "issueTitle": "Integrated browser add element to chat does not work in debug mode",
+  "issueAuthor": "lambainsaan",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

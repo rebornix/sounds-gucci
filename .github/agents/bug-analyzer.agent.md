@@ -2,7 +2,7 @@
 name: bug-analyzer
 model: GPT-5.3-Codex (copilot)
 description: Analyze a bug issue and propose a fix by examining git history. Use this agent after running setup-pr-analysis to analyze an issue and propose how to fix it.
-argument-hint: Path to the analysis directory (e.g., "data/analysis/12345") containing issue.md and metadata.json
+argument-hint: Path to the analysis directory (for example "data/analysis/12345") containing issue.md and metadata.json
 tools: ['execute', 'read', 'agent', 'edit', 'search', 'todo']
 ---
 
@@ -14,16 +14,16 @@ You are a bug analysis expert. Your task is to analyze a bug issue and propose a
 
 1. Run `date -u +%Y-%m-%d` to get today's date
 2. Read the model name from the `.model` file at the repo root: `cat .model`
-3. Create the directory: `mkdir -p data/analysis/<pr>/<model>-<date>/`
+3. Create the directory: `mkdir -p data/analysis/<analysis-id>/<model>-<date>/`
    - Example: `mkdir -p data/analysis/281397/gpt-5.3-codex-2026-02-21/`
-   - For a **single consolidated run** per slug (e.g. after merging dated dirs), the folder may be exactly `data/analysis/<pr>/<slug>/` such as `composer-2/` — see `scripts/merge-composer2-experiments.py`.
+   - For a **single consolidated run** per slug (e.g. after merging dated dirs), the folder may be exactly `data/analysis/<analysis-id>/<slug>/` such as `composer-2/` — see `scripts/merge-composer2-experiments.py`.
 4. **Save ALL output as `proposed-fix.md` inside this experiment directory**
 
 ## Directory Structure
 
 The analysis directory has this layout:
 ```
-data/analysis/<pr>/
+data/analysis/<analysis-id>/
 ├── metadata.json      # PR-level info (pr, issue, repo, parentCommit, etc.)
 ├── issue.md           # Bug issue description (READ THIS)
 ├── actual_fix/        # DO NOT READ - contains the real solution
@@ -50,7 +50,7 @@ You will receive a path to an analysis directory containing:
 
 ## Multi-PR batches (orchestration)
 
-This agent analyzes **exactly one** `data/analysis/<pr>` directory per run.
+This agent analyzes **exactly one** analysis directory per run.
 
 When a human or driver runs many PRs against the **same** `CLONE_PATH` (see Step 0):
 
@@ -58,7 +58,7 @@ When a human or driver runs many PRs against the **same** `CLONE_PATH` (see Step
 2. **Sequential driver order** — Start the bug-analyzer for PR *N+1* only after PR *N* has fully finished, so only one process mutates `git` state in `CLONE_PATH` at a time.
 3. **Never parallel bug-analyzers on one clone** — Concurrent `git checkout` on the same working tree races and corrupts analysis.
 
-`fix-validator` may run in parallel across different `data/analysis/<pr>` trees once `proposed-fix.md` exists; it does not require a specific checkout of the target repo.
+`fix-validator` may run in parallel across different analysis trees once `proposed-fix.md` exists; it does not require a specific checkout of the target repo.
 
 ## ⛔ STRICT PROHIBITIONS — DO NOT VIOLATE
 
@@ -78,7 +78,7 @@ You are simulating a developer who only knows about the bug from the issue. To e
 ## Analysis Process
 
 ### Step 0: Load Configuration
-Read `.config` at the repository root to get `CLONE_PATH` — the local clone of the target repo. Use this path for all git and file operations on the target codebase.
+Read `.config` at the repository root to get `CLONE_PATH` — the local clone of the target repo. If `.config` is absent or does not define `CLONE_PATH`, fall back to `clonePath` in `metadata.json`. If neither exists, stop and ask the driver to run setup again or provide the clone path. Use this path for all git and file operations on the target codebase.
 
 ### Step 1: Understand the Bug
 Read ONLY `issue.md` to understand:

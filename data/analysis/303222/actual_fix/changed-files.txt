@@ -1,0 +1,16 @@
+src/vs/platform/update/common/update.config.contribution.ts
+src/vs/platform/update/common/update.ts
+src/vs/platform/update/electron-main/abstractUpdateService.ts
+src/vs/platform/update/electron-main/updateService.win32.ts
+src/vs/sessions/contrib/accountMenu/test/browser/accountWidget.fixture.ts
+src/vs/sessions/contrib/accountMenu/test/browser/updateHoverWidget.fixture.ts
+src/vs/workbench/browser/parts/titlebar/media/titlebarpart.css
+src/vs/workbench/contrib/update/browser/media/updateStatusBarEntry.css
+src/vs/workbench/contrib/update/browser/media/updateTitleBarEntry.css
+src/vs/workbench/contrib/update/browser/media/updateTooltip.css
+src/vs/workbench/contrib/update/browser/releaseNotesEditor.ts
+src/vs/workbench/contrib/update/browser/update.contribution.ts
+src/vs/workbench/contrib/update/browser/update.ts
+src/vs/workbench/contrib/update/browser/updateStatusBarEntry.ts
+src/vs/workbench/contrib/update/browser/updateTitleBarEntry.ts
+src/vs/workbench/contrib/update/browser/updateTooltip.ts

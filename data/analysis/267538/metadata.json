@@ -1,0 +1,14 @@
+{
+  "pr": 306226,
+  "prTitle": "fix: scope editor service in window title to own editor groups container",
+  "mergeCommit": "4003d390fb8747be92b4e66c280584cf92579d16",
+  "parentCommit": "c2016b08f5d48a676858f04907c2b1c10ab03a44",
+  "fileCount": 1,
+  "issue": 267538,
+  "issueTitle": "Original window title incorrect after moving terminal to new window",
+  "issueAuthor": "studgeek",
+  "commentCount": 2,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

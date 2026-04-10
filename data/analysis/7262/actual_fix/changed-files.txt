@@ -1,0 +1,1 @@
+src/vs/workbench/services/accounts/browser/defaultAccount.ts

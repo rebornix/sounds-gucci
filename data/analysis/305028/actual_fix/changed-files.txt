@@ -1,0 +1,2 @@
+src/vs/workbench/contrib/terminal/common/terminal.ts
+src/vs/workbench/contrib/terminal/test/browser/terminalInstance.test.ts

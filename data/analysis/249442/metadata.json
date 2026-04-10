@@ -1,0 +1,14 @@
+{
+  "pr": 304979,
+  "prTitle": "fix: persist test coverage sort order across sessions",
+  "mergeCommit": "6e1bad2b04f91c3b5767035edfd0ab1ee3c20228",
+  "parentCommit": "e8e47a0d96a8efaee80c31a67412a848f3e2507d",
+  "fileCount": 1,
+  "issue": 249442,
+  "issueTitle": "Sorting is not persisted in Test Coverage",
+  "issueAuthor": "DiStOn-btc-es",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

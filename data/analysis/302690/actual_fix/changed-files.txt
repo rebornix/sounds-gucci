@@ -1,0 +1,2 @@
+src/vs/workbench/contrib/extensions/browser/extensionEditor.ts
+src/vs/workbench/contrib/extensions/browser/media/extensionEditor.css

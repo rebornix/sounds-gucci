@@ -1,0 +1,14 @@
+{
+  "pr": 304958,
+  "prTitle": "fix: use conic-gradient for image preview transparency checkerboard",
+  "mergeCommit": "93ca9c09293de70c5705c93ee5ddd92a538aa4cb",
+  "parentCommit": "d7c19c5af6e6a30a429780ef12c8146468e9cf6c",
+  "fileCount": 1,
+  "issue": 229565,
+  "issueTitle": "Image preview transparency shows triangles at certain zoom levels",
+  "issueAuthor": "Tyriar",
+  "commentCount": 2,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

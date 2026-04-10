@@ -1,5 +1,6 @@
 [
   {
+    "analysisId": 249498,
     "pr": 249498,
     "prTitle": "mcp: support resource templates",
     "prMergeCommit": "7e725c8ba323c872fdebc7eabec20d4f381019cf",
@@ -19,6 +20,7 @@
     "tags": []
   },
   {
+    "analysisId": 249498,
     "pr": 249498,
     "prTitle": "mcp: support resource templates",
     "prMergeCommit": "7e725c8ba323c872fdebc7eabec20d4f381019cf",
@@ -38,6 +40,7 @@
     "tags": []
   },
   {
+    "analysisId": 255490,
     "pr": 255490,
     "prTitle": "add layover to new cells correctly and dispose of listeners as cells are removed",
     "prMergeCommit": "ce37a385e43c4cfa00f150801e0575f32db40bbc",
@@ -59,6 +62,7 @@
     ]
   },
   {
+    "analysisId": 255490,
     "pr": 255490,
     "prTitle": "add layover to new cells correctly and dispose of listeners as cells are removed",
     "prMergeCommit": "ce37a385e43c4cfa00f150801e0575f32db40bbc",
@@ -80,6 +84,7 @@
     ]
   },
   {
+    "analysisId": 255490,
     "pr": 255490,
     "prTitle": "add layover to new cells correctly and dispose of listeners as cells are removed",
     "prMergeCommit": "ce37a385e43c4cfa00f150801e0575f32db40bbc",
@@ -101,6 +106,7 @@
     ]
   },
   {
+    "analysisId": 255490,
     "pr": 255490,
     "prTitle": "add layover to new cells correctly and dispose of listeners as cells are removed",
     "prMergeCommit": "ce37a385e43c4cfa00f150801e0575f32db40bbc",
@@ -122,6 +128,7 @@
     ]
   },
   {
+    "analysisId": 280217,
     "pr": 280217,
     "prTitle": "Fix illegal characters in Dynamic Auth Provider logger filename",
     "prMergeCommit": "2d96f38ce6ffb7355ade0ad99ca2dcb927d298ae",
@@ -143,6 +150,7 @@
     ]
   },
   {
+    "analysisId": 280217,
     "pr": 280217,
     "prTitle": "Fix illegal characters in Dynamic Auth Provider logger filename",
     "prMergeCommit": "2d96f38ce6ffb7355ade0ad99ca2dcb927d298ae",
@@ -164,6 +172,7 @@
     ]
   },
   {
+    "analysisId": 280217,
     "pr": 280217,
     "prTitle": "Fix illegal characters in Dynamic Auth Provider logger filename",
     "prMergeCommit": "2d96f38ce6ffb7355ade0ad99ca2dcb927d298ae",
@@ -185,6 +194,7 @@
     ]
   },
   {
+    "analysisId": 281397,
     "pr": 281397,
     "prTitle": "Fix for agent session progress",
     "prMergeCommit": "431aebe28b612f70c046d12bdb41fe3dd307ebd5",
@@ -206,6 +216,7 @@
     ]
   },
   {
+    "analysisId": 281397,
     "pr": 281397,
     "prTitle": "Fix for agent session progress",
     "prMergeCommit": "431aebe28b612f70c046d12bdb41fe3dd307ebd5",
@@ -227,6 +238,7 @@
     ]
   },
   {
+    "analysisId": 281397,
     "pr": 281397,
     "prTitle": "Fix for agent session progress",
     "prMergeCommit": "431aebe28b612f70c046d12bdb41fe3dd307ebd5",
@@ -248,6 +260,7 @@
     ]
   },
   {
+    "analysisId": 281397,
     "pr": 281397,
     "prTitle": "Fix for agent session progress",
     "prMergeCommit": "431aebe28b612f70c046d12bdb41fe3dd307ebd5",
@@ -269,6 +282,7 @@
     ]
   },
   {
+    "analysisId": 281397,
     "pr": 281397,
     "prTitle": "Fix for agent session progress",
     "prMergeCommit": "431aebe28b612f70c046d12bdb41fe3dd307ebd5",
@@ -290,6 +304,7 @@
     ]
   },
   {
+    "analysisId": 281589,
     "pr": 281589,
     "prTitle": "Various fixes for session progress",
     "prMergeCommit": "87466737669c9645a336f7647d4b46ecf7d84bf7",
@@ -311,6 +326,7 @@
     ]
   },
   {
+    "analysisId": 281589,
     "pr": 281589,
     "prTitle": "Various fixes for session progress",
     "prMergeCommit": "87466737669c9645a336f7647d4b46ecf7d84bf7",
@@ -332,6 +348,7 @@
     ]
   },
   {
+    "analysisId": 281589,
     "pr": 281589,
     "prTitle": "Various fixes for session progress",
     "prMergeCommit": "87466737669c9645a336f7647d4b46ecf7d84bf7",
@@ -353,6 +370,7 @@
     ]
   },
   {
+    "analysisId": 281589,
     "pr": 281589,
     "prTitle": "Various fixes for session progress",
     "prMergeCommit": "87466737669c9645a336f7647d4b46ecf7d84bf7",
@@ -374,6 +392,7 @@
     ]
   },
   {
+    "analysisId": 281589,
     "pr": 281589,
     "prTitle": "Various fixes for session progress",
     "prMergeCommit": "87466737669c9645a336f7647d4b46ecf7d84bf7",
@@ -395,6 +414,7 @@
     ]
   },
   {
+    "analysisId": 281673,
     "pr": 281673,
     "prTitle": "Fix edge case for in progress session",
     "prMergeCommit": "6801a977175147578333faaffeab6a95af8c43b1",
@@ -416,6 +436,7 @@
     ]
   },
   {
+    "analysisId": 281673,
     "pr": 281673,
     "prTitle": "Fix edge case for in progress session",
     "prMergeCommit": "6801a977175147578333faaffeab6a95af8c43b1",
@@ -437,6 +458,7 @@
     ]
   },
   {
+    "analysisId": 281673,
     "pr": 281673,
     "prTitle": "Fix edge case for in progress session",
     "prMergeCommit": "6801a977175147578333faaffeab6a95af8c43b1",
@@ -458,6 +480,7 @@
     ]
   },
   {
+    "analysisId": 281673,
     "pr": 281673,
     "prTitle": "Fix edge case for in progress session",
     "prMergeCommit": "6801a977175147578333faaffeab6a95af8c43b1",
@@ -479,6 +502,7 @@
     ]
   },
   {
+    "analysisId": 281673,
     "pr": 281673,
     "prTitle": "Fix edge case for in progress session",
     "prMergeCommit": "6801a977175147578333faaffeab6a95af8c43b1",
@@ -500,6 +524,7 @@
     ]
   },
   {
+    "analysisId": 282092,
     "pr": 282092,
     "prTitle": "Fix for cloud multi diff stats",
     "prMergeCommit": "5fbb91b1657478e7429c3e67554c23fee865e121",
@@ -521,6 +546,7 @@
     ]
   },
   {
+    "analysisId": 282092,
     "pr": 282092,
     "prTitle": "Fix for cloud multi diff stats",
     "prMergeCommit": "5fbb91b1657478e7429c3e67554c23fee865e121",
@@ -542,6 +568,7 @@
     ]
   },
   {
+    "analysisId": 282092,
     "pr": 282092,
     "prTitle": "Fix for cloud multi diff stats",
     "prMergeCommit": "5fbb91b1657478e7429c3e67554c23fee865e121",
@@ -563,6 +590,7 @@
     ]
   },
   {
+    "analysisId": 282092,
     "pr": 282092,
     "prTitle": "Fix for cloud multi diff stats",
     "prMergeCommit": "5fbb91b1657478e7429c3e67554c23fee865e121",
@@ -584,6 +612,7 @@
     ]
   },
   {
+    "analysisId": 282092,
     "pr": 282092,
     "prTitle": "Fix for cloud multi diff stats",
     "prMergeCommit": "5fbb91b1657478e7429c3e67554c23fee865e121",
@@ -605,6 +634,7 @@
     ]
   },
   {
+    "analysisId": 282221,
     "pr": 282221,
     "prTitle": "Fix race condition causing \\\"Model is disposed!\\\" error in virtual document updates",
     "prMergeCommit": "5639dca9912d7ab8896929b1a09f30f883ead43f",
@@ -626,6 +656,7 @@
     ]
   },
   {
+    "analysisId": 282221,
     "pr": 282221,
     "prTitle": "Fix race condition causing \\\"Model is disposed!\\\" error in virtual document updates",
     "prMergeCommit": "5639dca9912d7ab8896929b1a09f30f883ead43f",
@@ -647,6 +678,7 @@
     ]
   },
   {
+    "analysisId": 282221,
     "pr": 282221,
     "prTitle": "Fix race condition causing \\\"Model is disposed!\\\" error in virtual document updates",
     "prMergeCommit": "5639dca9912d7ab8896929b1a09f30f883ead43f",
@@ -668,6 +700,7 @@
     ]
   },
   {
+    "analysisId": 282245,
     "pr": 282245,
     "prTitle": "Small fix for in progress check for overrides",
     "prMergeCommit": "38fbd7711c6cb70fa1e37ed575b1af81a903fb63",
@@ -689,6 +722,7 @@
     ]
   },
   {
+    "analysisId": 282245,
     "pr": 282245,
     "prTitle": "Small fix for in progress check for overrides",
     "prMergeCommit": "38fbd7711c6cb70fa1e37ed575b1af81a903fb63",
@@ -710,6 +744,7 @@
     ]
   },
   {
+    "analysisId": 282245,
     "pr": 282245,
     "prTitle": "Small fix for in progress check for overrides",
     "prMergeCommit": "38fbd7711c6cb70fa1e37ed575b1af81a903fb63",
@@ -731,6 +766,7 @@
     ]
   },
   {
+    "analysisId": 282245,
     "pr": 282245,
     "prTitle": "Small fix for in progress check for overrides",
     "prMergeCommit": "38fbd7711c6cb70fa1e37ed575b1af81a903fb63",
@@ -752,6 +788,7 @@
     ]
   },
   {
+    "analysisId": 282245,
     "pr": 282245,
     "prTitle": "Small fix for in progress check for overrides",
     "prMergeCommit": "38fbd7711c6cb70fa1e37ed575b1af81a903fb63",
@@ -773,6 +810,7 @@
     ]
   },
   {
+    "analysisId": 282325,
     "pr": 282325,
     "prTitle": "Fix for completing response if needed",
     "prMergeCommit": "57f6d3a72c7d24b0719a5a60fd834e41b493c372",
@@ -794,6 +832,7 @@
     ]
   },
   {
+    "analysisId": 282325,
     "pr": 282325,
     "prTitle": "Fix for completing response if needed",
     "prMergeCommit": "57f6d3a72c7d24b0719a5a60fd834e41b493c372",
@@ -815,6 +854,7 @@
     ]
   },
   {
+    "analysisId": 282325,
     "pr": 282325,
     "prTitle": "Fix for completing response if needed",
     "prMergeCommit": "57f6d3a72c7d24b0719a5a60fd834e41b493c372",
@@ -836,6 +876,7 @@
     ]
   },
   {
+    "analysisId": 282325,
     "pr": 282325,
     "prTitle": "Fix for completing response if needed",
     "prMergeCommit": "57f6d3a72c7d24b0719a5a60fd834e41b493c372",
@@ -857,6 +898,7 @@
     ]
   },
   {
+    "analysisId": 283630,
     "pr": 283630,
     "prTitle": "fix: error in epoch bounds in edit timeline",
     "prMergeCommit": "059761d01f46380f93c4b0be42f4422285cdac59",
@@ -878,6 +920,7 @@
     ]
   },
   {
+    "analysisId": 283630,
     "pr": 283630,
     "prTitle": "fix: error in epoch bounds in edit timeline",
     "prMergeCommit": "059761d01f46380f93c4b0be42f4422285cdac59",
@@ -899,6 +942,7 @@
     ]
   },
   {
+    "analysisId": 283630,
     "pr": 283630,
     "prTitle": "fix: error in epoch bounds in edit timeline",
     "prMergeCommit": "059761d01f46380f93c4b0be42f4422285cdac59",
@@ -920,6 +964,7 @@
     ]
   },
   {
+    "analysisId": 283844,
     "pr": 283844,
     "prTitle": "Remove non null assertion",
     "prMergeCommit": "934a4f6b490505737f043f830e3993f76bc264ff",
@@ -941,6 +986,7 @@
     ]
   },
   {
+    "analysisId": 283844,
     "pr": 283844,
     "prTitle": "Remove non null assertion",
     "prMergeCommit": "934a4f6b490505737f043f830e3993f76bc264ff",
@@ -962,6 +1008,7 @@
     ]
   },
   {
+    "analysisId": 283844,
     "pr": 283844,
     "prTitle": "Remove non null assertion",
     "prMergeCommit": "934a4f6b490505737f043f830e3993f76bc264ff",
@@ -983,6 +1030,7 @@
     ]
   },
   {
+    "analysisId": 283868,
     "pr": 283868,
     "prTitle": "wait for xterm element vs assuming it's defined",
     "prMergeCommit": "f4367f568f22aff90295edb026ab877eb0d61cc0",
@@ -1004,6 +1052,7 @@
     ]
   },
   {
+    "analysisId": 283868,
     "pr": 283868,
     "prTitle": "wait for xterm element vs assuming it's defined",
     "prMergeCommit": "f4367f568f22aff90295edb026ab877eb0d61cc0",
@@ -1025,6 +1074,7 @@
     ]
   },
   {
+    "analysisId": 283868,
     "pr": 283868,
     "prTitle": "wait for xterm element vs assuming it's defined",
     "prMergeCommit": "f4367f568f22aff90295edb026ab877eb0d61cc0",
@@ -1046,6 +1096,7 @@
     ]
   },
   {
+    "analysisId": 283958,
     "pr": 283958,
     "prTitle": "Fix TypeError when accessing undefined character in terminal suggest trigger detection",
     "prMergeCommit": "88b7540ba1c539ea006bcc283a65655d39b19226",
@@ -1067,6 +1118,7 @@
     ]
   },
   {
+    "analysisId": 283958,
     "pr": 283958,
     "prTitle": "Fix TypeError when accessing undefined character in terminal suggest trigger detection",
     "prMergeCommit": "88b7540ba1c539ea006bcc283a65655d39b19226",
@@ -1088,6 +1140,7 @@
     ]
   },
   {
+    "analysisId": 283958,
     "pr": 283958,
     "prTitle": "Fix TypeError when accessing undefined character in terminal suggest trigger detection",
     "prMergeCommit": "88b7540ba1c539ea006bcc283a65655d39b19226",
@@ -1109,6 +1162,7 @@
     ]
   },
   {
+    "analysisId": 284078,
     "pr": 284078,
     "prTitle": "Fix error in releasenotes editor",
     "prMergeCommit": "39cf2824f01fd67709286034d433743adb5885b3",
@@ -1130,6 +1184,7 @@
     ]
   },
   {
+    "analysisId": 284078,
     "pr": 284078,
     "prTitle": "Fix error in releasenotes editor",
     "prMergeCommit": "39cf2824f01fd67709286034d433743adb5885b3",
@@ -1151,6 +1206,7 @@
     ]
   },
   {
+    "analysisId": 284078,
     "pr": 284078,
     "prTitle": "Fix error in releasenotes editor",
     "prMergeCommit": "39cf2824f01fd67709286034d433743adb5885b3",
@@ -1172,6 +1228,7 @@
     ]
   },
   {
+    "analysisId": 285608,
     "pr": 285608,
     "prTitle": "Handle more cases in scmViewPane.getParent",
     "prMergeCommit": "1eee6eb1488c56f9fc344909050b583ee604cf72",
@@ -1193,6 +1250,7 @@
     ]
   },
   {
+    "analysisId": 285608,
     "pr": 285608,
     "prTitle": "Handle more cases in scmViewPane.getParent",
     "prMergeCommit": "1eee6eb1488c56f9fc344909050b583ee604cf72",
@@ -1214,6 +1272,7 @@
     ]
   },
   {
+    "analysisId": 285608,
     "pr": 285608,
     "prTitle": "Handle more cases in scmViewPane.getParent",
     "prMergeCommit": "1eee6eb1488c56f9fc344909050b583ee604cf72",
@@ -1235,6 +1294,7 @@
     ]
   },
   {
+    "analysisId": 285610,
     "pr": 285610,
     "prTitle": "Do not assume stdio fields to be defined when spawning a child process.",
     "prMergeCommit": "3cb01d979b2ff5cae28f33df264bcabc46d49d8c",
@@ -1256,6 +1316,7 @@
     ]
   },
   {
+    "analysisId": 285610,
     "pr": 285610,
     "prTitle": "Do not assume stdio fields to be defined when spawning a child process.",
     "prMergeCommit": "3cb01d979b2ff5cae28f33df264bcabc46d49d8c",
@@ -1277,6 +1338,7 @@
     ]
   },
   {
+    "analysisId": 285610,
     "pr": 285610,
     "prTitle": "Do not assume stdio fields to be defined when spawning a child process.",
     "prMergeCommit": "3cb01d979b2ff5cae28f33df264bcabc46d49d8c",
@@ -1298,6 +1360,7 @@
     ]
   },
   {
+    "analysisId": 285970,
     "pr": 285970,
     "prTitle": "Fix querySelector TypeError in terminal suggest when xterm element becomes undefined",
     "prMergeCommit": "de56ab16ef93a6e348ddfabd4118d585d7746d7d",
@@ -1319,6 +1382,7 @@
     ]
   },
   {
+    "analysisId": 285970,
     "pr": 285970,
     "prTitle": "Fix querySelector TypeError in terminal suggest when xterm element becomes undefined",
     "prMergeCommit": "de56ab16ef93a6e348ddfabd4118d585d7746d7d",
@@ -1340,6 +1404,7 @@
     ]
   },
   {
+    "analysisId": 285970,
     "pr": 285970,
     "prTitle": "Fix querySelector TypeError in terminal suggest when xterm element becomes undefined",
     "prMergeCommit": "de56ab16ef93a6e348ddfabd4118d585d7746d7d",
@@ -1361,6 +1426,7 @@
     ]
   },
   {
+    "analysisId": 286173,
     "pr": 286173,
     "prTitle": "Fix race condition in terminal suggest widget initialization causing appendChild crash",
     "prMergeCommit": "a9676225eb6c43be43f8debcac2826ee989cc145",
@@ -1382,6 +1448,7 @@
     ]
   },
   {
+    "analysisId": 286173,
     "pr": 286173,
     "prTitle": "Fix race condition in terminal suggest widget initialization causing appendChild crash",
     "prMergeCommit": "a9676225eb6c43be43f8debcac2826ee989cc145",
@@ -1403,6 +1470,7 @@
     ]
   },
   {
+    "analysisId": 286173,
     "pr": 286173,
     "prTitle": "Fix race condition in terminal suggest widget initialization causing appendChild crash",
     "prMergeCommit": "a9676225eb6c43be43f8debcac2826ee989cc145",
@@ -1424,6 +1492,7 @@
     ]
   },
   {
+    "analysisId": 286385,
     "pr": 286385,
     "prTitle": "Memory leak related to diff editor (fix #286336)",
     "prMergeCommit": "0a29012f26a80170293ed80cf39977b188dda4f1",
@@ -1445,6 +1514,7 @@
     ]
   },
   {
+    "analysisId": 286385,
     "pr": 286385,
     "prTitle": "Memory leak related to diff editor (fix #286336)",
     "prMergeCommit": "0a29012f26a80170293ed80cf39977b188dda4f1",
@@ -1466,6 +1536,7 @@
     ]
   },
   {
+    "analysisId": 286385,
     "pr": 286385,
     "prTitle": "Memory leak related to diff editor (fix #286336)",
     "prMergeCommit": "0a29012f26a80170293ed80cf39977b188dda4f1",
@@ -1487,6 +1558,7 @@
     ]
   },
   {
+    "analysisId": 286385,
     "pr": 286385,
     "prTitle": "Memory leak related to diff editor (fix #286336)",
     "prMergeCommit": "0a29012f26a80170293ed80cf39977b188dda4f1",
@@ -1508,6 +1580,7 @@
     ]
   },
   {
+    "analysisId": 286543,
     "pr": 286543,
     "prTitle": "Disabling AI does not apply without restart when Copilot installed (fix #286498)",
     "prMergeCommit": "cdd00f23b3269f0788538509eb5d7e38f7898e74",
@@ -1529,6 +1602,7 @@
     ]
   },
   {
+    "analysisId": 286543,
     "pr": 286543,
     "prTitle": "Disabling AI does not apply without restart when Copilot installed (fix #286498)",
     "prMergeCommit": "cdd00f23b3269f0788538509eb5d7e38f7898e74",
@@ -1550,6 +1624,7 @@
     ]
   },
   {
+    "analysisId": 286543,
     "pr": 286543,
     "prTitle": "Disabling AI does not apply without restart when Copilot installed (fix #286498)",
     "prMergeCommit": "cdd00f23b3269f0788538509eb5d7e38f7898e74",
@@ -1571,6 +1646,7 @@
     ]
   },
   {
+    "analysisId": 286543,
     "pr": 286543,
     "prTitle": "Disabling AI does not apply without restart when Copilot installed (fix #286498)",
     "prMergeCommit": "cdd00f23b3269f0788538509eb5d7e38f7898e74",
@@ -1592,6 +1668,7 @@
     ]
   },
   {
+    "analysisId": 286573,
     "pr": 286573,
     "prTitle": "Fix error in rasterizeGlyph",
     "prMergeCommit": "e78547593cf2a52bf8386e64d71f6fdc4588a79c",
@@ -1613,6 +1690,7 @@
     ]
   },
   {
+    "analysisId": 286573,
     "pr": 286573,
     "prTitle": "Fix error in rasterizeGlyph",
     "prMergeCommit": "e78547593cf2a52bf8386e64d71f6fdc4588a79c",
@@ -1634,6 +1712,7 @@
     ]
   },
   {
+    "analysisId": 286573,
     "pr": 286573,
     "prTitle": "Fix error in rasterizeGlyph",
     "prMergeCommit": "e78547593cf2a52bf8386e64d71f6fdc4588a79c",
@@ -1655,6 +1734,7 @@
     ]
   },
   {
+    "analysisId": 287189,
     "pr": 287189,
     "prTitle": "fix undefined property error from getViewLineMinColumn",
     "prMergeCommit": "aee9b1b3f6916f1e177d2945389cdbeb655e1654",
@@ -1676,6 +1756,7 @@
     ]
   },
   {
+    "analysisId": 287189,
     "pr": 287189,
     "prTitle": "fix undefined property error from getViewLineMinColumn",
     "prMergeCommit": "aee9b1b3f6916f1e177d2945389cdbeb655e1654",
@@ -1697,6 +1778,7 @@
     ]
   },
   {
+    "analysisId": 287189,
     "pr": 287189,
     "prTitle": "fix undefined property error from getViewLineMinColumn",
     "prMergeCommit": "aee9b1b3f6916f1e177d2945389cdbeb655e1654",
@@ -1718,6 +1800,7 @@
     ]
   },
   {
+    "analysisId": 288359,
     "pr": 288359,
     "prTitle": "Agent sessions: rendering bug when stacked sessions list is expanded and context is added (fix #288151)",
     "prMergeCommit": "5591cd2fa63b0d72c862f74c3ffe8c7129efac10",
@@ -1739,6 +1822,7 @@
     ]
   },
   {
+    "analysisId": 288359,
     "pr": 288359,
     "prTitle": "Agent sessions: rendering bug when stacked sessions list is expanded and context is added (fix #288151)",
     "prMergeCommit": "5591cd2fa63b0d72c862f74c3ffe8c7129efac10",
@@ -1760,6 +1844,7 @@
     ]
   },
   {
+    "analysisId": 288359,
     "pr": 288359,
     "prTitle": "Agent sessions: rendering bug when stacked sessions list is expanded and context is added (fix #288151)",
     "prMergeCommit": "5591cd2fa63b0d72c862f74c3ffe8c7129efac10",
@@ -1781,6 +1866,7 @@
     ]
   },
   {
+    "analysisId": 288359,
     "pr": 288359,
     "prTitle": "Agent sessions: rendering bug when stacked sessions list is expanded and context is added (fix #288151)",
     "prMergeCommit": "5591cd2fa63b0d72c862f74c3ffe8c7129efac10",
@@ -1802,6 +1888,7 @@
     ]
   },
   {
+    "analysisId": 288437,
     "pr": 288437,
     "prTitle": "Leak (fix #288398)",
     "prMergeCommit": "1b4cd523aac3670395dba12ae917e4e1fe67ddf7",
@@ -1823,6 +1910,7 @@
     ]
   },
   {
+    "analysisId": 288437,
     "pr": 288437,
     "prTitle": "Leak (fix #288398)",
     "prMergeCommit": "1b4cd523aac3670395dba12ae917e4e1fe67ddf7",
@@ -1844,6 +1932,7 @@
     ]
   },
   {
+    "analysisId": 288437,
     "pr": 288437,
     "prTitle": "Leak (fix #288398)",
     "prMergeCommit": "1b4cd523aac3670395dba12ae917e4e1fe67ddf7",
@@ -1865,6 +1954,7 @@
     ]
   },
   {
+    "analysisId": 288437,
     "pr": 288437,
     "prTitle": "Leak (fix #288398)",
     "prMergeCommit": "1b4cd523aac3670395dba12ae917e4e1fe67ddf7",
@@ -1886,6 +1976,7 @@
     ]
   },
   {
+    "analysisId": 288472,
     "pr": 288472,
     "prTitle": "Chat empty view exp is odd (fix #288400)",
     "prMergeCommit": "998f544bc301ed5601871e38a5051a4bfa27608f",
@@ -1907,6 +1998,7 @@
     ]
   },
   {
+    "analysisId": 288472,
     "pr": 288472,
     "prTitle": "Chat empty view exp is odd (fix #288400)",
     "prMergeCommit": "998f544bc301ed5601871e38a5051a4bfa27608f",
@@ -1928,6 +2020,7 @@
     ]
   },
   {
+    "analysisId": 288472,
     "pr": 288472,
     "prTitle": "Chat empty view exp is odd (fix #288400)",
     "prMergeCommit": "998f544bc301ed5601871e38a5051a4bfa27608f",
@@ -1949,6 +2042,7 @@
     ]
   },
   {
+    "analysisId": 288472,
     "pr": 288472,
     "prTitle": "Chat empty view exp is odd (fix #288400)",
     "prMergeCommit": "998f544bc301ed5601871e38a5051a4bfa27608f",
@@ -1970,6 +2064,7 @@
     ]
   },
   {
+    "analysisId": 288922,
     "pr": 288922,
     "prTitle": "Explicitly archiving all sessions from Sessions view context menu should not show dialog (fix #288910)",
     "prMergeCommit": "7f460a4ad8472d53c28725e486954b0d1172efbf",
@@ -1991,6 +2086,7 @@
     ]
   },
   {
+    "analysisId": 288922,
     "pr": 288922,
     "prTitle": "Explicitly archiving all sessions from Sessions view context menu should not show dialog (fix #288910)",
     "prMergeCommit": "7f460a4ad8472d53c28725e486954b0d1172efbf",
@@ -2012,6 +2108,7 @@
     ]
   },
   {
+    "analysisId": 288922,
     "pr": 288922,
     "prTitle": "Explicitly archiving all sessions from Sessions view context menu should not show dialog (fix #288910)",
     "prMergeCommit": "7f460a4ad8472d53c28725e486954b0d1172efbf",
@@ -2033,6 +2130,7 @@
     ]
   },
   {
+    "analysisId": 288922,
     "pr": 288922,
     "prTitle": "Explicitly archiving all sessions from Sessions view context menu should not show dialog (fix #288910)",
     "prMergeCommit": "7f460a4ad8472d53c28725e486954b0d1172efbf",
@@ -2054,6 +2152,7 @@
     ]
   },
   {
+    "analysisId": 289039,
     "pr": 289039,
     "prTitle": "Do not mark sessions which completed while visible in the UI as unread (fix #288369)",
     "prMergeCommit": "4ec8c09e46c06a026cf78bacd77e044ccdc9fa5d",
@@ -2075,6 +2174,7 @@
     ]
   },
   {
+    "analysisId": 289039,
     "pr": 289039,
     "prTitle": "Do not mark sessions which completed while visible in the UI as unread (fix #288369)",
     "prMergeCommit": "4ec8c09e46c06a026cf78bacd77e044ccdc9fa5d",
@@ -2096,6 +2196,7 @@
     ]
   },
   {
+    "analysisId": 289039,
     "pr": 289039,
     "prTitle": "Do not mark sessions which completed while visible in the UI as unread (fix #288369)",
     "prMergeCommit": "4ec8c09e46c06a026cf78bacd77e044ccdc9fa5d",
@@ -2117,6 +2218,7 @@
     ]
   },
   {
+    "analysisId": 289039,
     "pr": 289039,
     "prTitle": "Do not mark sessions which completed while visible in the UI as unread (fix #288369)",
     "prMergeCommit": "4ec8c09e46c06a026cf78bacd77e044ccdc9fa5d",
@@ -2138,6 +2240,7 @@
     ]
   },
   {
+    "analysisId": 289808,
     "pr": 289808,
     "prTitle": "Target picker fixes",
     "prMergeCommit": "f8bd1cfbc94b253e95852185b71646f4ea42770f",
@@ -2159,6 +2262,7 @@
     ]
   },
   {
+    "analysisId": 289808,
     "pr": 289808,
     "prTitle": "Target picker fixes",
     "prMergeCommit": "f8bd1cfbc94b253e95852185b71646f4ea42770f",
@@ -2180,6 +2284,7 @@
     ]
   },
   {
+    "analysisId": 289808,
     "pr": 289808,
     "prTitle": "Target picker fixes",
     "prMergeCommit": "f8bd1cfbc94b253e95852185b71646f4ea42770f",
@@ -2201,6 +2306,7 @@
     ]
   },
   {
+    "analysisId": 289808,
     "pr": 289808,
     "prTitle": "Target picker fixes",
     "prMergeCommit": "f8bd1cfbc94b253e95852185b71646f4ea42770f",
@@ -2222,6 +2328,7 @@
     ]
   },
   {
+    "analysisId": 289880,
     "pr": 289880,
     "prTitle": "VS Code asks me to confirm to quit while a Cloud session is running (fix #289726)",
     "prMergeCommit": "b43a3a3df6c87a1cc49ca73985782b3c94026004",
@@ -2243,6 +2350,7 @@
     ]
   },
   {
+    "analysisId": 289880,
     "pr": 289880,
     "prTitle": "VS Code asks me to confirm to quit while a Cloud session is running (fix #289726)",
     "prMergeCommit": "b43a3a3df6c87a1cc49ca73985782b3c94026004",
@@ -2264,6 +2372,7 @@
     ]
   },
   {
+    "analysisId": 289880,
     "pr": 289880,
     "prTitle": "VS Code asks me to confirm to quit while a Cloud session is running (fix #289726)",
     "prMergeCommit": "b43a3a3df6c87a1cc49ca73985782b3c94026004",
@@ -2285,6 +2394,7 @@
     ]
   },
   {
+    "analysisId": 289880,
     "pr": 289880,
     "prTitle": "VS Code asks me to confirm to quit while a Cloud session is running (fix #289726)",
     "prMergeCommit": "b43a3a3df6c87a1cc49ca73985782b3c94026004",
@@ -2306,6 +2416,7 @@
     ]
   },
   {
+    "analysisId": 289883,
     "pr": 289883,
     "prTitle": "Agent sessions sash can hide the side-by-side when sized small (fix #289680)",
     "prMergeCommit": "4af12255f5b9dd3679c5adfe4739908d5412ddb2",
@@ -2327,6 +2438,7 @@
     ]
   },
   {
+    "analysisId": 289883,
     "pr": 289883,
     "prTitle": "Agent sessions sash can hide the side-by-side when sized small (fix #289680)",
     "prMergeCommit": "4af12255f5b9dd3679c5adfe4739908d5412ddb2",
@@ -2348,6 +2460,7 @@
     ]
   },
   {
+    "analysisId": 289883,
     "pr": 289883,
     "prTitle": "Agent sessions sash can hide the side-by-side when sized small (fix #289680)",
     "prMergeCommit": "4af12255f5b9dd3679c5adfe4739908d5412ddb2",
@@ -2369,6 +2482,7 @@
     ]
   },
   {
+    "analysisId": 289883,
     "pr": 289883,
     "prTitle": "Agent sessions sash can hide the side-by-side when sized small (fix #289680)",
     "prMergeCommit": "4af12255f5b9dd3679c5adfe4739908d5412ddb2",
@@ -2390,6 +2504,7 @@
     ]
   },
   {
+    "analysisId": 289885,
     "pr": 289885,
     "prTitle": "Chat drag and drop target much smaller since sessions expanded (fix #289062)",
     "prMergeCommit": "4daeb8f993748295082ef89baef196b54c20adf8",
@@ -2411,6 +2526,7 @@
     ]
   },
   {
+    "analysisId": 289885,
     "pr": 289885,
     "prTitle": "Chat drag and drop target much smaller since sessions expanded (fix #289062)",
     "prMergeCommit": "4daeb8f993748295082ef89baef196b54c20adf8",
@@ -2432,6 +2548,7 @@
     ]
   },
   {
+    "analysisId": 289885,
     "pr": 289885,
     "prTitle": "Chat drag and drop target much smaller since sessions expanded (fix #289062)",
     "prMergeCommit": "4daeb8f993748295082ef89baef196b54c20adf8",
@@ -2453,6 +2570,7 @@
     ]
   },
   {
+    "analysisId": 289885,
     "pr": 289885,
     "prTitle": "Chat drag and drop target much smaller since sessions expanded (fix #289062)",
     "prMergeCommit": "4daeb8f993748295082ef89baef196b54c20adf8",
@@ -2474,6 +2592,7 @@
     ]
   },
   {
+    "analysisId": 290020,
     "pr": 290020,
     "prTitle": "Claude Agent integration: Archiving a Chat does not prompt me to decide if I want to keep/discard my changes from that chat (fix #289688)",
     "prMergeCommit": "042b8f0ae7375cc67b2575a7d0cffaad501736c6",
@@ -2495,6 +2614,7 @@
     ]
   },
   {
+    "analysisId": 290020,
     "pr": 290020,
     "prTitle": "Claude Agent integration: Archiving a Chat does not prompt me to decide if I want to keep/discard my changes from that chat (fix #289688)",
     "prMergeCommit": "042b8f0ae7375cc67b2575a7d0cffaad501736c6",
@@ -2516,6 +2636,7 @@
     ]
   },
   {
+    "analysisId": 290020,
     "pr": 290020,
     "prTitle": "Claude Agent integration: Archiving a Chat does not prompt me to decide if I want to keep/discard my changes from that chat (fix #289688)",
     "prMergeCommit": "042b8f0ae7375cc67b2575a7d0cffaad501736c6",
@@ -2537,6 +2658,7 @@
     ]
   },
   {
+    "analysisId": 290020,
     "pr": 290020,
     "prTitle": "Claude Agent integration: Archiving a Chat does not prompt me to decide if I want to keep/discard my changes from that chat (fix #289688)",
     "prMergeCommit": "042b8f0ae7375cc67b2575a7d0cffaad501736c6",
@@ -2558,6 +2680,7 @@
     ]
   },
   {
+    "analysisId": 290038,
     "pr": 290038,
     "prTitle": "Fixes for agent sessions welcome page logic for Insiders and prefill data",
     "prMergeCommit": "e55c97262cbe55dcad1b8f01381056f164d7968c",
@@ -2579,6 +2702,7 @@
     ]
   },
   {
+    "analysisId": 290038,
     "pr": 290038,
     "prTitle": "Fixes for agent sessions welcome page logic for Insiders and prefill data",
     "prMergeCommit": "e55c97262cbe55dcad1b8f01381056f164d7968c",
@@ -2600,6 +2724,7 @@
     ]
   },
   {
+    "analysisId": 290038,
     "pr": 290038,
     "prTitle": "Fixes for agent sessions welcome page logic for Insiders and prefill data",
     "prMergeCommit": "e55c97262cbe55dcad1b8f01381056f164d7968c",
@@ -2621,6 +2746,7 @@
     ]
   },
   {
+    "analysisId": 290038,
     "pr": 290038,
     "prTitle": "Fixes for agent sessions welcome page logic for Insiders and prefill data",
     "prMergeCommit": "e55c97262cbe55dcad1b8f01381056f164d7968c",
@@ -2642,6 +2768,7 @@
     ]
   },
   {
+    "analysisId": 290114,
     "pr": 290114,
     "prTitle": "Agents control: every chat interaction shows 1-progress, 1-unread (fix #289831)",
     "prMergeCommit": "87e6108688849dc201fcd2b50e4e36cd62a6a53e",
@@ -2663,6 +2790,7 @@
     ]
   },
   {
+    "analysisId": 290114,
     "pr": 290114,
     "prTitle": "Agents control: every chat interaction shows 1-progress, 1-unread (fix #289831)",
     "prMergeCommit": "87e6108688849dc201fcd2b50e4e36cd62a6a53e",
@@ -2684,6 +2812,7 @@
     ]
   },
   {
+    "analysisId": 290114,
     "pr": 290114,
     "prTitle": "Agents control: every chat interaction shows 1-progress, 1-unread (fix #289831)",
     "prMergeCommit": "87e6108688849dc201fcd2b50e4e36cd62a6a53e",
@@ -2705,6 +2834,7 @@
     ]
   },
   {
+    "analysisId": 290114,
     "pr": 290114,
     "prTitle": "Agents control: every chat interaction shows 1-progress, 1-unread (fix #289831)",
     "prMergeCommit": "87e6108688849dc201fcd2b50e4e36cd62a6a53e",
@@ -2726,6 +2856,7 @@
     ]
   },
   {
+    "analysisId": 290497,
     "pr": 290497,
     "prTitle": "fix 'Filter agent sessions resets when selecting additional session state filter'",
     "prMergeCommit": "109e2ee9b061bcbcbabebb8bea86b9350326776e",
@@ -2747,6 +2878,7 @@
     ]
   },
   {
+    "analysisId": 290497,
     "pr": 290497,
     "prTitle": "fix 'Filter agent sessions resets when selecting additional session state filter'",
     "prMergeCommit": "109e2ee9b061bcbcbabebb8bea86b9350326776e",
@@ -2768,6 +2900,7 @@
     ]
   },
   {
+    "analysisId": 290497,
     "pr": 290497,
     "prTitle": "fix 'Filter agent sessions resets when selecting additional session state filter'",
     "prMergeCommit": "109e2ee9b061bcbcbabebb8bea86b9350326776e",
@@ -2789,6 +2922,7 @@
     ]
   },
   {
+    "analysisId": 290497,
     "pr": 290497,
     "prTitle": "fix 'Filter agent sessions resets when selecting additional session state filter'",
     "prMergeCommit": "109e2ee9b061bcbcbabebb8bea86b9350326776e",
@@ -2810,6 +2944,7 @@
     ]
   },
   {
+    "analysisId": 290564,
     "pr": 290564,
     "prTitle": "fix tabbing around agent status",
     "prMergeCommit": "53db96894dd584e92b7a37ec781defa76420639e",
@@ -2831,6 +2966,7 @@
     ]
   },
   {
+    "analysisId": 290564,
     "pr": 290564,
     "prTitle": "fix tabbing around agent status",
     "prMergeCommit": "53db96894dd584e92b7a37ec781defa76420639e",
@@ -2852,6 +2988,7 @@
     ]
   },
   {
+    "analysisId": 290564,
     "pr": 290564,
     "prTitle": "fix tabbing around agent status",
     "prMergeCommit": "53db96894dd584e92b7a37ec781defa76420639e",
@@ -2873,6 +3010,7 @@
     ]
   },
   {
+    "analysisId": 290564,
     "pr": 290564,
     "prTitle": "fix tabbing around agent status",
     "prMergeCommit": "53db96894dd584e92b7a37ec781defa76420639e",
@@ -2894,6 +3032,7 @@
     ]
   },
   {
+    "analysisId": 291199,
     "pr": 291199,
     "prTitle": "Running chat not marked as 'in-progress' if currently viewed (fix #290642)",
     "prMergeCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
@@ -2915,6 +3054,7 @@
     ]
   },
   {
+    "analysisId": 291199,
     "pr": 291199,
     "prTitle": "Running chat not marked as 'in-progress' if currently viewed (fix #290642)",
     "prMergeCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
@@ -2936,6 +3076,7 @@
     ]
   },
   {
+    "analysisId": 291199,
     "pr": 291199,
     "prTitle": "Running chat not marked as 'in-progress' if currently viewed (fix #290642)",
     "prMergeCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
@@ -2957,6 +3098,7 @@
     ]
   },
   {
+    "analysisId": 291199,
     "pr": 291199,
     "prTitle": "Running chat not marked as 'in-progress' if currently viewed (fix #290642)",
     "prMergeCommit": "63f6c69f4135ec8a7906d0372b089757f462f23a",
@@ -2978,6 +3120,7 @@
     ]
   },
   {
+    "analysisId": 291200,
     "pr": 291200,
     "prTitle": "Chat progress badge not useful and just distracts me (fix #290793)",
     "prMergeCommit": "a066abff0fe2962791823f757767d88f079a036c",
@@ -2999,6 +3142,7 @@
     ]
   },
   {
+    "analysisId": 291200,
     "pr": 291200,
     "prTitle": "Chat progress badge not useful and just distracts me (fix #290793)",
     "prMergeCommit": "a066abff0fe2962791823f757767d88f079a036c",
@@ -3020,6 +3164,7 @@
     ]
   },
   {
+    "analysisId": 291200,
     "pr": 291200,
     "prTitle": "Chat progress badge not useful and just distracts me (fix #290793)",
     "prMergeCommit": "a066abff0fe2962791823f757767d88f079a036c",
@@ -3041,6 +3186,7 @@
     ]
   },
   {
+    "analysisId": 291200,
     "pr": 291200,
     "prTitle": "Chat progress badge not useful and just distracts me (fix #290793)",
     "prMergeCommit": "a066abff0fe2962791823f757767d88f079a036c",
@@ -3062,6 +3208,7 @@
     ]
   },
   {
+    "analysisId": 291207,
     "pr": 291207,
     "prTitle": "Don't sort sessions by read/unread state (fix #290858)",
     "prMergeCommit": "555c71bd02142065b21f32c07921b7f072b6bcba",
@@ -3083,6 +3230,7 @@
     ]
   },
   {
+    "analysisId": 291207,
     "pr": 291207,
     "prTitle": "Don't sort sessions by read/unread state (fix #290858)",
     "prMergeCommit": "555c71bd02142065b21f32c07921b7f072b6bcba",
@@ -3104,6 +3252,7 @@
     ]
   },
   {
+    "analysisId": 291207,
     "pr": 291207,
     "prTitle": "Don't sort sessions by read/unread state (fix #290858)",
     "prMergeCommit": "555c71bd02142065b21f32c07921b7f072b6bcba",
@@ -3125,6 +3274,7 @@
     ]
   },
   {
+    "analysisId": 291207,
     "pr": 291207,
     "prTitle": "Don't sort sessions by read/unread state (fix #290858)",
     "prMergeCommit": "555c71bd02142065b21f32c07921b7f072b6bcba",
@@ -3146,6 +3296,7 @@
     ]
   },
   {
+    "analysisId": 291227,
     "pr": 291227,
     "prTitle": "Unread state seems flaky and random (fix #290346)",
     "prMergeCommit": "761f19c25f6be7cf9cdf90c8d1bd632f8ba21459",
@@ -3167,6 +3318,7 @@
     ]
   },
   {
+    "analysisId": 291227,
     "pr": 291227,
     "prTitle": "Unread state seems flaky and random (fix #290346)",
     "prMergeCommit": "761f19c25f6be7cf9cdf90c8d1bd632f8ba21459",
@@ -3188,6 +3340,7 @@
     ]
   },
   {
+    "analysisId": 291227,
     "pr": 291227,
     "prTitle": "Unread state seems flaky and random (fix #290346)",
     "prMergeCommit": "761f19c25f6be7cf9cdf90c8d1bd632f8ba21459",
@@ -3209,6 +3362,7 @@
     ]
   },
   {
+    "analysisId": 291227,
     "pr": 291227,
     "prTitle": "Unread state seems flaky and random (fix #290346)",
     "prMergeCommit": "761f19c25f6be7cf9cdf90c8d1bd632f8ba21459",
@@ -3230,6 +3384,7 @@
     ]
   },
   {
+    "analysisId": 291243,
     "pr": 291243,
     "prTitle": "Agent session mode breaks the tri-state toggle of the chat icon in the title bar (fix #291099)",
     "prMergeCommit": "e1cede2ffcb069f8021bddca87ca5666be937c8a",
@@ -3251,6 +3406,7 @@
     ]
   },
   {
+    "analysisId": 291243,
     "pr": 291243,
     "prTitle": "Agent session mode breaks the tri-state toggle of the chat icon in the title bar (fix #291099)",
     "prMergeCommit": "e1cede2ffcb069f8021bddca87ca5666be937c8a",
@@ -3272,6 +3428,7 @@
     ]
   },
   {
+    "analysisId": 291243,
     "pr": 291243,
     "prTitle": "Agent session mode breaks the tri-state toggle of the chat icon in the title bar (fix #291099)",
     "prMergeCommit": "e1cede2ffcb069f8021bddca87ca5666be937c8a",
@@ -3293,6 +3450,7 @@
     ]
   },
   {
+    "analysisId": 291243,
     "pr": 291243,
     "prTitle": "Agent session mode breaks the tri-state toggle of the chat icon in the title bar (fix #291099)",
     "prMergeCommit": "e1cede2ffcb069f8021bddca87ca5666be937c8a",
@@ -3314,6 +3472,7 @@
     ]
   },
   {
+    "analysisId": 291262,
     "pr": 291262,
     "prTitle": "In stacked view filtering resets the more expansion making filtering hard to see (fix #290873)",
     "prMergeCommit": "9961a3a8b0a359d52663daf2de3067a0f525733c",
@@ -3335,6 +3494,7 @@
     ]
   },
   {
+    "analysisId": 291262,
     "pr": 291262,
     "prTitle": "In stacked view filtering resets the more expansion making filtering hard to see (fix #290873)",
     "prMergeCommit": "9961a3a8b0a359d52663daf2de3067a0f525733c",
@@ -3356,6 +3516,7 @@
     ]
   },
   {
+    "analysisId": 291262,
     "pr": 291262,
     "prTitle": "In stacked view filtering resets the more expansion making filtering hard to see (fix #290873)",
     "prMergeCommit": "9961a3a8b0a359d52663daf2de3067a0f525733c",
@@ -3377,6 +3538,7 @@
     ]
   },
   {
+    "analysisId": 291262,
     "pr": 291262,
     "prTitle": "In stacked view filtering resets the more expansion making filtering hard to see (fix #290873)",
     "prMergeCommit": "9961a3a8b0a359d52663daf2de3067a0f525733c",
@@ -3398,6 +3560,7 @@
     ]
   },
   {
+    "analysisId": 291529,
     "pr": 291529,
     "prTitle": "In agent session window, layout falls over when opening editors (fix #291089)",
     "prMergeCommit": "7a488d0f074748d65b5e017eea3662dc0aa17fbd",
@@ -3419,6 +3582,7 @@
     ]
   },
   {
+    "analysisId": 291529,
     "pr": 291529,
     "prTitle": "In agent session window, layout falls over when opening editors (fix #291089)",
     "prMergeCommit": "7a488d0f074748d65b5e017eea3662dc0aa17fbd",
@@ -3440,6 +3604,7 @@
     ]
   },
   {
+    "analysisId": 291529,
     "pr": 291529,
     "prTitle": "In agent session window, layout falls over when opening editors (fix #291089)",
     "prMergeCommit": "7a488d0f074748d65b5e017eea3662dc0aa17fbd",
@@ -3461,6 +3626,7 @@
     ]
   },
   {
+    "analysisId": 291529,
     "pr": 291529,
     "prTitle": "In agent session window, layout falls over when opening editors (fix #291089)",
     "prMergeCommit": "7a488d0f074748d65b5e017eea3662dc0aa17fbd",
@@ -3482,6 +3648,7 @@
     ]
   },
   {
+    "analysisId": 291572,
     "pr": 291572,
     "prTitle": "Agents welcome view UI fixes",
     "prMergeCommit": "16d4fc6d853bf4d5a82768ca4cc1d62f5284f431",
@@ -3503,6 +3670,7 @@
     ]
   },
   {
+    "analysisId": 291572,
     "pr": 291572,
     "prTitle": "Agents welcome view UI fixes",
     "prMergeCommit": "16d4fc6d853bf4d5a82768ca4cc1d62f5284f431",
@@ -3524,6 +3692,7 @@
     ]
   },
   {
+    "analysisId": 291572,
     "pr": 291572,
     "prTitle": "Agents welcome view UI fixes",
     "prMergeCommit": "16d4fc6d853bf4d5a82768ca4cc1d62f5284f431",
@@ -3545,6 +3714,7 @@
     ]
   },
   {
+    "analysisId": 291572,
     "pr": 291572,
     "prTitle": "Agents welcome view UI fixes",
     "prMergeCommit": "16d4fc6d853bf4d5a82768ca4cc1d62f5284f431",
@@ -3566,6 +3736,7 @@
     ]
   },
   {
+    "analysisId": 291683,
     "pr": 291683,
     "prTitle": "Chat Sessions: Toggling filter collapses More section (fix #291544)",
     "prMergeCommit": "90d24f7d3424df566adb7cc6a3d758ca7f169964",
@@ -3587,6 +3758,7 @@
     ]
   },
   {
+    "analysisId": 291683,
     "pr": 291683,
     "prTitle": "Chat Sessions: Toggling filter collapses More section (fix #291544)",
     "prMergeCommit": "90d24f7d3424df566adb7cc6a3d758ca7f169964",
@@ -3608,6 +3780,7 @@
     ]
   },
   {
+    "analysisId": 291683,
     "pr": 291683,
     "prTitle": "Chat Sessions: Toggling filter collapses More section (fix #291544)",
     "prMergeCommit": "90d24f7d3424df566adb7cc6a3d758ca7f169964",
@@ -3629,6 +3802,7 @@
     ]
   },
   {
+    "analysisId": 291683,
     "pr": 291683,
     "prTitle": "Chat Sessions: Toggling filter collapses More section (fix #291544)",
     "prMergeCommit": "90d24f7d3424df566adb7cc6a3d758ca7f169964",
@@ -3650,6 +3824,7 @@
     ]
   },
   {
+    "analysisId": 291805,
     "pr": 291805,
     "prTitle": "Agent sessions - Session grouping doesn't seem to always account for \\\"yesterday\\\" sessions (fix #291589)",
     "prMergeCommit": "dc1437b20d1a2087321d030461981bbc48d2607f",
@@ -3671,6 +3846,7 @@
     ]
   },
   {
+    "analysisId": 291805,
     "pr": 291805,
     "prTitle": "Agent sessions - Session grouping doesn't seem to always account for \\\"yesterday\\\" sessions (fix #291589)",
     "prMergeCommit": "dc1437b20d1a2087321d030461981bbc48d2607f",
@@ -3692,6 +3868,7 @@
     ]
   },
   {
+    "analysisId": 291805,
     "pr": 291805,
     "prTitle": "Agent sessions - Session grouping doesn't seem to always account for \\\"yesterday\\\" sessions (fix #291589)",
     "prMergeCommit": "dc1437b20d1a2087321d030461981bbc48d2607f",
@@ -3713,6 +3890,7 @@
     ]
   },
   {
+    "analysisId": 291805,
     "pr": 291805,
     "prTitle": "Agent sessions - Session grouping doesn't seem to always account for \\\"yesterday\\\" sessions (fix #291589)",
     "prMergeCommit": "dc1437b20d1a2087321d030461981bbc48d2607f",
@@ -3734,6 +3912,7 @@
     ]
   },
   {
+    "analysisId": 291911,
     "pr": 291911,
     "prTitle": "targetted fix for agent status widget with multiple windows open",
     "prMergeCommit": "2b17889bea76cae3a08203311262ad137632a22c",
@@ -3755,6 +3934,7 @@
     ]
   },
   {
+    "analysisId": 291911,
     "pr": 291911,
     "prTitle": "targetted fix for agent status widget with multiple windows open",
     "prMergeCommit": "2b17889bea76cae3a08203311262ad137632a22c",
@@ -3776,6 +3956,7 @@
     ]
   },
   {
+    "analysisId": 291911,
     "pr": 291911,
     "prTitle": "targetted fix for agent status widget with multiple windows open",
     "prMergeCommit": "2b17889bea76cae3a08203311262ad137632a22c",
@@ -3797,6 +3978,7 @@
     ]
   },
   {
+    "analysisId": 291911,
     "pr": 291911,
     "prTitle": "targetted fix for agent status widget with multiple windows open",
     "prMergeCommit": "2b17889bea76cae3a08203311262ad137632a22c",
@@ -3818,6 +4000,7 @@
     ]
   },
   {
+    "analysisId": 291919,
     "pr": 291919,
     "prTitle": "release: targetted fix for agent status widget with multiple windows open",
     "prMergeCommit": "876b74756125becabec92ae8ca34f0767f84f056",
@@ -3839,6 +4022,7 @@
     ]
   },
   {
+    "analysisId": 291919,
     "pr": 291919,
     "prTitle": "release: targetted fix for agent status widget with multiple windows open",
     "prMergeCommit": "876b74756125becabec92ae8ca34f0767f84f056",
@@ -3860,6 +4044,7 @@
     ]
   },
   {
+    "analysisId": 291919,
     "pr": 291919,
     "prTitle": "release: targetted fix for agent status widget with multiple windows open",
     "prMergeCommit": "876b74756125becabec92ae8ca34f0767f84f056",
@@ -3881,6 +4066,7 @@
     ]
   },
   {
+    "analysisId": 291919,
     "pr": 291919,
     "prTitle": "release: targetted fix for agent status widget with multiple windows open",
     "prMergeCommit": "876b74756125becabec92ae8ca34f0767f84f056",
@@ -3902,6 +4088,7 @@
     ]
   },
   {
+    "analysisId": 292160,
     "pr": 292160,
     "prTitle": "Agents welcome view command fixes",
     "prMergeCommit": "d6ff40d9187f4f0a0d4139211742773111ad6816",
@@ -3923,6 +4110,7 @@
     ]
   },
   {
+    "analysisId": 292160,
     "pr": 292160,
     "prTitle": "Agents welcome view command fixes",
     "prMergeCommit": "d6ff40d9187f4f0a0d4139211742773111ad6816",
@@ -3944,6 +4132,7 @@
     ]
   },
   {
+    "analysisId": 292160,
     "pr": 292160,
     "prTitle": "Agents welcome view command fixes",
     "prMergeCommit": "d6ff40d9187f4f0a0d4139211742773111ad6816",
@@ -3965,6 +4154,7 @@
     ]
   },
   {
+    "analysisId": 292160,
     "pr": 292160,
     "prTitle": "Agents welcome view command fixes",
     "prMergeCommit": "d6ff40d9187f4f0a0d4139211742773111ad6816",
@@ -3986,6 +4176,7 @@
     ]
   },
   {
+    "analysisId": 292341,
     "pr": 292341,
     "prTitle": "Chat Anonymous: can send a chat message with anonymous access (fix #292296)",
     "prMergeCommit": "1951d880562601ebdb30c0a509d6b7bd37a05f09",
@@ -4007,6 +4198,7 @@
     ]
   },
   {
+    "analysisId": 292341,
     "pr": 292341,
     "prTitle": "Chat Anonymous: can send a chat message with anonymous access (fix #292296)",
     "prMergeCommit": "1951d880562601ebdb30c0a509d6b7bd37a05f09",
@@ -4028,6 +4220,7 @@
     ]
   },
   {
+    "analysisId": 292341,
     "pr": 292341,
     "prTitle": "Chat Anonymous: can send a chat message with anonymous access (fix #292296)",
     "prMergeCommit": "1951d880562601ebdb30c0a509d6b7bd37a05f09",
@@ -4049,6 +4242,7 @@
     ]
   },
   {
+    "analysisId": 292341,
     "pr": 292341,
     "prTitle": "Chat Anonymous: can send a chat message with anonymous access (fix #292296)",
     "prMergeCommit": "1951d880562601ebdb30c0a509d6b7bd37a05f09",
@@ -4070,6 +4264,7 @@
     ]
   },
   {
+    "analysisId": 292472,
     "pr": 292472,
     "prTitle": "Agent session list collapsed automatically without interaction (fix #291701)",
     "prMergeCommit": "8d864503e1d96ad37e2c4b001b330a75b03261cb",
@@ -4091,6 +4286,7 @@
     ]
   },
   {
+    "analysisId": 292472,
     "pr": 292472,
     "prTitle": "Agent session list collapsed automatically without interaction (fix #291701)",
     "prMergeCommit": "8d864503e1d96ad37e2c4b001b330a75b03261cb",
@@ -4112,6 +4308,7 @@
     ]
   },
   {
+    "analysisId": 292472,
     "pr": 292472,
     "prTitle": "Agent session list collapsed automatically without interaction (fix #291701)",
     "prMergeCommit": "8d864503e1d96ad37e2c4b001b330a75b03261cb",
@@ -4133,6 +4330,7 @@
     ]
   },
   {
+    "analysisId": 292472,
     "pr": 292472,
     "prTitle": "Agent session list collapsed automatically without interaction (fix #291701)",
     "prMergeCommit": "8d864503e1d96ad37e2c4b001b330a75b03261cb",
@@ -4154,6 +4352,7 @@
     ]
   },
   {
+    "analysisId": 292593,
     "pr": 292593,
     "prTitle": "can send a chat message with anonymous access (fix #292582)",
     "prMergeCommit": "1adb77d0f4dbadb1077087395d4bf917cd0359cf",
@@ -4175,6 +4374,7 @@
     ]
   },
   {
+    "analysisId": 292593,
     "pr": 292593,
     "prTitle": "can send a chat message with anonymous access (fix #292582)",
     "prMergeCommit": "1adb77d0f4dbadb1077087395d4bf917cd0359cf",
@@ -4196,6 +4396,7 @@
     ]
   },
   {
+    "analysisId": 292593,
     "pr": 292593,
     "prTitle": "can send a chat message with anonymous access (fix #292582)",
     "prMergeCommit": "1adb77d0f4dbadb1077087395d4bf917cd0359cf",
@@ -4217,6 +4418,7 @@
     ]
   },
   {
+    "analysisId": 292593,
     "pr": 292593,
     "prTitle": "can send a chat message with anonymous access (fix #292582)",
     "prMergeCommit": "1adb77d0f4dbadb1077087395d4bf917cd0359cf",
@@ -4238,6 +4440,7 @@
     ]
   },
   {
+    "analysisId": 294001,
     "pr": 294001,
     "prTitle": "Fix URI scheme error in LoggerChannelClient.deregisterLogger",
     "prMergeCommit": "0c3d14a4802fd082e75ce6360d39c8f8f3c11992",
@@ -4259,6 +4462,7 @@
     ]
   },
   {
+    "analysisId": 294001,
     "pr": 294001,
     "prTitle": "Fix URI scheme error in LoggerChannelClient.deregisterLogger",
     "prMergeCommit": "0c3d14a4802fd082e75ce6360d39c8f8f3c11992",
@@ -4280,6 +4484,7 @@
     ]
   },
   {
+    "analysisId": 294001,
     "pr": 294001,
     "prTitle": "Fix URI scheme error in LoggerChannelClient.deregisterLogger",
     "prMergeCommit": "0c3d14a4802fd082e75ce6360d39c8f8f3c11992",
@@ -4301,6 +4506,7 @@
     ]
   },
   {
+    "analysisId": 296709,
     "pr": 296709,
     "prTitle": "Fix ViewModel issue where all lines were hidden",
     "prMergeCommit": "9c99e8fb20933a838deb6a62a0a9e2ab1919290f",
@@ -4322,6 +4528,7 @@
     ]
   },
   {
+    "analysisId": 296709,
     "pr": 296709,
     "prTitle": "Fix ViewModel issue where all lines were hidden",
     "prMergeCommit": "9c99e8fb20933a838deb6a62a0a9e2ab1919290f",
@@ -4343,6 +4550,7 @@
     ]
   },
   {
+    "analysisId": 296709,
     "pr": 296709,
     "prTitle": "Fix ViewModel issue where all lines were hidden",
     "prMergeCommit": "9c99e8fb20933a838deb6a62a0a9e2ab1919290f",

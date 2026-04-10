@@ -1,0 +1,14 @@
+{
+  "pr": 304987,
+  "prTitle": "fix: send user preferences to TS server even without visible editor",
+  "mergeCommit": "abdf722266f3d65b8d50c2cbd77421c7db5e95ec",
+  "parentCommit": "6648ece501f958a8fcf9092583e7541818992258",
+  "fileCount": 1,
+  "issue": 272479,
+  "issueTitle": "The typescript source.addMissingImports code action always using type keyword and doesn't respect the settings: preferTypeOnlyAutoImport",
+  "issueAuthor": "hansyulian",
+  "commentCount": 9,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

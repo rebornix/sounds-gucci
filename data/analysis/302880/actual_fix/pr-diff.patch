@@ -1,0 +1,387 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/chat.contribution.ts b/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+index 7e9c63e46d81e..ee691117f4206 100644
+--- a/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
++++ b/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+@@ -59,7 +59,7 @@ import { agentPluginDiscoveryRegistry, IAgentPluginService } from '../common/plu
+ import { ChatPromptFilesExtensionPointHandler } from '../common/promptSyntax/chatPromptFilesContribution.js';
+ import { isTildePath, PromptsConfig } from '../common/promptSyntax/config/config.js';
+ import { INSTRUCTIONS_DEFAULT_SOURCE_FOLDER, INSTRUCTION_FILE_EXTENSION, LEGACY_MODE_DEFAULT_SOURCE_FOLDER, LEGACY_MODE_FILE_EXTENSION, PROMPT_DEFAULT_SOURCE_FOLDER, PROMPT_FILE_EXTENSION, DEFAULT_SKILL_SOURCE_FOLDERS, AGENTS_SOURCE_FOLDER, AGENT_FILE_EXTENSION, SKILL_FILENAME, CLAUDE_AGENTS_SOURCE_FOLDER, DEFAULT_HOOK_FILE_PATHS, DEFAULT_INSTRUCTIONS_SOURCE_FOLDERS, PromptFileSource, COPILOT_USER_AGENTS_SOURCE_FOLDER } from '../common/promptSyntax/config/promptFileLocations.js';
+-import { PromptLanguageFeaturesProvider } from '../common/promptSyntax/promptFileContributions.js';
++import { PromptLanguageFeaturesProvider } from './promptSyntax/promptFileContributions.js';
+ import { AGENT_DOCUMENTATION_URL, INSTRUCTIONS_DOCUMENTATION_URL, PROMPT_DOCUMENTATION_URL, SKILL_DOCUMENTATION_URL, HOOK_DOCUMENTATION_URL, PromptsType } from '../common/promptSyntax/promptTypes.js';
+ import { hookFileSchema, HOOK_SCHEMA_URI } from '../common/promptSyntax/hookSchema.js';
+ import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
+diff --git a/src/vs/workbench/contrib/chat/browser/promptSyntax/promptFileContributions.ts b/src/vs/workbench/contrib/chat/browser/promptSyntax/promptFileContributions.ts
+new file mode 100644
+index 0000000000000..04e1853ddd581
+--- /dev/null
++++ b/src/vs/workbench/contrib/chat/browser/promptSyntax/promptFileContributions.ts
+@@ -0,0 +1,192 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright (c) Microsoft Corporation. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++import { IWorkbenchContribution } from '../../../../common/contributions.js';
++import { PromptLinkProvider } from '../../common/promptSyntax/languageProviders/promptLinkProvider.js';
++import { PromptBodyAutocompletion } from '../../common/promptSyntax/languageProviders/promptBodyAutocompletion.js';
++import { PromptHeaderAutocompletion } from '../../common/promptSyntax/languageProviders/promptHeaderAutocompletion.js';
++import { PromptHoverProvider } from '../../common/promptSyntax/languageProviders/promptHovers.js';
++import { PromptHeaderDefinitionProvider } from '../../common/promptSyntax/languageProviders/PromptHeaderDefinitionProvider.js';
++import { MARKERS_OWNER_ID, PromptValidator } from '../../common/promptSyntax/languageProviders/promptValidator.js';
++import { PromptDocumentSemanticTokensProvider } from '../../common/promptSyntax/languageProviders/promptDocumentSemanticTokensProvider.js';
++import { PromptCodeActionProvider } from '../../common/promptSyntax/languageProviders/promptCodeActions.js';
++import { ILanguageFeaturesService } from '../../../../../editor/common/services/languageFeatures.js';
++import { Disposable, DisposableMap, DisposableStore, toDisposable } from '../../../../../base/common/lifecycle.js';
++import { ALL_PROMPTS_LANGUAGE_SELECTOR, getPromptsTypeForLanguageId, PromptsType } from '../../common/promptSyntax/promptTypes.js';
++import { IInstantiationService } from '../../../../../platform/instantiation/common/instantiation.js';
++import { ICodeEditorService } from '../../../../../editor/browser/services/codeEditorService.js';
++import { ICodeEditor } from '../../../../../editor/browser/editorBrowser.js';
++import { IMarkerData, IMarkerService } from '../../../../../platform/markers/common/markers.js';
++import { ILanguageModelsService } from '../../common/languageModels.js';
++import { ILanguageModelToolsService } from '../../common/tools/languageModelToolsService.js';
++import { IChatModeService } from '../../common/chatModes.js';
++import { IPromptsService } from '../../common/promptSyntax/service/promptsService.js';
++import { Delayer } from '../../../../../base/common/async.js';
++import { ITextModel } from '../../../../../editor/common/model.js';
++import { ResourceMap } from '../../../../../base/common/map.js';
++import { URI } from '../../../../../base/common/uri.js';
++
++export class PromptLanguageFeaturesProvider extends Disposable implements IWorkbenchContribution {
++	static readonly ID = 'chat.promptLanguageFeatures';
++
++	constructor(
++		@ILanguageFeaturesService languageService: ILanguageFeaturesService,
++		@IInstantiationService instantiationService: IInstantiationService,
++	) {
++		super();
++
++		this._register(languageService.linkProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptLinkProvider)));
++		this._register(languageService.completionProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptBodyAutocompletion)));
++		this._register(languageService.completionProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptHeaderAutocompletion)));
++		this._register(languageService.hoverProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptHoverProvider)));
++		this._register(languageService.definitionProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptHeaderDefinitionProvider)));
++		this._register(languageService.documentSemanticTokensProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptDocumentSemanticTokensProvider)));
++		this._register(languageService.codeActionProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptCodeActionProvider)));
++
++		this._register(instantiationService.createInstance(PromptValidatorContribution));
++	}
++}
++
++/**
++ * Tracks open code editors and validates prompt models that are visible in an editor.
++ * Only emits markers for models that are currently open in an editor.
++ */
++class PromptValidatorContribution extends Disposable {
++
++	private readonly validator: PromptValidator;
++	private readonly localDisposables = this._register(new DisposableStore());
++
++	constructor(
++		@ICodeEditorService private readonly codeEditorService: ICodeEditorService,
++		@IInstantiationService instantiationService: IInstantiationService,
++		@IMarkerService private readonly markerService: IMarkerService,
++		@IPromptsService private readonly promptsService: IPromptsService,
++		@ILanguageModelsService private readonly languageModelsService: ILanguageModelsService,
++		@ILanguageModelToolsService private readonly languageModelToolsService: ILanguageModelToolsService,
++		@IChatModeService private readonly chatModeService: IChatModeService,
++	) {
++		super();
++		this.validator = instantiationService.createInstance(PromptValidator);
++
++		this.updateRegistration();
++	}
++
++	updateRegistration(): void {
++		this.localDisposables.clear();
++		const trackers = new ResourceMap<ModelTracker>();
++		this.localDisposables.add(toDisposable(() => {
++			trackers.forEach(tracker => tracker.dispose());
++			trackers.clear();
++		}));
++
++		// Increment the ref count for a model, creating a tracker if needed
++		const acquire = (editor: ICodeEditor): void => {
++			const model = editor.getModel();
++			if (!model) {
++				return;
++			}
++			const promptType = getPromptsTypeForLanguageId(model.getLanguageId());
++			if (promptType) {
++				const existing = trackers.get(model.uri);
++				if (existing) {
++					existing.refCount++;
++					return;
++				}
++				trackers.set(model.uri, new ModelTracker(model, promptType, this.validator, this.promptsService, this.markerService));
++			}
++		};
++
++		// Decrement the ref count, disposing the tracker when it reaches zero
++		const release = (uri: URI): void => {
++			const tracker = trackers.get(uri);
++			if (tracker && --tracker.refCount === 0) {
++				tracker.dispose();
++				trackers.delete(uri);
++			}
++		};
++
++		const perEditorDisposables = new DisposableMap<string, DisposableStore>();
++		this.localDisposables.add(perEditorDisposables);
++
++		const onCodeEditorAdd = (editor: ICodeEditor) => {
++			acquire(editor);
++			const store = new DisposableStore();
++			// Track model changes within the editor (e.g. when a different file is opened in the same editor)
++			store.add(editor.onDidChangeModel((e) => {
++				if (e.oldModelUrl) {
++					release(e.oldModelUrl);
++				}
++				acquire(editor);
++			}));
++			store.add(editor.onDidChangeModelLanguage((e) => {
++				const model = editor.getModel();
++				if (model) {
++					release(model.uri);
++					acquire(editor);
++				}
++			}));
++			perEditorDisposables.set(editor.getId(), store);
++		};
++
++		// Track models from editors that are currently open
++		for (const editor of this.codeEditorService.listCodeEditors()) {
++			onCodeEditorAdd(editor);
++		}
++
++		// When an editor is added, start tracking its model
++		this.localDisposables.add(this.codeEditorService.onCodeEditorAdd((editor: ICodeEditor) => {
++			onCodeEditorAdd(editor);
++		}));
++
++		// When an editor is removed, clean up its per-editor listeners and release its model
++		this.localDisposables.add(this.codeEditorService.onCodeEditorRemove((editor: ICodeEditor) => {
++			perEditorDisposables.deleteAndDispose(editor.getId());
++			const model = editor.getModel();
++			if (model) {
++				release(model.uri);
++			}
++		}));
++
++		const validateAll = (): void => trackers.forEach(tracker => tracker.validate());
++		this.localDisposables.add(this.languageModelToolsService.onDidChangeTools(() => validateAll()));
++		this.localDisposables.add(this.chatModeService.onDidChangeChatModes(() => validateAll()));
++		this.localDisposables.add(this.languageModelsService.onDidChangeLanguageModels(() => validateAll()));
++	}
++}
++
++class ModelTracker extends Disposable {
++
++	public refCount = 1;
++	private readonly delayer: Delayer<void>;
++
++	constructor(
++		private readonly textModel: ITextModel,
++		private readonly promptType: PromptsType,
++		private readonly validator: PromptValidator,
++		private readonly promptsService: IPromptsService,
++		private readonly markerService: IMarkerService,
++	) {
++		super();
++		this.delayer = this._register(new Delayer<void>(200));
++		this._register(textModel.onDidChangeContent(() => this.validate()));
++		this.validate();
++	}
++
++	public validate(): void {
++		this.delayer.trigger(async () => {
++			const markers: IMarkerData[] = [];
++			const ast = this.promptsService.getParsedPromptFile(this.textModel);
++			await this.validator.validate(ast, this.promptType, m => markers.push(m));
++			if (!this._store.isDisposed) {
++				this.markerService.changeOne(MARKERS_OWNER_ID, this.textModel.uri, markers);
++			}
++		});
++	}
++
++	public override dispose() {
++		this.markerService.remove(MARKERS_OWNER_ID, [this.textModel.uri]);
++		super.dispose();
++	}
++}
+diff --git a/src/vs/workbench/contrib/chat/common/promptSyntax/languageProviders/promptValidator.ts b/src/vs/workbench/contrib/chat/common/promptSyntax/languageProviders/promptValidator.ts
+index 3eadf14d4055d..d61027cb00c6c 100644
+--- a/src/vs/workbench/contrib/chat/common/promptSyntax/languageProviders/promptValidator.ts
++++ b/src/vs/workbench/contrib/chat/common/promptSyntax/languageProviders/promptValidator.ts
+@@ -6,21 +6,15 @@
+ import { isEmptyPattern, parse, splitGlobAware } from '../../../../../../base/common/glob.js';
+ import { Iterable } from '../../../../../../base/common/iterator.js';
+ import { Range } from '../../../../../../editor/common/core/range.js';
+-import { ITextModel } from '../../../../../../editor/common/model.js';
+-import { IModelService } from '../../../../../../editor/common/services/model.js';
+ import { localize } from '../../../../../../nls.js';
+ import { IConfigurationService } from '../../../../../../platform/configuration/common/configuration.js';
+-import { IInstantiationService } from '../../../../../../platform/instantiation/common/instantiation.js';
+-import { IMarkerData, IMarkerService, MarkerSeverity } from '../../../../../../platform/markers/common/markers.js';
++import { IMarkerData, MarkerSeverity } from '../../../../../../platform/markers/common/markers.js';
+ import { ChatMode, IChatMode, IChatModeService } from '../../chatModes.js';
+ import { ChatConfiguration, ChatModeKind } from '../../constants.js';
+ import { ILanguageModelChatMetadata, ILanguageModelsService } from '../../languageModels.js';
+ import { ILanguageModelToolsService, SpecedToolAliases } from '../../tools/languageModelToolsService.js';
+-import { getPromptsTypeForLanguageId, PromptsType, Target } from '../promptTypes.js';
++import { PromptsType, Target } from '../promptTypes.js';
+ import { ISequenceValue, IHeaderAttribute, IScalarValue, parseCommaSeparatedList, ParsedPromptFile, PromptHeader, IValue, PromptHeaderAttributes } from '../promptFileParser.js';
+-import { Disposable, DisposableStore, toDisposable } from '../../../../../../base/common/lifecycle.js';
+-import { Delayer } from '../../../../../../base/common/async.js';
+-import { ResourceMap } from '../../../../../../base/common/map.js';
+ import { IFileService } from '../../../../../../platform/files/common/files.js';
+ import { IPromptsService } from '../service/promptsService.js';
+ import { ILabelService } from '../../../../../../platform/label/common/label.js';
+@@ -1230,102 +1224,3 @@ export function getTarget(promptType: PromptsType, header: PromptHeader | URI):
+ function toMarker(message: string, range: Range, severity = MarkerSeverity.Error): IMarkerData {
+ 	return { severity, message, ...range };
+ }
+-
+-export class PromptValidatorContribution extends Disposable {
+-
+-	private readonly validator: PromptValidator;
+-	private readonly localDisposables = this._register(new DisposableStore());
+-
+-	constructor(
+-		@IModelService private modelService: IModelService,
+-		@IInstantiationService instantiationService: IInstantiationService,
+-		@IMarkerService private readonly markerService: IMarkerService,
+-		@IPromptsService private readonly promptsService: IPromptsService,
+-		@ILanguageModelsService private readonly languageModelsService: ILanguageModelsService,
+-		@ILanguageModelToolsService private readonly languageModelToolsService: ILanguageModelToolsService,
+-		@IChatModeService private readonly chatModeService: IChatModeService,
+-	) {
+-		super();
+-		this.validator = instantiationService.createInstance(PromptValidator);
+-
+-		this.updateRegistration();
+-	}
+-
+-	updateRegistration(): void {
+-		this.localDisposables.clear();
+-		const trackers = new ResourceMap<ModelTracker>();
+-		this.localDisposables.add(toDisposable(() => {
+-			trackers.forEach(tracker => tracker.dispose());
+-			trackers.clear();
+-		}));
+-		this.modelService.getModels().forEach(model => {
+-			const promptType = getPromptsTypeForLanguageId(model.getLanguageId());
+-			if (promptType) {
+-				trackers.set(model.uri, new ModelTracker(model, promptType, this.validator, this.promptsService, this.markerService));
+-			}
+-		});
+-
+-		this.localDisposables.add(this.modelService.onModelAdded((model) => {
+-			const promptType = getPromptsTypeForLanguageId(model.getLanguageId());
+-			if (promptType && !trackers.has(model.uri)) {
+-				trackers.set(model.uri, new ModelTracker(model, promptType, this.validator, this.promptsService, this.markerService));
+-			}
+-		}));
+-		this.localDisposables.add(this.modelService.onModelRemoved((model) => {
+-			const tracker = trackers.get(model.uri);
+-			if (tracker) {
+-				tracker.dispose();
+-				trackers.delete(model.uri);
+-			}
+-		}));
+-		this.localDisposables.add(this.modelService.onModelLanguageChanged((event) => {
+-			const { model } = event;
+-			const tracker = trackers.get(model.uri);
+-			if (tracker) {
+-				tracker.dispose();
+-				trackers.delete(model.uri);
+-			}
+-			const promptType = getPromptsTypeForLanguageId(model.getLanguageId());
+-			if (promptType) {
+-				trackers.set(model.uri, new ModelTracker(model, promptType, this.validator, this.promptsService, this.markerService));
+-			}
+-		}));
+-
+-		const validateAll = (): void => trackers.forEach(tracker => tracker.validate());
+-		this.localDisposables.add(this.languageModelToolsService.onDidChangeTools(() => validateAll()));
+-		this.localDisposables.add(this.chatModeService.onDidChangeChatModes(() => validateAll()));
+-		this.localDisposables.add(this.languageModelsService.onDidChangeLanguageModels(() => validateAll()));
+-	}
+-}
+-
+-class ModelTracker extends Disposable {
+-
+-	private readonly delayer: Delayer<void>;
+-
+-	constructor(
+-		private readonly textModel: ITextModel,
+-		private readonly promptType: PromptsType,
+-		private readonly validator: PromptValidator,
+-		@IPromptsService private readonly promptsService: IPromptsService,
+-		@IMarkerService private readonly markerService: IMarkerService,
+-	) {
+-		super();
+-		this.delayer = this._register(new Delayer<void>(200));
+-		this._register(textModel.onDidChangeContent(() => this.validate()));
+-		this.validate();
+-	}
+-
+-	public validate(): void {
+-		this.delayer.trigger(async () => {
+-			const markers: IMarkerData[] = [];
+-			const ast = this.promptsService.getParsedPromptFile(this.textModel);
+-			await this.validator.validate(ast, this.promptType, m => markers.push(m));
+-			this.markerService.changeOne(MARKERS_OWNER_ID, this.textModel.uri, markers);
+-		});
+-	}
+-
+-	public override dispose() {
+-		this.markerService.remove(MARKERS_OWNER_ID, [this.textModel.uri]);
+-		super.dispose();
+-	}
+-}
+diff --git a/src/vs/workbench/contrib/chat/common/promptSyntax/promptFileContributions.ts b/src/vs/workbench/contrib/chat/common/promptSyntax/promptFileContributions.ts
+deleted file mode 100644
+index 66cee4974348c..0000000000000
+--- a/src/vs/workbench/contrib/chat/common/promptSyntax/promptFileContributions.ts
++++ /dev/null
+@@ -1,39 +0,0 @@
+-/*---------------------------------------------------------------------------------------------
+- *  Copyright (c) Microsoft Corporation. All rights reserved.
+- *  Licensed under the MIT License. See License.txt in the project root for license information.
+- *--------------------------------------------------------------------------------------------*/
+-
+-import { IWorkbenchContribution } from '../../../../common/contributions.js';
+-import { PromptLinkProvider } from './languageProviders/promptLinkProvider.js';
+-import { PromptBodyAutocompletion } from './languageProviders/promptBodyAutocompletion.js';
+-import { PromptHeaderAutocompletion } from './languageProviders/promptHeaderAutocompletion.js';
+-import { PromptHoverProvider } from './languageProviders/promptHovers.js';
+-import { PromptHeaderDefinitionProvider } from './languageProviders/PromptHeaderDefinitionProvider.js';
+-import { PromptValidatorContribution } from './languageProviders/promptValidator.js';
+-import { PromptDocumentSemanticTokensProvider } from './languageProviders/promptDocumentSemanticTokensProvider.js';
+-import { PromptCodeActionProvider } from './languageProviders/promptCodeActions.js';
+-import { ILanguageFeaturesService } from '../../../../../editor/common/services/languageFeatures.js';
+-import { Disposable } from '../../../../../base/common/lifecycle.js';
+-import { ALL_PROMPTS_LANGUAGE_SELECTOR } from './promptTypes.js';
+-import { IInstantiationService } from '../../../../../platform/instantiation/common/instantiation.js';
+-
+-export class PromptLanguageFeaturesProvider extends Disposable implements IWorkbenchContribution {
+-	static readonly ID = 'chat.promptLanguageFeatures';
+-
+-	constructor(
+-		@ILanguageFeaturesService languageService: ILanguageFeaturesService,
+-		@IInstantiationService instantiationService: IInstantiationService,
+-	) {
+-		super();
+-
+-		this._register(languageService.linkProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptLinkProvider)));
+-		this._register(languageService.completionProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptBodyAutocompletion)));
+-		this._register(languageService.completionProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptHeaderAutocompletion)));
+-		this._register(languageService.hoverProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptHoverProvider)));
+-		this._register(languageService.definitionProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptHeaderDefinitionProvider)));
+-		this._register(languageService.documentSemanticTokensProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptDocumentSemanticTokensProvider)));
+-		this._register(languageService.codeActionProvider.register(ALL_PROMPTS_LANGUAGE_SELECTOR, instantiationService.createInstance(PromptCodeActionProvider)));
+-
+-		this._register(instantiationService.createInstance(PromptValidatorContribution));
+-	}
+-}

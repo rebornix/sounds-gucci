@@ -1,0 +1,14 @@
+{
+  "pr": 304261,
+  "prTitle": "fix https://github.com/microsoft/vscode/issues/304025",
+  "mergeCommit": "02ddda819c1f2885b6092823cc4f0bc6fe345509",
+  "parentCommit": "959009139285ae41f3d90d4d889fefc65e9603a5",
+  "fileCount": 5,
+  "issue": 304025,
+  "issueTitle": "Chat customization: descriptions are cut off",
+  "issueAuthor": "aeschli",
+  "commentCount": 0,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

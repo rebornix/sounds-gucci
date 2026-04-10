@@ -1,0 +1,14 @@
+{
+  "pr": 306265,
+  "prTitle": "fix #305321",
+  "mergeCommit": "d55c8eb9f133854f1abe897a484a7a97155d6239",
+  "parentCommit": "3d5035e98791181f4fb04962a8a7b127106d2626",
+  "fileCount": 1,
+  "issue": 305321,
+  "issueTitle": "Sessions: Can't open archived sessions (without unarchiving them)",
+  "issueAuthor": "bamurtaugh",
+  "commentCount": 3,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

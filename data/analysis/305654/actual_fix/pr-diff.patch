@@ -1,0 +1,15 @@
+diff --git a/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/chatThinkingContentPart.ts b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/chatThinkingContentPart.ts
+index 32dc64e4497f9..91d19062db02f 100644
+--- a/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/chatThinkingContentPart.ts
++++ b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/chatThinkingContentPart.ts
+@@ -1272,7 +1272,9 @@ ${this.hookCount > 0 ? `EXAMPLES WITH BLOCKED CONTENT (from hooks):
+ 
+ 	private setFallbackTitle(): void {
+ 		const finalLabel = this.appendedItemCount > 0
+-			? localize('chat.thinking.finished.withSteps', 'Finished with {0} step{1}', this.appendedItemCount, this.appendedItemCount === 1 ? '' : 's')
++			? this.appendedItemCount === 1
++				? localize('chat.thinking.finished.withStepsSingular', 'Finished with 1 step')
++				: localize('chat.thinking.finished.withStepsPlural', 'Finished with {0} steps', this.appendedItemCount)
+ 			: localize('chat.thinking.finished', 'Finished Working');
+ 
+ 		this.currentTitle = finalLabel;

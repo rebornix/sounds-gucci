@@ -1,0 +1,35 @@
+diff --git a/src/vs/sessions/browser/media/style.css b/src/vs/sessions/browser/media/style.css
+index c36832a96c2ee..1e3a9eaeae926 100644
+--- a/src/vs/sessions/browser/media/style.css
++++ b/src/vs/sessions/browser/media/style.css
+@@ -100,12 +100,6 @@
+ 	box-sizing: border-box;
+ }
+ 
+-/* ---- Session List ---- */
+-
+-.agent-sessions-workbench .agent-session-title {
+-	color: var(--vscode-list-activeSelectionForeground);
+-}
+-
+ /* ---- Modal Editor Block ---- */
+ 
+ .agent-sessions-workbench .monaco-modal-editor-block {
+diff --git a/src/vs/workbench/contrib/chat/browser/agentSessions/media/agentsessionsviewer.css b/src/vs/workbench/contrib/chat/browser/agentSessions/media/agentsessionsviewer.css
+index 4d7badd32dbad..4243cea61602b 100644
+--- a/src/vs/workbench/contrib/chat/browser/agentSessions/media/agentsessionsviewer.css
++++ b/src/vs/workbench/contrib/chat/browser/agentSessions/media/agentsessionsviewer.css
+@@ -44,11 +44,12 @@
+ 		.agent-session-diff-container {
+ 			.agent-session-diff-added,
+ 			.agent-session-diff-removed {
+-					color: unset;
++				color: unset;
+ 			}
+ 		}
+ 	}
+ 
++	.monaco-list-row.selected .agent-session-item,
+ 	.monaco-list-row.selected .agent-session-title {
+ 		color: unset;
+ 	}

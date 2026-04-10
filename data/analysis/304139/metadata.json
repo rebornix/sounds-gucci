@@ -1,0 +1,14 @@
+{
+  "pr": 304286,
+  "prTitle": "fix: re-layout list when toggling browse mode in MCP/plugin widgets",
+  "mergeCommit": "4fb07896862c03e740c0513292656cfac3ed9c7c",
+  "parentCommit": "bc80ed36d187fd569c9fd123883f6a0e6860c04d",
+  "fileCount": 2,
+  "issue": 304139,
+  "issueTitle": "Chat customization: search marketplace: last entry not visible",
+  "issueAuthor": "aeschli",
+  "commentCount": 1,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

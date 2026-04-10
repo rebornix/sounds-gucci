@@ -1,0 +1,14 @@
+{
+  "pr": 304973,
+  "prTitle": "fix: enable zoom for SVGs without explicit width/height dimensions",
+  "mergeCommit": "d5370dfd468f3d10216e5fb2fb5c8696fca6254f",
+  "parentCommit": "71e3258bcce316b7d5fcba99ea8c6a5656cbb685",
+  "fileCount": 1,
+  "issue": 240638,
+  "issueTitle": "SVG without set width or height can't be zoomed",
+  "issueAuthor": "adzenith",
+  "commentCount": 2,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

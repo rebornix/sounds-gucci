@@ -1,0 +1,14 @@
+{
+  "pr": 303859,
+  "prTitle": "Fix command rewriting issues when terminal sandboxing is enabled",
+  "mergeCommit": "3460bdb15c72c1586ba5d74ce1e91df179e74215",
+  "parentCommit": "ca117fbb4f0a60c2bcd03bdf5db2bf4e037a4e9e",
+  "fileCount": 8,
+  "issue": 303848,
+  "issueTitle": "`cd CWD && ` doesn't get stripped when sandboxing is enabled",
+  "issueAuthor": "alexdima",
+  "commentCount": 1,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

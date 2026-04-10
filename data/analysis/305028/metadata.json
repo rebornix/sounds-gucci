@@ -1,0 +1,14 @@
+{
+  "pr": 305037,
+  "prTitle": "Fix ctrl+/- not working on Windows Copilot CLI",
+  "mergeCommit": "926cb66d572df3845067eed94105b2ce96fc6623",
+  "parentCommit": "a0862900828cca92e1c526340777d1d10ceb8aba",
+  "fileCount": 2,
+  "issue": 305028,
+  "issueTitle": "Ctrl + and ctrl - does not work on Copilot CLI in VS Code on Windows.",
+  "issueAuthor": "anthonykim1",
+  "commentCount": 2,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

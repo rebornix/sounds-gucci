@@ -23,7 +23,7 @@ Run the `setup.sh` script with the following parameters:
 | `--issue` | Yes | Linked issue number | `12340` |
 | `--repo` | Yes | Repository in `owner/repo` format | `microsoft/vscode` |
 | `--clone-path` | Yes | Path to local repo clone | `/Users/penlv/Code/Work/vscode2` |
-| `--output-dir` | No | Directory for context files (default: `data/analysis/<pr>`) | `./context` |
+| `--output-dir` | No | Directory for context files (default: `data/analysis/<pr>`, but issue-keyed output is also supported) | `./context` |
 | `--tags` | No | Comma-separated tags for categorization | `sessions,error-telemetry` |
 
 ### Example
@@ -67,3 +67,17 @@ data/analysis/<pr>/
 - `jq` for JSON processing
 - Local clone of the repository at the specified path
 - Git access to checkout commits
+
+## Batch Setup
+
+For issue-centric batches such as a month of bug issues, use the batch helper:
+
+```bash
+./.github/skills/setup-pr-analysis/setup-batch.sh \
+  --input data/prs-with-issues-2026-03.md \
+  --clone-path /Users/penlv/Code/Work/vscode \
+  --key-by issue \
+  --tags round-2,2026-03,bug
+```
+
+This reads the markdown manifest, skips retrospective rows by default, and refreshes each analysis directory with full metadata and actual-fix artifacts.

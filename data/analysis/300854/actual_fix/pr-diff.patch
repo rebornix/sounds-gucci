@@ -1,0 +1,13 @@
+diff --git a/src/vs/workbench/contrib/chat/common/tools/builtinTools/runSubagentTool.ts b/src/vs/workbench/contrib/chat/common/tools/builtinTools/runSubagentTool.ts
+index af4de401d078f..b74009f4a7d64 100644
+--- a/src/vs/workbench/contrib/chat/common/tools/builtinTools/runSubagentTool.ts
++++ b/src/vs/workbench/contrib/chat/common/tools/builtinTools/runSubagentTool.ts
+@@ -319,7 +319,7 @@ export class RunSubagentTool extends Disposable implements IToolImpl {
+ 				modeInstructions,
+ 				parentRequestId: invocation.chatRequestId,
+ 				hooks: collectedHooks,
+-				hasHooksEnabled: !!collectedHooks && Object.values(collectedHooks).some(arr => arr.length > 0),
++				hasHooksEnabled: !!collectedHooks && Object.values(collectedHooks).some(arr => arr && arr.length > 0),
+ 			};
+ 
+ 			// Subscribe to tool invocations to clear markdown parts when a tool is invoked

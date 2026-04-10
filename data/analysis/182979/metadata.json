@@ -1,0 +1,14 @@
+{
+  "pr": 304802,
+  "prTitle": "fix: prevent terminal panel from overwriting terminalEditorActive context key",
+  "mergeCommit": "bf4a0eb258dd27981b5d660d93e5a47d7d46e6ed",
+  "parentCommit": "1974322e5c2bfee74cb723ebe8456232b1d2e5f3",
+  "fileCount": 1,
+  "issue": 182979,
+  "issueTitle": "Terminal panel overwrites `terminalEditorActive` context key when a terminal editor is present",
+  "issueAuthor": "akbyrd",
+  "commentCount": 5,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

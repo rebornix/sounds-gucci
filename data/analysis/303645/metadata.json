@@ -1,0 +1,14 @@
+{
+  "pr": 303903,
+  "prTitle": "fix #303645. handle uint8array in addition to vsbuffer",
+  "mergeCommit": "0aaf631fd943a286525f4c6ed7c0848d062e2aec",
+  "parentCommit": "ba842b2e1a3ca0cfcab197276b16b18beee15f0b",
+  "fileCount": 2,
+  "issue": 303645,
+  "issueTitle": "Chat image carousel shows broken images for element screenshots added with \"Add Element to Chat\"",
+  "issueAuthor": "jruales",
+  "commentCount": 3,
+  "repo": "microsoft/vscode",
+  "clonePath": "/Users/penlv/Code/Work/vscode.worktrees/sounds-gucci-march",
+  "tags": ["round-2","2026-03","bug"]
+}

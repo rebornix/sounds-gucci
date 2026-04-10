@@ -1,0 +1,12 @@
+diff --git a/src/vs/platform/actionWidget/browser/actionList.ts b/src/vs/platform/actionWidget/browser/actionList.ts
+index 0e8d0502762e1..b6c6731c8604f 100644
+--- a/src/vs/platform/actionWidget/browser/actionList.ts
++++ b/src/vs/platform/actionWidget/browser/actionList.ts
+@@ -1234,6 +1234,7 @@ export class ActionListWidget<T> extends Disposable {
+ 						description: child.tooltip || undefined,
+ 						group: { title: '', icon: ThemeIcon.fromId(child.checked ? Codicon.check.id : Codicon.blank.id) },
+ 						hideIcon: false,
++						hover: {},
+ 					});
+ 				}
+ 			}
