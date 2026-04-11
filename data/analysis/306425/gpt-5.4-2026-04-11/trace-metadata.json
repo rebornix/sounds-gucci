@@ -1,0 +1,37 @@
+{
+  "analysisId": "306425",
+  "experimentId": "gpt-5.4-2026-04-11",
+  "status": "available",
+  "source": {
+    "kind": "tempo-direct",
+    "traceIds": [
+      "29988777dc6aa4ab504f394b6dfd03c3"
+    ]
+  },
+  "generatedAt": "2026-04-11T21:00:00.328380Z",
+  "window": {
+    "start": "2026-04-11T16:59:54Z",
+    "end": "2026-04-11T17:10:51Z"
+  },
+  "windowLocal": {
+    "start": "2026-04-11T09:59:54-07:00",
+    "end": "2026-04-11T10:10:51-07:00"
+  },
+  "fallbackWindows": [
+    {
+      "start": "2026-04-11T07:00:00Z",
+      "end": "2026-04-12T06:59:59Z",
+      "startLocal": "2026-04-11T00:00:00-07:00",
+      "endLocal": "2026-04-11T23:59:59-07:00"
+    },
+    {
+      "start": "2026-04-11T00:00:00Z",
+      "end": "2026-04-11T23:59:59Z",
+      "startLocal": "2026-04-10T17:00:00-07:00",
+      "endLocal": "2026-04-11T16:59:59-07:00"
+    }
+  ],
+  "traceCount": 1,
+  "spanCount": 28,
+  "note": "Rendered from Tempo spans that directly reference this analysis run."
+}

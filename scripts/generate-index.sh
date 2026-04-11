@@ -72,6 +72,21 @@ for pr_dir in "$ANALYSIS_DIR"/*/; do
         trace_url=""
         agent_version=""
         agent_commit=""
+        trace_status="missing"
+        trace_source=""
+        trace_span_count=0
+
+        trace_meta_file="${exp_dir}trace-metadata.json"
+        trace_file="${exp_dir}trace.json"
+        if [ -f "$trace_meta_file" ]; then
+            trace_status=$(jq -r '.status // "missing"' "$trace_meta_file")
+            trace_source=$(jq -r '.source.kind // ""' "$trace_meta_file")
+            trace_span_count=$(jq -r '.spanCount // 0' "$trace_meta_file")
+        elif [ -f "$trace_file" ]; then
+            trace_status="available"
+            trace_source="local"
+            trace_span_count=$(jq -r '.spans | length' "$trace_file" 2>/dev/null || echo 0)
+        fi
         
         # Build JSON entry using jq for proper escaping
         entry=$(jq -n \
@@ -92,6 +107,9 @@ for pr_dir in "$ANALYSIS_DIR"/*/; do
             --argjson fileCount "${file_count:-0}" \
             --arg proposalSummary "$proposal_summary" \
             --arg traceUrl "$trace_url" \
+            --arg traceStatus "$trace_status" \
+            --arg traceSource "$trace_source" \
+            --argjson traceSpanCount "${trace_span_count:-0}" \
             --argjson tags "$tags" \
             '{
                 analysisId: $analysisId,
@@ -111,6 +129,9 @@ for pr_dir in "$ANALYSIS_DIR"/*/; do
                 fileCount: $fileCount,
                 proposalSummary: $proposalSummary,
                 traceUrl: $traceUrl,
+                traceStatus: $traceStatus,
+                traceSource: $traceSource,
+                traceSpanCount: $traceSpanCount,
                 tags: $tags
             }')
         

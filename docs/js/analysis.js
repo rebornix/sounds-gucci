@@ -3,6 +3,7 @@
 let allAnalyses = [];
 let currentAnalysisId = null;
 let currentExperiment = null;
+let currentAnalysis = null;
 
 async function init() {
     const params = new URLSearchParams(window.location.search);
@@ -32,6 +33,7 @@ async function init() {
         }
         
         const analysis = prAnalyses.find(a => a.experimentId === currentExperiment) || prAnalyses[0];
+        currentAnalysis = analysis;
         
         // Render header
         renderHeader(analysis);
@@ -42,7 +44,7 @@ async function init() {
         }
         
         // Load content files
-        await loadContent(currentAnalysisId, currentExperiment);
+        await loadContent(currentAnalysisId, currentExperiment, analysis);
         
         // Setup navigation
         setupNavigation();
@@ -109,7 +111,7 @@ function renderExperimentSelector(analyses, selected) {
     });
 }
 
-async function loadContent(analysisId, experimentId) {
+async function loadContent(analysisId, experimentId, analysis) {
     const basePath = `data/analysis/${analysisId}`;
     const expPath = `${basePath}/${experimentId}`;
     
@@ -153,18 +155,101 @@ async function loadContent(analysisId, experimentId) {
         document.getElementById('diff-content').textContent = 'Failed to load diff';
     }
 
-    // Load trace
+    await loadTrace(expPath, analysis);
+}
+
+async function loadTrace(expPath, analysis) {
+    const traceContainer = document.getElementById('trace-content');
+    let traceMeta = null;
+
+    try {
+        const metaResponse = await fetch(`${expPath}/trace-metadata.json`);
+        if (metaResponse.ok) {
+            traceMeta = await metaResponse.json();
+        }
+    } catch {
+        // Best effort only; older experiments won't have trace metadata.
+    }
+
     try {
         const traceResponse = await fetch(`${expPath}/trace.json`);
         if (traceResponse.ok) {
             const trace = await traceResponse.json();
-            document.getElementById('trace-content').innerHTML = renderTrace(trace);
-        } else {
-            document.getElementById('trace-content').innerHTML = '<p class="muted">No trace data available. Run <code>python3 scripts/fetch-traces.py</code> to fetch.</p>';
+            traceContainer.innerHTML = renderTraceSummary(traceMeta, analysis) + renderTrace(trace);
+            return;
         }
-    } catch {
-        document.getElementById('trace-content').innerHTML = '<p class="muted">Failed to load trace</p>';
+    } catch (err) {
+        console.error('Failed to load trace payload:', err);
     }
+
+    traceContainer.innerHTML = renderTraceUnavailable(traceMeta, analysis);
+}
+
+function getTraceState(traceMeta, analysis) {
+    const status = traceMeta?.status || analysis?.traceStatus || 'missing';
+    const source = traceMeta?.source?.kind || analysis?.traceSource || '';
+    const traceIds = traceMeta?.source?.traceIds || [];
+    const spanCount = traceMeta?.spanCount ?? analysis?.traceSpanCount ?? 0;
+    const timeWindow = traceMeta?.window || null;
+
+    let note = traceMeta?.note || '';
+    if (!note) {
+        if (source === 'local' || status === 'available') {
+            note = 'Rendered from a stored trace.json file.';
+        } else if (status === 'partial') {
+            note = 'Only a parent/root trace was available for this run.';
+        } else {
+            note = 'No trace was captured for this experiment.';
+        }
+    }
+
+    return {
+        status,
+        source,
+        traceIds,
+        spanCount,
+        note,
+        timeWindow,
+    };
+}
+
+function renderTraceSummary(traceMeta, analysis) {
+    const state = getTraceState(traceMeta, analysis);
+    const badgeClass = `trace-status-badge trace-status-${state.status}`;
+    const traceIdHtml = state.traceIds.length > 0
+        ? `<div class="trace-status-detail"><strong>Trace IDs:</strong> ${state.traceIds.map(id => `<span class="trace-tag" title="${escapeHtml(id)}">${escapeHtml(id.slice(0, 12))}</span>`).join(' ')}</div>`
+        : '';
+    const windowHtml = state.timeWindow?.start && state.timeWindow?.end
+        ? `<div class="trace-status-detail"><strong>Window:</strong> ${escapeHtml(state.timeWindow.start)} to ${escapeHtml(state.timeWindow.end)}</div>`
+        : '';
+    const spanHtml = state.spanCount > 0
+        ? `<div class="trace-status-detail"><strong>Normalized spans:</strong> ${state.spanCount}</div>`
+        : '';
+    const sourceHtml = state.source
+        ? `<div class="trace-status-detail"><strong>Source:</strong> ${escapeHtml(state.source)}</div>`
+        : '';
+
+    return `<div class="trace-status-card">
+        <div class="trace-status-header">
+            <span class="${badgeClass}">${escapeHtml(state.status)}</span>
+            ${sourceHtml}
+            ${spanHtml}
+        </div>
+        <p class="trace-status-note">${escapeHtml(state.note)}</p>
+        ${traceIdHtml}
+        ${windowHtml}
+    </div>`;
+}
+
+function renderTraceUnavailable(traceMeta, analysis) {
+    const state = getTraceState(traceMeta, analysis);
+    let message = 'No trace data is available for this experiment.';
+    if (state.status === 'missing') {
+        message = 'No Tempo trace was captured for this run. Re-run the analysis if you want a renderable trace.';
+    } else if (state.status === 'partial') {
+        message = 'Trace metadata exists, but the normalized trace payload is missing. Re-run the Tempo exporter to rebuild trace.json.';
+    }
+    return renderTraceSummary(traceMeta, analysis) + `<p class="muted">${escapeHtml(message)}</p>`;
 }
 
 function renderTrace(trace) {

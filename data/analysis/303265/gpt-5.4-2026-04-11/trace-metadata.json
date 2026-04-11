@@ -1,0 +1,39 @@
+{
+  "analysisId": "303265",
+  "experimentId": "gpt-5.4-2026-04-11",
+  "status": "partial",
+  "source": {
+    "kind": "tempo-parent",
+    "traceIds": [
+      "3b91b931bea1882d1bb9393d7a8f13bf",
+      "a649dd98da04c077c8c69d699d139d1f",
+      "e7f1e4996b6dfd325a0f7fad92203b46"
+    ]
+  },
+  "generatedAt": "2026-04-11T20:59:57.672553Z",
+  "window": {
+    "start": "2026-04-11T03:10:33Z",
+    "end": "2026-04-11T03:22:26Z"
+  },
+  "windowLocal": {
+    "start": "2026-04-10T20:10:33-07:00",
+    "end": "2026-04-10T20:22:26-07:00"
+  },
+  "fallbackWindows": [
+    {
+      "start": "2026-04-10T07:00:00Z",
+      "end": "2026-04-11T06:59:59Z",
+      "startLocal": "2026-04-10T00:00:00-07:00",
+      "endLocal": "2026-04-10T23:59:59-07:00"
+    },
+    {
+      "start": "2026-04-11T00:00:00Z",
+      "end": "2026-04-11T23:59:59Z",
+      "startLocal": "2026-04-10T17:00:00-07:00",
+      "endLocal": "2026-04-11T16:59:59-07:00"
+    }
+  ],
+  "traceCount": 3,
+  "spanCount": 7,
+  "note": "Rendered from a parent/root Tempo trace because no direct per-analysis subagent span was available."
+}
