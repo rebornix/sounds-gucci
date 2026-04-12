@@ -11,129 +11,218 @@
   "totalCost": null,
   "spans": [
     {
-      "id": "analysis:303265",
-      "parentId": null,
+      "spanId": "analysis:303265",
+      "parentSpanId": null,
       "name": "analysis:303265",
-      "type": "SPAN",
-      "startTime": "2026-04-11T03:19:45.793000Z",
-      "endTime": "2026-04-11T03:19:50.295269Z",
-      "latency": 4.502269506454468,
-      "input": null,
-      "output": null,
-      "metadata": {
-        "analysisId": "303265",
-        "experimentId": "gpt-5.4-2026-04-11",
-        "sourceTraceIds": [
-          "3b91b931bea1882d1bb9393d7a8f13bf",
-          "a649dd98da04c077c8c69d699d139d1f",
-          "e7f1e4996b6dfd325a0f7fad92203b46"
-        ]
-      }
+      "kind": "SPAN",
+      "startTimeUnixNano": "1775877585792999936",
+      "endTimeUnixNano": "1775877590295269120",
+      "attributes": [
+        {
+          "key": "synthetic",
+          "value": {
+            "stringValue": "true"
+          }
+        },
+        {
+          "key": "analysis.id",
+          "value": {
+            "stringValue": "303265"
+          }
+        },
+        {
+          "key": "analysis.experimentId",
+          "value": {
+            "stringValue": "gpt-5.4-2026-04-11"
+          }
+        },
+        {
+          "key": "source.traceIds",
+          "value": {
+            "stringValue": "3b91b931bea1882d1bb9393d7a8f13bf,a649dd98da04c077c8c69d699d139d1f,e7f1e4996b6dfd325a0f7fad92203b46"
+          }
+        }
+      ]
     },
     {
-      "id": "trace-group:3b91b931bea1882d1bb9393d7a8f13bf",
-      "parentId": "analysis:303265",
+      "spanId": "trace-group:3b91b931bea1882d1bb9393d7a8f13bf",
+      "parentSpanId": "analysis:303265",
       "name": "tempo:parent:3b91b931bea1",
-      "type": "SPAN",
-      "startTime": "2026-04-11T03:19:45.793000Z",
-      "endTime": "2026-04-11T03:19:46.626951Z",
-      "latency": 0.8339509963989258,
-      "input": null,
-      "output": null,
-      "metadata": {
-        "traceId": "3b91b931bea1882d1bb9393d7a8f13bf",
-        "sourceKind": "parent"
-      }
+      "kind": "SPAN",
+      "startTimeUnixNano": "1775877585792999936",
+      "endTimeUnixNano": "1775877586626950912",
+      "attributes": [
+        {
+          "key": "synthetic",
+          "value": {
+            "stringValue": "true"
+          }
+        },
+        {
+          "key": "source.traceId",
+          "value": {
+            "stringValue": "3b91b931bea1882d1bb9393d7a8f13bf"
+          }
+        },
+        {
+          "key": "source.kind",
+          "value": {
+            "stringValue": "parent"
+          }
+        }
+      ]
     },
     {
-      "id": "3b91b931bea1882d1bb9393d7a8f13bf:MIsc6JPp3jU=",
-      "parentId": "trace-group:3b91b931bea1882d1bb9393d7a8f13bf",
-      "name": "subagent:XtabProvider",
-      "type": "SPAN_KIND_CLIENT",
-      "startTime": "2026-04-11T03:19:45.793000Z",
-      "endTime": "2026-04-11T03:19:46.626951Z",
-      "latency": 0.8339509963989258,
-      "input": "[{\"role\":\"system\",\"parts\":[{\"type\":\"text\",\"content\":\"Predict the next code edit based on user context, following Microsoft content policies and avoiding copyright violations. If a request may breach guidelines, reply: \\\"Sorry, I can't assist with that.\\\"\"}]},{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"```\\n<|recently_viewed_code_snippets|>\\n<|recently_viewed_code_snippet|>\\ncode_snippet_file_path: /Users/penlv/Code/Work/sounds-gucci/data/analysis/303265/gpt-5.4-2026-04-11/validation.md\\n# Fix Validation: PR #305039\\n\\n## Actual Fix Summary\\nThe actual PR fixed a snapshot relayout bug in the chat terminal output section. When a snapshot mirror had already been created, the relayout path used `snapshot.lineCount ?? 0` instead of falling back to the previously rendered line count, so the output area could be sized too small even though the terminal content was still present.\\n\\n### Files Changed\\n- `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` - In `_renderSnapshotOutput()`, reuse `_lastRenderedLineCount` when `snapshot.lineCount` is absent and a snapshot mirror already exists.\\n\\n### Approach\\nKeep the fix in the UI layout layer. Preserve the line count returned by the snapshot mirror's prior render and use it during later layout passes instead of collapsing to zero when serialized metadata is missing.\\n\\n## Proposal Comparison\\n\\n### Files Overlap\\n| Proposal | Actual | Match |\\n|----------|--------|-------|\\n| `src/vs/workbench/contrib/terminal/browser/chatTerminalCommandMirror.ts` | - | \u274c (primary proposal targeted a different file) |\\n| `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` | `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` | \u2705 (mentioned as an optional follow-up; this is where the PR landed) |\\n\\n**Overlap Score:** 1/1 actual files mentioned, but only 1/2 proposed file targets matched the ",
-      "output": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Generation complete. task calls found \u2014 fall back to per-user-message splitting\\n        return split_events_by_prompt(events)\\n    \\n    # Group task ranges by PR number, maintaining order\\n    pr_groups = {}  # pr_number -> [(start, end), ...]\\n    pr_order = []\\n    for start, end, pr in task_ranges:\\n        if pr not in pr_groups:\"}]}]",
-      "metadata": {
-        "traceId": "3b91b931bea1882d1bb9393d7a8f13bf",
-        "sourceKind": "parent",
-        "originalName": "chat dd_5minichat_edits_xtab_300_unified",
-        "agentName": "XtabProvider",
-        "toolName": null,
-        "operation": "chat",
-        "agentDescription": null
-      }
+      "spanId": "MIsc6JPp3jU=",
+      "parentSpanId": "trace-group:3b91b931bea1882d1bb9393d7a8f13bf",
+      "name": "chat dd_5minichat_edits_xtab_300_unified",
+      "kind": "SPAN_KIND_CLIENT",
+      "startTimeUnixNano": "1775877585792999936",
+      "endTimeUnixNano": "1775877586626950912",
+      "attributes": [
+        {
+          "key": "gen_ai.agent.name",
+          "value": {
+            "stringValue": "XtabProvider"
+          }
+        },
+        {
+          "key": "gen_ai.operation.name",
+          "value": {
+            "stringValue": "chat"
+          }
+        },
+        {
+          "key": "gen_ai.input.messages",
+          "value": {
+            "stringValue": "[{\"role\":\"system\",\"parts\":[{\"type\":\"text\",\"content\":\"Predict the next code edit based on user context, following Microsoft content policies and avoiding copyright violations. If a request may breach guidelines, reply: \\\"Sorry, I can't assist with that.\\\"\"}]},{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"```\\n<|recently_viewed_code_snippets|>\\n<|recently_viewed_code_snippet|>\\ncode_snippet_file_path: /Users/penlv/Code/Work/sounds-gucci/data/analysis/303265/gpt-5.4-2026-04-11/validation.md\\n# Fix Validation: PR #305039\\n\\n## Actual Fix Summary\\nThe actual PR fixed a snapshot relayout bug in the chat terminal output section. When a snapshot mirror had already been created, the relayout path used `snapshot.lineCount ?? 0` instead of falling back to the previously rendered line count, so the output area could be sized too small even though the terminal content was still present.\\n\\n### Files Changed\\n- `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` - In `_renderSnapshotOutput()`, reuse `_lastRenderedLineCount` when `snapshot.lineCount` is absent and a snapshot mirror already exists.\\n\\n### Approach\\nKeep the fix in the UI layout layer. Preserve the line count returned by the snapshot mirror's prior render and use it during later layout passes instead of collapsing to zero when serialized metadata is missing.\\n\\n## Proposal Comparison\\n\\n### Files Overlap\\n| Proposal | Actual | Match |\\n|----------|--------|-------|\\n| `src/vs/workbench/contrib/terminal/browser/chatTerminalCommandMirror.ts` | - | \u274c (primary proposal targeted a different file) |\\n| `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` | `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` | \u2705 (mentioned as an optional follow-up; this is where the PR landed) |\\n\\n**Overlap Score:** 1/1 actual files mentioned, but only 1/2 proposed file targets matched the "
+          }
+        },
+        {
+          "key": "gen_ai.output.messages",
+          "value": {
+            "stringValue": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Generation complete. task calls found \u2014 fall back to per-user-message splitting\\n        return split_events_by_prompt(events)\\n    \\n    # Group task ranges by PR number, maintaining order\\n    pr_groups = {}  # pr_number -> [(start, end), ...]\\n    pr_order = []\\n    for start, end, pr in task_ranges:\\n        if pr not in pr_groups:\"}]}]"
+          }
+        }
+      ]
     },
     {
-      "id": "trace-group:a649dd98da04c077c8c69d699d139d1f",
-      "parentId": "analysis:303265",
+      "spanId": "trace-group:a649dd98da04c077c8c69d699d139d1f",
+      "parentSpanId": "analysis:303265",
       "name": "tempo:parent:a649dd98da04",
-      "type": "SPAN",
-      "startTime": "2026-04-11T03:19:47.041000Z",
-      "endTime": "2026-04-11T03:19:50.295269Z",
-      "latency": 3.254269599914551,
-      "input": null,
-      "output": null,
-      "metadata": {
-        "traceId": "a649dd98da04c077c8c69d699d139d1f",
-        "sourceKind": "parent"
-      }
+      "kind": "SPAN",
+      "startTimeUnixNano": "1775877587040999936",
+      "endTimeUnixNano": "1775877590295269120",
+      "attributes": [
+        {
+          "key": "synthetic",
+          "value": {
+            "stringValue": "true"
+          }
+        },
+        {
+          "key": "source.traceId",
+          "value": {
+            "stringValue": "a649dd98da04c077c8c69d699d139d1f"
+          }
+        },
+        {
+          "key": "source.kind",
+          "value": {
+            "stringValue": "parent"
+          }
+        }
+      ]
     },
     {
-      "id": "a649dd98da04c077c8c69d699d139d1f:Lagc9UeJ2i4=",
-      "parentId": "trace-group:a649dd98da04c077c8c69d699d139d1f",
-      "name": "subagent:XtabProvider",
-      "type": "SPAN_KIND_CLIENT",
-      "startTime": "2026-04-11T03:19:47.041000Z",
-      "endTime": "2026-04-11T03:19:50.295269Z",
-      "latency": 3.254269599914551,
-      "input": "[{\"role\":\"system\",\"parts\":[{\"type\":\"text\",\"content\":\"Predict the next code edit based on user context, following Microsoft content policies and avoiding copyright violations. If a request may breach guidelines, reply: \\\"Sorry, I can't assist with that.\\\"\"}]},{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"```\\n<|recently_viewed_code_snippets|>\\n<|recently_viewed_code_snippet|>\\ncode_snippet_file_path: /Users/penlv/Code/Work/sounds-gucci/data/analysis/303265/gpt-5.4-2026-04-11/validation.md\\n# Fix Validation: PR #305039\\n\\n## Actual Fix Summary\\nThe actual PR fixed a snapshot relayout bug in the chat terminal output section. When a snapshot mirror had already been created, the relayout path used `snapshot.lineCount ?? 0` instead of falling back to the previously rendered line count, so the output area could be sized too small even though the terminal content was still present.\\n\\n### Files Changed\\n- `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` - In `_renderSnapshotOutput()`, reuse `_lastRenderedLineCount` when `snapshot.lineCount` is absent and a snapshot mirror already exists.\\n\\n### Approach\\nKeep the fix in the UI layout layer. Preserve the line count returned by the snapshot mirror's prior render and use it during later layout passes instead of collapsing to zero when serialized metadata is missing.\\n\\n## Proposal Comparison\\n\\n### Files Overlap\\n| Proposal | Actual | Match |\\n|----------|--------|-------|\\n| `src/vs/workbench/contrib/terminal/browser/chatTerminalCommandMirror.ts` | - | \u274c (primary proposal targeted a different file) |\\n| `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` | `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` | \u2705 (mentioned as an optional follow-up; this is where the PR landed) |\\n\\n**Overlap Score:** 1/1 actual files mentioned, but only 1/2 proposed file targets matched the ",
-      "output": null,
-      "metadata": {
-        "traceId": "a649dd98da04c077c8c69d699d139d1f",
-        "sourceKind": "parent",
-        "originalName": "chat dd_5minichat_edits_xtab_300_unified",
-        "agentName": "XtabProvider",
-        "toolName": null,
-        "operation": "chat",
-        "agentDescription": null
-      }
+      "spanId": "Lagc9UeJ2i4=",
+      "parentSpanId": "trace-group:a649dd98da04c077c8c69d699d139d1f",
+      "name": "chat dd_5minichat_edits_xtab_300_unified",
+      "kind": "SPAN_KIND_CLIENT",
+      "startTimeUnixNano": "1775877587040999936",
+      "endTimeUnixNano": "1775877590295269120",
+      "attributes": [
+        {
+          "key": "gen_ai.agent.name",
+          "value": {
+            "stringValue": "XtabProvider"
+          }
+        },
+        {
+          "key": "gen_ai.operation.name",
+          "value": {
+            "stringValue": "chat"
+          }
+        },
+        {
+          "key": "gen_ai.input.messages",
+          "value": {
+            "stringValue": "[{\"role\":\"system\",\"parts\":[{\"type\":\"text\",\"content\":\"Predict the next code edit based on user context, following Microsoft content policies and avoiding copyright violations. If a request may breach guidelines, reply: \\\"Sorry, I can't assist with that.\\\"\"}]},{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"```\\n<|recently_viewed_code_snippets|>\\n<|recently_viewed_code_snippet|>\\ncode_snippet_file_path: /Users/penlv/Code/Work/sounds-gucci/data/analysis/303265/gpt-5.4-2026-04-11/validation.md\\n# Fix Validation: PR #305039\\n\\n## Actual Fix Summary\\nThe actual PR fixed a snapshot relayout bug in the chat terminal output section. When a snapshot mirror had already been created, the relayout path used `snapshot.lineCount ?? 0` instead of falling back to the previously rendered line count, so the output area could be sized too small even though the terminal content was still present.\\n\\n### Files Changed\\n- `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` - In `_renderSnapshotOutput()`, reuse `_lastRenderedLineCount` when `snapshot.lineCount` is absent and a snapshot mirror already exists.\\n\\n### Approach\\nKeep the fix in the UI layout layer. Preserve the line count returned by the snapshot mirror's prior render and use it during later layout passes instead of collapsing to zero when serialized metadata is missing.\\n\\n## Proposal Comparison\\n\\n### Files Overlap\\n| Proposal | Actual | Match |\\n|----------|--------|-------|\\n| `src/vs/workbench/contrib/terminal/browser/chatTerminalCommandMirror.ts` | - | \u274c (primary proposal targeted a different file) |\\n| `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` | `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` | \u2705 (mentioned as an optional follow-up; this is where the PR landed) |\\n\\n**Overlap Score:** 1/1 actual files mentioned, but only 1/2 proposed file targets matched the "
+          }
+        }
+      ]
     },
     {
-      "id": "trace-group:e7f1e4996b6dfd325a0f7fad92203b46",
-      "parentId": "analysis:303265",
+      "spanId": "trace-group:e7f1e4996b6dfd325a0f7fad92203b46",
+      "parentSpanId": "analysis:303265",
       "name": "tempo:parent:e7f1e4996b6d",
-      "type": "SPAN",
-      "startTime": "2026-04-11T03:19:46.631000Z",
-      "endTime": "2026-04-11T03:19:47.033706Z",
-      "latency": 0.40270566940307617,
-      "input": null,
-      "output": null,
-      "metadata": {
-        "traceId": "e7f1e4996b6dfd325a0f7fad92203b46",
-        "sourceKind": "parent"
-      }
+      "kind": "SPAN",
+      "startTimeUnixNano": "1775877586631000064",
+      "endTimeUnixNano": "1775877587033705984",
+      "attributes": [
+        {
+          "key": "synthetic",
+          "value": {
+            "stringValue": "true"
+          }
+        },
+        {
+          "key": "source.traceId",
+          "value": {
+            "stringValue": "e7f1e4996b6dfd325a0f7fad92203b46"
+          }
+        },
+        {
+          "key": "source.kind",
+          "value": {
+            "stringValue": "parent"
+          }
+        }
+      ]
     },
     {
-      "id": "e7f1e4996b6dfd325a0f7fad92203b46:vsbxiRW9wEc=",
-      "parentId": "trace-group:e7f1e4996b6dfd325a0f7fad92203b46",
-      "name": "subagent:nes.nextCursorPosition",
-      "type": "SPAN_KIND_CLIENT",
-      "startTime": "2026-04-11T03:19:46.631000Z",
-      "endTime": "2026-04-11T03:19:47.033706Z",
-      "latency": 0.40270566940307617,
-      "input": "[{\"role\":\"system\",\"parts\":[{\"type\":\"text\",\"content\":\"Your task is to predict the line number where the developer is most likely to make their next edit. If you jump in the current file, just output the line number. If you want to jump to another file, output the filepath (relative to workspace root), colon, then line number. If you don't think anywhere is a good next line jump target, just output the current line number of the cursor. Make sure to output no explanation, reasoning, extra spaces, etc.\"}]},{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"```\\n<|recently_viewed_code_snippets|>\\n<|recently_viewed_code_snippet|>\\ncode_snippet_file_path: /Users/penlv/Code/Work/sounds-gucci/data/analysis/303265/gpt-5.4-2026-04-11/validation.md\\n# Fix Validation: PR #305039\\n\\n## Actual Fix Summary\\nThe actual PR fixed a snapshot relayout bug in the chat terminal output section. When a snapshot mirror had already been created, the relayout path used `snapshot.lineCount ?? 0` instead of falling back to the previously rendered line count, so the output area could be sized too small even though the terminal content was still present.\\n\\n### Files Changed\\n- `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` - In `_renderSnapshotOutput()`, reuse `_lastRenderedLineCount` when `snapshot.lineCount` is absent and a snapshot mirror already exists.\\n\\n### Approach\\nKeep the fix in the UI layout layer. Preserve the line count returned by the snapshot mirror's prior render and use it during later layout passes instead of collapsing to zero when serialized metadata is missing.\\n\\n## Proposal Comparison\\n\\n### Files Overlap\\n| Proposal | Actual | Match |\\n|----------|--------|-------|\\n| `src/vs/workbench/contrib/terminal/browser/chatTerminalCommandMirror.ts` | - | \u274c (primary proposal targeted a different file) |\\n| `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` | `src/vs/workbench/contrib/chat/browse",
-      "output": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"115\"}]}]",
-      "metadata": {
-        "traceId": "e7f1e4996b6dfd325a0f7fad92203b46",
-        "sourceKind": "parent",
-        "originalName": "chat copilot-suggestions-himalia-001",
-        "agentName": "nes.nextCursorPosition",
-        "toolName": null,
-        "operation": "chat",
-        "agentDescription": null
-      }
+      "spanId": "vsbxiRW9wEc=",
+      "parentSpanId": "trace-group:e7f1e4996b6dfd325a0f7fad92203b46",
+      "name": "chat copilot-suggestions-himalia-001",
+      "kind": "SPAN_KIND_CLIENT",
+      "startTimeUnixNano": "1775877586631000064",
+      "endTimeUnixNano": "1775877587033705984",
+      "attributes": [
+        {
+          "key": "gen_ai.agent.name",
+          "value": {
+            "stringValue": "nes.nextCursorPosition"
+          }
+        },
+        {
+          "key": "gen_ai.operation.name",
+          "value": {
+            "stringValue": "chat"
+          }
+        },
+        {
+          "key": "gen_ai.input.messages",
+          "value": {
+            "stringValue": "[{\"role\":\"system\",\"parts\":[{\"type\":\"text\",\"content\":\"Your task is to predict the line number where the developer is most likely to make their next edit. If you jump in the current file, just output the line number. If you want to jump to another file, output the filepath (relative to workspace root), colon, then line number. If you don't think anywhere is a good next line jump target, just output the current line number of the cursor. Make sure to output no explanation, reasoning, extra spaces, etc.\"}]},{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"```\\n<|recently_viewed_code_snippets|>\\n<|recently_viewed_code_snippet|>\\ncode_snippet_file_path: /Users/penlv/Code/Work/sounds-gucci/data/analysis/303265/gpt-5.4-2026-04-11/validation.md\\n# Fix Validation: PR #305039\\n\\n## Actual Fix Summary\\nThe actual PR fixed a snapshot relayout bug in the chat terminal output section. When a snapshot mirror had already been created, the relayout path used `snapshot.lineCount ?? 0` instead of falling back to the previously rendered line count, so the output area could be sized too small even though the terminal content was still present.\\n\\n### Files Changed\\n- `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` - In `_renderSnapshotOutput()`, reuse `_lastRenderedLineCount` when `snapshot.lineCount` is absent and a snapshot mirror already exists.\\n\\n### Approach\\nKeep the fix in the UI layout layer. Preserve the line count returned by the snapshot mirror's prior render and use it during later layout passes instead of collapsing to zero when serialized metadata is missing.\\n\\n## Proposal Comparison\\n\\n### Files Overlap\\n| Proposal | Actual | Match |\\n|----------|--------|-------|\\n| `src/vs/workbench/contrib/terminal/browser/chatTerminalCommandMirror.ts` | - | \u274c (primary proposal targeted a different file) |\\n| `src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatTerminalToolProgressPart.ts` | `src/vs/workbench/contrib/chat/browse"
+          }
+        },
+        {
+          "key": "gen_ai.output.messages",
+          "value": {
+            "stringValue": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"115\"}]}]"
+          }
+        }
+      ]
     }
   ]
 }

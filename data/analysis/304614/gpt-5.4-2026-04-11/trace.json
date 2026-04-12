@@ -11,77 +11,134 @@
   "totalCost": null,
   "spans": [
     {
-      "id": "analysis:304614",
-      "parentId": null,
+      "spanId": "analysis:304614",
+      "parentSpanId": null,
       "name": "analysis:304614",
-      "type": "SPAN",
-      "startTime": "2026-04-11T17:52:05.524000Z",
-      "endTime": "2026-04-11T18:29:32.851212Z",
-      "latency": 2247.3272116184235,
-      "input": null,
-      "output": null,
-      "metadata": {
-        "analysisId": "304614",
-        "experimentId": "gpt-5.4-2026-04-11",
-        "sourceTraceIds": [
-          "d542edc5ea657086760f0e92e827ace8"
-        ]
-      }
+      "kind": "SPAN",
+      "startTimeUnixNano": "1775929925524000000",
+      "endTimeUnixNano": "1775932172851212032",
+      "attributes": [
+        {
+          "key": "synthetic",
+          "value": {
+            "stringValue": "true"
+          }
+        },
+        {
+          "key": "analysis.id",
+          "value": {
+            "stringValue": "304614"
+          }
+        },
+        {
+          "key": "analysis.experimentId",
+          "value": {
+            "stringValue": "gpt-5.4-2026-04-11"
+          }
+        },
+        {
+          "key": "source.traceIds",
+          "value": {
+            "stringValue": "d542edc5ea657086760f0e92e827ace8"
+          }
+        }
+      ]
     },
     {
-      "id": "trace-group:d542edc5ea657086760f0e92e827ace8",
-      "parentId": "analysis:304614",
+      "spanId": "trace-group:d542edc5ea657086760f0e92e827ace8",
+      "parentSpanId": "analysis:304614",
       "name": "tempo:parent:d542edc5ea65",
-      "type": "SPAN",
-      "startTime": "2026-04-11T17:52:05.524000Z",
-      "endTime": "2026-04-11T18:24:08.685903Z",
-      "latency": 2247.3272116184235,
-      "input": null,
-      "output": null,
-      "metadata": {
-        "traceId": "d542edc5ea657086760f0e92e827ace8",
-        "sourceKind": "parent"
-      }
+      "kind": "SPAN",
+      "startTimeUnixNano": "1775929925524000000",
+      "endTimeUnixNano": "1775931848685903104",
+      "attributes": [
+        {
+          "key": "synthetic",
+          "value": {
+            "stringValue": "true"
+          }
+        },
+        {
+          "key": "source.traceId",
+          "value": {
+            "stringValue": "d542edc5ea657086760f0e92e827ace8"
+          }
+        },
+        {
+          "key": "source.kind",
+          "value": {
+            "stringValue": "parent"
+          }
+        }
+      ]
     },
     {
-      "id": "d542edc5ea657086760f0e92e827ace8:S69nAXwE94g=",
-      "parentId": "trace-group:d542edc5ea657086760f0e92e827ace8",
-      "name": "subagent:GitHub Copilot Chat",
-      "type": "SPAN_KIND_INTERNAL",
-      "startTime": "2026-04-11T17:52:05.524000Z",
-      "endTime": "2026-04-11T18:29:32.851212Z",
-      "latency": 2247.3272116184235,
-      "input": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"it should cover everything, all are logged, you can go through each trace and validate\"}]}]",
-      "output": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Sounds gucci. I went trace-by-trace through the real March execution windows and validated against the raw Tempo payloads, not just search results. The raw data does not currently show full coverage.\\n\\nFor actual subagent-run traces, I can confirm these three trace trees:\\n- `e48554e55df65b22507ce3d236093c77` with `32` `execute_tool runSubagent` spans, `16` `invoke_agent bug-analyzer` spans, and `16` `invoke_agent fix-validator` spans.\\n- `bb53d47e8409495968c4f0afc02fdc59` with a single `invoke_agent bug-analyzer` span.\\n- `29988777dc6aa4ab504f394b6dfd03c3` with `23` `execute_tool runSubagent` spans, `12` `invoke_agent bug-analyzer` spans, and `12` `invoke_agent fix-validator` spans.\\n\\nThere are also parent chat traces that mention March analysis folders but are not direct per-analysis subagent trees, mainly `c5989fa1a5a41d7f2f7e229e45d4f99e` and `7fefb70bee48cd36ac94407a12cf54a0`. Using raw pre-debug Tempo payloads, that gives:\\n- `28` March folders with direct subagent spans\\n- `23` more March folders visible only in parent/root chat traces\\n- `9` March folders with no Tempo trace payload at all in their actual execution window\\n\\nThe missing nine are:\\n- `304382`\\n- `304488`\\n- `304493`\\n- `304525`\\n- `304544`\\n- `304613`\\n- `304614`\\n- `304746`\\n- `304774`\\n\\nWhy I\u2019m confident those nine are missing from Tempo: their output files were written between `2026-04-10 21:59 -0700` and `2026-04-10 22:45 -0700`, but Tempo returns zero traces for that exact UTC block (`2026-04-11 04:50Z` to `06:10Z`) in all four cases:\\n- unfiltered search\\n- session-scoped search\\n- `runSubagent` search\\n- `bug-analyzer` / `fix-validator` search\\n\\nSo the gap is in telemetry coverage, not just in the website mapping. Also, text-based Tempo search is noisy here: some hits came from helper model traces that summarized validation content later, which is why I relied on raw `/api/traces/<id>` payloads as the ground truth.\\n\\nIf you want, I can do one of these next:\\n1. Generate ",
-      "metadata": {
-        "traceId": "d542edc5ea657086760f0e92e827ace8",
-        "sourceKind": "parent",
-        "originalName": "invoke_agent GitHub Copilot Chat",
-        "agentName": "GitHub Copilot Chat",
-        "toolName": null,
-        "operation": "invoke_agent",
-        "agentDescription": null
-      }
+      "spanId": "S69nAXwE94g=",
+      "parentSpanId": "trace-group:d542edc5ea657086760f0e92e827ace8",
+      "name": "invoke_agent GitHub Copilot Chat",
+      "kind": "SPAN_KIND_INTERNAL",
+      "startTimeUnixNano": "1775929925524000000",
+      "endTimeUnixNano": "1775932172851212032",
+      "attributes": [
+        {
+          "key": "gen_ai.agent.name",
+          "value": {
+            "stringValue": "GitHub Copilot Chat"
+          }
+        },
+        {
+          "key": "gen_ai.operation.name",
+          "value": {
+            "stringValue": "invoke_agent"
+          }
+        },
+        {
+          "key": "gen_ai.input.messages",
+          "value": {
+            "stringValue": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"it should cover everything, all are logged, you can go through each trace and validate\"}]}]"
+          }
+        },
+        {
+          "key": "gen_ai.output.messages",
+          "value": {
+            "stringValue": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Sounds gucci. I went trace-by-trace through the real March execution windows and validated against the raw Tempo payloads, not just search results. The raw data does not currently show full coverage.\\n\\nFor actual subagent-run traces, I can confirm these three trace trees:\\n- `e48554e55df65b22507ce3d236093c77` with `32` `execute_tool runSubagent` spans, `16` `invoke_agent bug-analyzer` spans, and `16` `invoke_agent fix-validator` spans.\\n- `bb53d47e8409495968c4f0afc02fdc59` with a single `invoke_agent bug-analyzer` span.\\n- `29988777dc6aa4ab504f394b6dfd03c3` with `23` `execute_tool runSubagent` spans, `12` `invoke_agent bug-analyzer` spans, and `12` `invoke_agent fix-validator` spans.\\n\\nThere are also parent chat traces that mention March analysis folders but are not direct per-analysis subagent trees, mainly `c5989fa1a5a41d7f2f7e229e45d4f99e` and `7fefb70bee48cd36ac94407a12cf54a0`. Using raw pre-debug Tempo payloads, that gives:\\n- `28` March folders with direct subagent spans\\n- `23` more March folders visible only in parent/root chat traces\\n- `9` March folders with no Tempo trace payload at all in their actual execution window\\n\\nThe missing nine are:\\n- `304382`\\n- `304488`\\n- `304493`\\n- `304525`\\n- `304544`\\n- `304613`\\n- `304614`\\n- `304746`\\n- `304774`\\n\\nWhy I\u2019m confident those nine are missing from Tempo: their output files were written between `2026-04-10 21:59 -0700` and `2026-04-10 22:45 -0700`, but Tempo returns zero traces for that exact UTC block (`2026-04-11 04:50Z` to `06:10Z`) in all four cases:\\n- unfiltered search\\n- session-scoped search\\n- `runSubagent` search\\n- `bug-analyzer` / `fix-validator` search\\n\\nSo the gap is in telemetry coverage, not just in the website mapping. Also, text-based Tempo search is noisy here: some hits came from helper model traces that summarized validation content later, which is why I relied on raw `/api/traces/<id>` payloads as the ground truth.\\n\\nIf you want, I can do one of these next:\\n1. Generate "
+          }
+        }
+      ]
     },
     {
-      "id": "d542edc5ea657086760f0e92e827ace8:256qzaxFMSM=",
-      "parentId": "d542edc5ea657086760f0e92e827ace8:S69nAXwE94g=",
-      "name": "tool:run_in_terminal",
-      "type": "SPAN_KIND_INTERNAL",
-      "startTime": "2026-04-11T18:24:08.385000Z",
-      "endTime": "2026-04-11T18:24:08.685903Z",
-      "latency": 0.3009026050567627,
-      "input": "{\"command\":\"setopt errexit && cd /Users/penlv/Code/Work/sounds-gucci && for id in 304382 304488 304493 304525 304544 304613 304614 304746 304774; do stat -f '%Sm %N' -t '%Y-%m-%dT%H:%M:%S%z' \\\"data/analysis/$id/gpt-5.4-2026-04-11/proposed-fix.md\\\"; stat -f '%Sm %N' -t '%Y-%m-%dT%H:%M:%S%z' \\\"data/analysis/$id/gpt-5.4-2026-04-11/validation.md\\\"; done\",\"explanation\":\"Read the filesystem timestamps of the nine uncovered March outputs so I can align the missing traces against their actual execution times.\",\"goal\":\"Identify execution times for missing March analyses\",\"mode\":\"sync\",\"timeout\":30000}",
-      "output": "2026-04-10T21:59:44-0700 data/analysis/304382/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:01:31-0700 data/analysis/304382/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:07:01-0700 data/analysis/304488/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:08:19-0700 data/analysis/304488/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:11:07-0700 data/analysis/304493/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:11:57-0700 data/analysis/304493/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:15:37-0700 data/analysis/304525/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:17:19-0700 data/analysis/304525/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:21:05-0700 data/analysis/304544/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:22:12-0700 data/analysis/304544/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:25:12-0700 data/analysis/304613/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:26:51-0700 data/analysis/304613/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:32:56-0700 data/analysis/304614/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:34:56-0700 data/analysis/304614/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:38:10-0700 data/analysis/304746/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:39:07-0700 data/analysis/304746/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:43:55-0700 data/analysis/304774/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:45:03-0700 data/analysis/304774/gpt-5.4-2026-04-11/validation.md",
-      "metadata": {
-        "traceId": "d542edc5ea657086760f0e92e827ace8",
-        "sourceKind": "parent",
-        "originalName": "execute_tool run_in_terminal",
-        "agentName": null,
-        "toolName": "run_in_terminal",
-        "operation": "execute_tool",
-        "agentDescription": null
-      }
+      "spanId": "256qzaxFMSM=",
+      "parentSpanId": "S69nAXwE94g=",
+      "name": "execute_tool run_in_terminal",
+      "kind": "SPAN_KIND_INTERNAL",
+      "startTimeUnixNano": "1775931848384999936",
+      "endTimeUnixNano": "1775931848685903104",
+      "attributes": [
+        {
+          "key": "gen_ai.tool.name",
+          "value": {
+            "stringValue": "run_in_terminal"
+          }
+        },
+        {
+          "key": "gen_ai.operation.name",
+          "value": {
+            "stringValue": "execute_tool"
+          }
+        },
+        {
+          "key": "gen_ai.tool.call.arguments",
+          "value": {
+            "stringValue": "{\"command\":\"setopt errexit && cd /Users/penlv/Code/Work/sounds-gucci && for id in 304382 304488 304493 304525 304544 304613 304614 304746 304774; do stat -f '%Sm %N' -t '%Y-%m-%dT%H:%M:%S%z' \\\"data/analysis/$id/gpt-5.4-2026-04-11/proposed-fix.md\\\"; stat -f '%Sm %N' -t '%Y-%m-%dT%H:%M:%S%z' \\\"data/analysis/$id/gpt-5.4-2026-04-11/validation.md\\\"; done\",\"explanation\":\"Read the filesystem timestamps of the nine uncovered March outputs so I can align the missing traces against their actual execution times.\",\"goal\":\"Identify execution times for missing March analyses\",\"mode\":\"sync\",\"timeout\":30000}"
+          }
+        },
+        {
+          "key": "gen_ai.tool.call.result",
+          "value": {
+            "stringValue": "2026-04-10T21:59:44-0700 data/analysis/304382/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:01:31-0700 data/analysis/304382/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:07:01-0700 data/analysis/304488/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:08:19-0700 data/analysis/304488/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:11:07-0700 data/analysis/304493/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:11:57-0700 data/analysis/304493/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:15:37-0700 data/analysis/304525/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:17:19-0700 data/analysis/304525/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:21:05-0700 data/analysis/304544/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:22:12-0700 data/analysis/304544/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:25:12-0700 data/analysis/304613/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:26:51-0700 data/analysis/304613/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:32:56-0700 data/analysis/304614/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:34:56-0700 data/analysis/304614/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:38:10-0700 data/analysis/304746/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:39:07-0700 data/analysis/304746/gpt-5.4-2026-04-11/validation.md\n2026-04-10T22:43:55-0700 data/analysis/304774/gpt-5.4-2026-04-11/proposed-fix.md\n2026-04-10T22:45:03-0700 data/analysis/304774/gpt-5.4-2026-04-11/validation.md"
+          }
+        }
+      ]
     }
   ]
 }

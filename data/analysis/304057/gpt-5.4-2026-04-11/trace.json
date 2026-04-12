@@ -11,77 +11,134 @@
   "totalCost": null,
   "spans": [
     {
-      "id": "analysis:304057",
-      "parentId": null,
+      "spanId": "analysis:304057",
+      "parentSpanId": null,
       "name": "analysis:304057",
-      "type": "SPAN",
-      "startTime": "2026-04-11T17:25:27.434000Z",
-      "endTime": "2026-04-11T17:26:24.886262Z",
-      "latency": 57.45226263999939,
-      "input": null,
-      "output": null,
-      "metadata": {
-        "analysisId": "304057",
-        "experimentId": "gpt-5.4-2026-04-11",
-        "sourceTraceIds": [
-          "c5989fa1a5a41d7f2f7e229e45d4f99e"
-        ]
-      }
+      "kind": "SPAN",
+      "startTimeUnixNano": "1775928327434000128",
+      "endTimeUnixNano": "1775928384886262016",
+      "attributes": [
+        {
+          "key": "synthetic",
+          "value": {
+            "stringValue": "true"
+          }
+        },
+        {
+          "key": "analysis.id",
+          "value": {
+            "stringValue": "304057"
+          }
+        },
+        {
+          "key": "analysis.experimentId",
+          "value": {
+            "stringValue": "gpt-5.4-2026-04-11"
+          }
+        },
+        {
+          "key": "source.traceIds",
+          "value": {
+            "stringValue": "c5989fa1a5a41d7f2f7e229e45d4f99e"
+          }
+        }
+      ]
     },
     {
-      "id": "trace-group:c5989fa1a5a41d7f2f7e229e45d4f99e",
-      "parentId": "analysis:304057",
+      "spanId": "trace-group:c5989fa1a5a41d7f2f7e229e45d4f99e",
+      "parentSpanId": "analysis:304057",
       "name": "tempo:parent:c5989fa1a5a4",
-      "type": "SPAN",
-      "startTime": "2026-04-11T17:25:27.434000Z",
-      "endTime": "2026-04-11T17:25:44.982487Z",
-      "latency": 57.45226263999939,
-      "input": null,
-      "output": null,
-      "metadata": {
-        "traceId": "c5989fa1a5a41d7f2f7e229e45d4f99e",
-        "sourceKind": "parent"
-      }
+      "kind": "SPAN",
+      "startTimeUnixNano": "1775928327434000128",
+      "endTimeUnixNano": "1775928344982487040",
+      "attributes": [
+        {
+          "key": "synthetic",
+          "value": {
+            "stringValue": "true"
+          }
+        },
+        {
+          "key": "source.traceId",
+          "value": {
+            "stringValue": "c5989fa1a5a41d7f2f7e229e45d4f99e"
+          }
+        },
+        {
+          "key": "source.kind",
+          "value": {
+            "stringValue": "parent"
+          }
+        }
+      ]
     },
     {
-      "id": "c5989fa1a5a41d7f2f7e229e45d4f99e:yonzc9+VuRk=",
-      "parentId": "trace-group:c5989fa1a5a41d7f2f7e229e45d4f99e",
-      "name": "subagent:GitHub Copilot Chat",
-      "type": "SPAN_KIND_INTERNAL",
-      "startTime": "2026-04-11T17:25:27.434000Z",
-      "endTime": "2026-04-11T17:26:24.886263Z",
-      "latency": 57.45226263999939,
-      "input": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"yes, commit this change. then I have asks for website rendering\"}]}]",
-      "output": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Sounds gucci. I committed the March `gpt-5.4` experiment results as `8e5092b` with message `Add gpt-5.4 March experiment results`.\\n\\nI only included the completed March output set, the refreshed [docs/data/index.json](docs/data/index.json), and the matching model metadata changes. I left the unrelated local hook changes in [./.github/hooks/langfuse.json.disabled](.github/hooks/langfuse.json.disabled) and [./.github/hooks/langfuse.json.bak](.github/hooks/langfuse.json.bak) unstaged, and I did not push this commit.\\n\\nReady for the website rendering asks.\"}]}]",
-      "metadata": {
-        "traceId": "c5989fa1a5a41d7f2f7e229e45d4f99e",
-        "sourceKind": "parent",
-        "originalName": "invoke_agent GitHub Copilot Chat",
-        "agentName": "GitHub Copilot Chat",
-        "toolName": null,
-        "operation": "invoke_agent",
-        "agentDescription": null
-      }
+      "spanId": "yonzc9+VuRk=",
+      "parentSpanId": "trace-group:c5989fa1a5a41d7f2f7e229e45d4f99e",
+      "name": "invoke_agent GitHub Copilot Chat",
+      "kind": "SPAN_KIND_INTERNAL",
+      "startTimeUnixNano": "1775928327434000128",
+      "endTimeUnixNano": "1775928384886262784",
+      "attributes": [
+        {
+          "key": "gen_ai.agent.name",
+          "value": {
+            "stringValue": "GitHub Copilot Chat"
+          }
+        },
+        {
+          "key": "gen_ai.operation.name",
+          "value": {
+            "stringValue": "invoke_agent"
+          }
+        },
+        {
+          "key": "gen_ai.input.messages",
+          "value": {
+            "stringValue": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"yes, commit this change. then I have asks for website rendering\"}]}]"
+          }
+        },
+        {
+          "key": "gen_ai.output.messages",
+          "value": {
+            "stringValue": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Sounds gucci. I committed the March `gpt-5.4` experiment results as `8e5092b` with message `Add gpt-5.4 March experiment results`.\\n\\nI only included the completed March output set, the refreshed [docs/data/index.json](docs/data/index.json), and the matching model metadata changes. I left the unrelated local hook changes in [./.github/hooks/langfuse.json.disabled](.github/hooks/langfuse.json.disabled) and [./.github/hooks/langfuse.json.bak](.github/hooks/langfuse.json.bak) unstaged, and I did not push this commit.\\n\\nReady for the website rendering asks.\"}]}]"
+          }
+        }
+      ]
     },
     {
-      "id": "c5989fa1a5a41d7f2f7e229e45d4f99e:P1LIcnZMizA=",
-      "parentId": "c5989fa1a5a41d7f2f7e229e45d4f99e:yonzc9+VuRk=",
-      "name": "tool:run_in_terminal",
-      "type": "SPAN_KIND_INTERNAL",
-      "startTime": "2026-04-11T17:25:44.885000Z",
-      "endTime": "2026-04-11T17:25:44.982487Z",
-      "latency": 0.09748721122741699,
-      "input": "{\"command\":\"cd /Users/penlv/Code/Work/sounds-gucci && git status --short\",\"explanation\":\"Inspect the working tree before creating the commit for the March run outputs.\",\"goal\":\"Review pending repo changes\",\"mode\":\"sync\",\"timeout\":120000}",
-      "output": "Note: The tool simplified the command to ` git status --short`, and this is the output of running that command instead:\n M .github/agents/bug-analyzer.agent.md\n M .github/agents/fix-validator.agent.md\n D .github/hooks/langfuse.json.disabled\n M .model\n M docs/data/index.json\n?? .github/hooks/langfuse.json.bak\n?? data/analysis/182979/gpt-5.4-2026-04-11/\n?? data/analysis/229565/gpt-5.4-2026-04-11/\n?? data/analysis/240638/gpt-5.4-2026-04-11/\n?? data/analysis/249442/gpt-5.4-2026-04-11/\n?? data/analysis/267538/gpt-5.4-2026-04-11/\n?? data/analysis/272479/gpt-5.4-2026-04-11/\n?? data/analysis/289777/gpt-5.4-2026-04-11/\n?? data/analysis/296060/gpt-5.4-2026-04-11/\n?? data/analysis/297827/gpt-5.4-2026-04-11/\n?? data/analysis/299224/gpt-5.4-2026-04-11/\n?? data/analysis/299777/gpt-5.4-2026-04-11/\n?? data/analysis/300854/gpt-5.4-2026-04-11/\n?? data/analysis/301564/gpt-5.4-2026-04-11/\n?? data/analysis/301645/gpt-5.4-2026-04-11/\n?? data/analysis/301779/gpt-5.4-2026-04-11/\n?? data/analysis/302054/gpt-5.4-2026-04-11/\n?? data/analysis/302212/gpt-5.4-2026-04-11/\n?? data/analysis/302379/gpt-5.4-2026-04-11/\n?? data/analysis/302690/gpt-5.4-2026-04-11/\n?? data/analysis/302880/gpt-5.4-2026-04-11/\n?? data/analysis/303222/gpt-5.4-2026-04-11/\n?? data/analysis/303265/gpt-5.4-2026-04-11/\n?? data/analysis/303283/gpt-5.4-2026-04-11/\n?? data/analysis/303429/gpt-5.4-2026-04-11/\n?? data/analysis/303505/gpt-5.4-2026-04-11/\n?? data/analysis/303645/gpt-5.4-2026-04-11/\n?? data/analysis/303769/gpt-5.4-2026-04-11/\n?? data/analysis/303771/gpt-5.4-2026-04-11/\n?? data/analysis/303844/gpt-5.4-2026-04-11/\n?? data/analysis/303848/gpt-5.4-2026-04-11/\n?? data/analysis/303906/gpt-5.4-2026-04-11/\n?? data/analysis/304013/gpt-5.4-2026-04-11/\n?? data/analysis/304025/gpt-5.4-2026-04-11/\n?? data/analysis/304034/gpt-5.4-2026-04-11/\n?? data/analysis/304047/gpt-5.4-2026-04-11/\n?? data/analysis/304057/gpt-5.4-2026-04-11/\n?? data/analysis/304111/gpt-5.4-2026-04-11/\n?? data/analysis/304139/gpt-5.4-2026-04-11/\n?? data/analysis/304294/gpt-5.4-2026-04-11/\n?? data/analysis/30438",
-      "metadata": {
-        "traceId": "c5989fa1a5a41d7f2f7e229e45d4f99e",
-        "sourceKind": "parent",
-        "originalName": "execute_tool run_in_terminal",
-        "agentName": null,
-        "toolName": "run_in_terminal",
-        "operation": "execute_tool",
-        "agentDescription": null
-      }
+      "spanId": "P1LIcnZMizA=",
+      "parentSpanId": "yonzc9+VuRk=",
+      "name": "execute_tool run_in_terminal",
+      "kind": "SPAN_KIND_INTERNAL",
+      "startTimeUnixNano": "1775928344884999936",
+      "endTimeUnixNano": "1775928344982487040",
+      "attributes": [
+        {
+          "key": "gen_ai.tool.name",
+          "value": {
+            "stringValue": "run_in_terminal"
+          }
+        },
+        {
+          "key": "gen_ai.operation.name",
+          "value": {
+            "stringValue": "execute_tool"
+          }
+        },
+        {
+          "key": "gen_ai.tool.call.arguments",
+          "value": {
+            "stringValue": "{\"command\":\"cd /Users/penlv/Code/Work/sounds-gucci && git status --short\",\"explanation\":\"Inspect the working tree before creating the commit for the March run outputs.\",\"goal\":\"Review pending repo changes\",\"mode\":\"sync\",\"timeout\":120000}"
+          }
+        },
+        {
+          "key": "gen_ai.tool.call.result",
+          "value": {
+            "stringValue": "Note: The tool simplified the command to ` git status --short`, and this is the output of running that command instead:\n M .github/agents/bug-analyzer.agent.md\n M .github/agents/fix-validator.agent.md\n D .github/hooks/langfuse.json.disabled\n M .model\n M docs/data/index.json\n?? .github/hooks/langfuse.json.bak\n?? data/analysis/182979/gpt-5.4-2026-04-11/\n?? data/analysis/229565/gpt-5.4-2026-04-11/\n?? data/analysis/240638/gpt-5.4-2026-04-11/\n?? data/analysis/249442/gpt-5.4-2026-04-11/\n?? data/analysis/267538/gpt-5.4-2026-04-11/\n?? data/analysis/272479/gpt-5.4-2026-04-11/\n?? data/analysis/289777/gpt-5.4-2026-04-11/\n?? data/analysis/296060/gpt-5.4-2026-04-11/\n?? data/analysis/297827/gpt-5.4-2026-04-11/\n?? data/analysis/299224/gpt-5.4-2026-04-11/\n?? data/analysis/299777/gpt-5.4-2026-04-11/\n?? data/analysis/300854/gpt-5.4-2026-04-11/\n?? data/analysis/301564/gpt-5.4-2026-04-11/\n?? data/analysis/301645/gpt-5.4-2026-04-11/\n?? data/analysis/301779/gpt-5.4-2026-04-11/\n?? data/analysis/302054/gpt-5.4-2026-04-11/\n?? data/analysis/302212/gpt-5.4-2026-04-11/\n?? data/analysis/302379/gpt-5.4-2026-04-11/\n?? data/analysis/302690/gpt-5.4-2026-04-11/\n?? data/analysis/302880/gpt-5.4-2026-04-11/\n?? data/analysis/303222/gpt-5.4-2026-04-11/\n?? data/analysis/303265/gpt-5.4-2026-04-11/\n?? data/analysis/303283/gpt-5.4-2026-04-11/\n?? data/analysis/303429/gpt-5.4-2026-04-11/\n?? data/analysis/303505/gpt-5.4-2026-04-11/\n?? data/analysis/303645/gpt-5.4-2026-04-11/\n?? data/analysis/303769/gpt-5.4-2026-04-11/\n?? data/analysis/303771/gpt-5.4-2026-04-11/\n?? data/analysis/303844/gpt-5.4-2026-04-11/\n?? data/analysis/303848/gpt-5.4-2026-04-11/\n?? data/analysis/303906/gpt-5.4-2026-04-11/\n?? data/analysis/304013/gpt-5.4-2026-04-11/\n?? data/analysis/304025/gpt-5.4-2026-04-11/\n?? data/analysis/304034/gpt-5.4-2026-04-11/\n?? data/analysis/304047/gpt-5.4-2026-04-11/\n?? data/analysis/304057/gpt-5.4-2026-04-11/\n?? data/analysis/304111/gpt-5.4-2026-04-11/\n?? data/analysis/304139/gpt-5.4-2026-04-11/\n?? data/analysis/304294/gpt-5.4-2026-04-11/\n?? data/analysis/30438"
+          }
+        }
+      ]
     }
   ]
 }
