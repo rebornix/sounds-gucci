@@ -191,6 +191,7 @@ function getTraceState(traceMeta, analysis) {
     const traceIds = traceMeta?.source?.traceIds || [];
     const spanCount = traceMeta?.spanCount ?? analysis?.traceSpanCount ?? 0;
     const timeWindow = traceMeta?.window || null;
+    const phases = traceMeta?.phases || [];
 
     let note = traceMeta?.note || '';
     if (!note) {
@@ -210,6 +211,7 @@ function getTraceState(traceMeta, analysis) {
         spanCount,
         note,
         timeWindow,
+        phases,
     };
 }
 
@@ -225,6 +227,9 @@ function renderTraceSummary(traceMeta, analysis) {
     const spanHtml = state.spanCount > 0
         ? `<div class="trace-status-detail"><strong>Normalized spans:</strong> ${state.spanCount}</div>`
         : '';
+    const phaseHtml = state.phases.length > 0
+        ? `<div class="trace-status-detail"><strong>Sessions:</strong> ${state.phases.map(p => `<span class="trace-tag">${escapeHtml(p)}</span>`).join(' ')}</div>`
+        : '';
     const sourceHtml = state.source
         ? `<div class="trace-status-detail"><strong>Source:</strong> ${escapeHtml(state.source)}</div>`
         : '';
@@ -234,6 +239,7 @@ function renderTraceSummary(traceMeta, analysis) {
             <span class="${badgeClass}">${escapeHtml(state.status)}</span>
             ${sourceHtml}
             ${spanHtml}
+            ${phaseHtml}
         </div>
         <p class="trace-status-note">${escapeHtml(state.note)}</p>
         ${traceIdHtml}
@@ -271,6 +277,8 @@ function attrMap(span) {
 function spanDisplayName(span, attrs) {
     // Legacy format already has normalized names
     if (span.id && !span.spanId) return span.name;
+    // Phase-labeled session spans
+    if (attrs['analysis.phase']) return `session:${attrs['analysis.phase']}`;
     const agentName = attrs['gen_ai.agent.name'];
     if (agentName) return `subagent:${agentName}`;
     const toolName = attrs['gen_ai.tool.name'];
@@ -453,6 +461,7 @@ function renderTrace(trace) {
 }
 
 function getSpanClass(name) {
+    if (name.startsWith('session:')) return 'span-session';
     if (name.startsWith('subagent:')) return 'span-subagent';
     if (name.startsWith('tool:')) return 'span-tool';
     if (name === 'user-message') return 'span-user';

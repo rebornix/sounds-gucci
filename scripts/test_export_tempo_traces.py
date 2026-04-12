@@ -268,9 +268,36 @@ class TestClassifyTraceForAnalysis(unittest.TestCase):
         self.assertIsNone(ett.classify_trace_for_analysis(spans, attrs_by_id, "99999"))
 
 
+class TestDetectPhase(unittest.TestCase):
+    def test_proposal_from_agent_name(self):
+        spans = [_span("s1", attrs={"gen_ai.agent.name": "bug-analyzer"})]
+        attrs_by_id = {"s1": ett.attr_map(spans[0])}
+        self.assertEqual(ett.detect_phase(spans, attrs_by_id), "proposal")
+
+    def test_validation_from_agent_name(self):
+        spans = [_span("s1", attrs={"gen_ai.agent.name": "fix-validator"})]
+        attrs_by_id = {"s1": ett.attr_map(spans[0])}
+        self.assertEqual(ett.detect_phase(spans, attrs_by_id), "validation")
+
+    def test_proposal_from_span_name(self):
+        spans = [_span("s1", name="invoke_agent bug-analyzer")]
+        attrs_by_id = {"s1": ett.attr_map(spans[0])}
+        self.assertEqual(ett.detect_phase(spans, attrs_by_id), "proposal")
+
+    def test_validation_from_span_name(self):
+        spans = [_span("s1", name="invoke_agent fix-validator")]
+        attrs_by_id = {"s1": ett.attr_map(spans[0])}
+        self.assertEqual(ett.detect_phase(spans, attrs_by_id), "validation")
+
+    def test_none_when_no_agent(self):
+        spans = [_span("s1", name="chat", attrs={"gen_ai.operation.name": "chat"})]
+        attrs_by_id = {"s1": ett.attr_map(spans[0])}
+        self.assertIsNone(ett.detect_phase(spans, attrs_by_id))
+
+
 class TestBuildBundleForTrace(unittest.TestCase):
     def test_direct_bundle(self):
-        """Direct trace produces a bundle with kind='direct'."""
+        """Direct trace produces a bundle with kind='direct' and phase='proposal'."""
         trace_data = [
             _span("root", name="chat", start_ns=1000, end_ns=2000),
             _span("s1", name="invoke_agent", parent="root",
@@ -283,6 +310,7 @@ class TestBuildBundleForTrace(unittest.TestCase):
         bundle = ett.build_bundle_for_trace("t1", trace_data, "12345")
         self.assertIsNotNone(bundle)
         self.assertEqual(bundle["kind"], "direct")
+        self.assertEqual(bundle["phase"], "proposal")
         self.assertEqual(bundle["traceId"], "t1")
         # Should include s1 (matching) and root (ancestor)
         span_ids = {s["spanId"] for s in bundle["spans"]}
@@ -321,6 +349,7 @@ class TestNormalizeTrace(unittest.TestCase):
         bundle = {
             "traceId": "abc123",
             "kind": "direct",
+            "phase": "proposal",
             "spans": [
                 _span("s1", name="invoke_agent", attrs={
                     "gen_ai.agent.name": "bug-analyzer",
@@ -349,6 +378,11 @@ class TestNormalizeTrace(unittest.TestCase):
         self.assertIn("spanId", root)
         self.assertIn("startTimeUnixNano", root)
         self.assertIn("attributes", root)
+        # Group span has phase label
+        group = result["spans"][1]
+        self.assertEqual(group["name"], "session:proposal")
+        group_attrs = ett.attr_map(group)
+        self.assertEqual(group_attrs.get("analysis.phase"), "proposal")
         # Data span preserves original OTEL attributes
         data_span = result["spans"][2]
         self.assertEqual(data_span["spanId"], "s1")
@@ -358,19 +392,21 @@ class TestNormalizeTrace(unittest.TestCase):
 
 class TestBuildTraceMetadata(unittest.TestCase):
     def test_available_status(self):
-        bundles = [{"kind": "direct", "traceId": "t1"}]
+        bundles = [{"kind": "direct", "traceId": "t1", "phase": "proposal"}]
         trace_payload = {"spans": [1, 2, 3]}
         meta = ett.build_trace_metadata("12345", "exp-1", (1000, 2000), bundles, trace_payload)
         self.assertEqual(meta["status"], "available")
         self.assertEqual(meta["source"]["kind"], "tempo-direct")
         self.assertEqual(meta["spanCount"], 3)
+        self.assertEqual(meta["phases"], ["proposal"])
 
     def test_partial_status(self):
-        bundles = [{"kind": "parent", "traceId": "t1"}]
+        bundles = [{"kind": "parent", "traceId": "t1", "phase": None}]
         trace_payload = {"spans": [1]}
         meta = ett.build_trace_metadata("12345", "exp-1", (1000, 2000), bundles, trace_payload)
         self.assertEqual(meta["status"], "partial")
         self.assertEqual(meta["source"]["kind"], "tempo-parent")
+        self.assertEqual(meta["phases"], [])
 
     def test_missing_status(self):
         meta = ett.build_trace_metadata("12345", "exp-1", (1000, 2000), [], None)

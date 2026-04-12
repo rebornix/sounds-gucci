@@ -278,6 +278,27 @@ def get_fallback_windows(window: tuple[int, int]) -> list[tuple[int, int]]:
     return windows
 
 
+def detect_phase(spans: list[dict[str, Any]], attrs_by_id: dict[str, dict[str, str]]) -> str | None:
+    """Detect whether a trace belongs to the proposal or validation phase.
+
+    Looks for agent names in spans: bug-analyzer → proposal, fix-validator → validation.
+    Returns None if neither agent is found (e.g. a parent/root trace).
+    """
+    for span in spans:
+        agent = attrs_by_id[span["spanId"]].get("gen_ai.agent.name", "")
+        if agent == "bug-analyzer":
+            return "proposal"
+        if agent == "fix-validator":
+            return "validation"
+        # Also check span name for invoke_agent patterns
+        name = span.get("name", "")
+        if "bug-analyzer" in name:
+            return "proposal"
+        if "fix-validator" in name:
+            return "validation"
+    return None
+
+
 def build_bundle_for_trace(trace_id: str, trace_data: dict[str, Any], analysis_id: str) -> dict[str, Any] | None:
     spans: list[dict[str, Any]] = []
     flatten_spans(trace_data, spans)
@@ -310,9 +331,12 @@ def build_bundle_for_trace(trace_id: str, trace_data: dict[str, Any], analysis_i
     included_spans = [span for span in spans if span["spanId"] in included_ids]
     included_spans.sort(key=lambda item: (item.get("startTimeUnixNano") or "", item.get("spanId") or ""))
 
+    phase = detect_phase(included_spans, {sid: attrs_by_id[sid] for sid in included_ids})
+
     return {
         "traceId": trace_id,
         "kind": kind,
+        "phase": phase,
         "spans": included_spans,
         "attrsById": {span_id: attrs_by_id[span_id] for span_id in included_ids},
     }
@@ -347,19 +371,24 @@ def normalize_trace(analysis_id: str, experiment_id: str, bundles: list[dict[str
         last_end = next((span.get("endTimeUnixNano") for span in reversed(group_spans) if span.get("endTimeUnixNano")), None)
 
         # Synthetic group span to anchor this bundle under the root
+        phase = bundle.get("phase")
+        phase_label = phase or bundle["kind"]
+        group_attrs = [
+            {"key": "synthetic", "value": {"stringValue": "true"}},
+            {"key": "source.traceId", "value": {"stringValue": bundle["traceId"]}},
+            {"key": "source.kind", "value": {"stringValue": bundle["kind"]}},
+        ]
+        if phase:
+            group_attrs.append({"key": "analysis.phase", "value": {"stringValue": phase}})
         span_entries.append(
             {
                 "spanId": group_id,
                 "parentSpanId": synthetic_root_id,
-                "name": f"tempo:{bundle['kind']}:{bundle['traceId'][:12]}",
+                "name": f"session:{phase_label}",
                 "kind": "SPAN",
                 "startTimeUnixNano": first_start,
                 "endTimeUnixNano": last_end,
-                "attributes": [
-                    {"key": "synthetic", "value": {"stringValue": "true"}},
-                    {"key": "source.traceId", "value": {"stringValue": bundle["traceId"]}},
-                    {"key": "source.kind", "value": {"stringValue": bundle["kind"]}},
-                ],
+                "attributes": group_attrs,
             }
         )
 
@@ -473,10 +502,13 @@ def build_trace_metadata(
         source_kind = "missing"
         note = "No Tempo trace payload matched this analysis directory inside the execution window derived from proposal and validation timestamps."
 
+    phases = sorted({bundle.get("phase") for bundle in bundles if bundle.get("phase")})
+
     return {
         "analysisId": analysis_id,
         "experimentId": experiment_id,
         "status": status,
+        "phases": phases,
         "source": {
             "kind": source_kind,
             "traceIds": [bundle["traceId"] for bundle in bundles],

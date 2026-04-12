@@ -608,6 +608,7 @@ main {
     flex-shrink: 0;
 }
 
+.trace-span-icon.span-session { background: #60a5fa; }
 .trace-span-icon.span-subagent { background: var(--score-5-text); }
 .trace-span-icon.span-tool { background: var(--score-4-text); }
 .trace-span-icon.span-user { background: var(--score-3-text); }
@@ -644,6 +645,7 @@ main {
     opacity: 0.8;
 }
 
+.trace-span-bar.span-session { background: #60a5fa; }
 .trace-span-bar.span-subagent { background: var(--score-5-text); }
 .trace-span-bar.span-tool { background: var(--score-4-text); }
 .trace-span-bar.span-user { background: var(--score-3-text); }
