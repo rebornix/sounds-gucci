@@ -252,38 +252,140 @@ function renderTraceUnavailable(traceMeta, analysis) {
     return renderTraceSummary(traceMeta, analysis) + `<p class="muted">${escapeHtml(message)}</p>`;
 }
 
+// ---------------------------------------------------------------------------
+// OTEL span helpers — extract display info from native attributes
+// ---------------------------------------------------------------------------
+
+/** Convert OTEL attributes array to a flat key→value map. */
+function attrMap(span) {
+    const attrs = {};
+    for (const entry of (span.attributes || [])) {
+        if (!entry.key) continue;
+        const val = entry.value;
+        attrs[entry.key] = val?.stringValue ?? val?.intValue ?? val?.boolValue ?? String(Object.values(val || {})[0] ?? '');
+    }
+    return attrs;
+}
+
+/** Derive a display name from an OTEL span. */
+function spanDisplayName(span, attrs) {
+    // Legacy format already has normalized names
+    if (span.id && !span.spanId) return span.name;
+    const agentName = attrs['gen_ai.agent.name'];
+    if (agentName) return `subagent:${agentName}`;
+    const toolName = attrs['gen_ai.tool.name'];
+    if (toolName) return `tool:${toolName}`;
+    return span.name || attrs['gen_ai.operation.name'] || 'span';
+}
+
+/** Extract input text from OTEL attributes. */
+function spanInput(span, attrs) {
+    // Legacy format
+    if ('input' in span) return span.input;
+    return attrs['gen_ai.tool.call.arguments'] || attrs['gen_ai.input.messages'] || null;
+}
+
+/** Extract output text from OTEL attributes. */
+function spanOutput(span, attrs) {
+    // Legacy format
+    if ('output' in span) return span.output;
+    return attrs['gen_ai.tool.call.result'] || attrs['gen_ai.output.messages'] || null;
+}
+
+/** Get the span's unique ID (supports both old and OTEL formats). */
+function spanId(span) {
+    return span.spanId || span.id;
+}
+
+/** Get the span's parent ID (supports both old and OTEL formats). */
+function spanParentId(span) {
+    return span.parentSpanId ?? span.parentId ?? null;
+}
+
+/** Convert nanos timestamp to milliseconds, or parse ISO string. */
+function spanStartMs(span) {
+    if (span.startTimeUnixNano) return Number(BigInt(span.startTimeUnixNano) / 1_000_000n);
+    if (span.startTime) return new Date(span.startTime).getTime();
+    return null;
+}
+
+function spanEndMs(span) {
+    if (span.endTimeUnixNano) return Number(BigInt(span.endTimeUnixNano) / 1_000_000n);
+    if (span.endTime) return new Date(span.endTime).getTime();
+    return null;
+}
+
+/** Compute latency in seconds from an OTEL span. */
+function spanLatency(span) {
+    if (span.latency != null) return span.latency;
+    const start = spanStartMs(span);
+    const end = spanEndMs(span);
+    if (start != null && end != null) return (end - start) / 1000;
+    return null;
+}
+
+/** Build a short preview string for a span. */
+function spanPreview(displayName, input, output) {
+    if (displayName === 'assistant-message' && output) {
+        return output.substring(0, 100);
+    }
+    if (displayName.startsWith('tool:') && input) {
+        try {
+            const args = JSON.parse(input);
+            if (args.command) return args.command.substring(0, 100);
+            if (args.path) return args.path;
+            if (args.pattern) return args.pattern;
+            return input.substring(0, 100);
+        } catch { return input.substring(0, 100); }
+    }
+    if (displayName === 'user-message' && input) {
+        return input.substring(0, 100);
+    }
+    if (displayName.startsWith('subagent:') && input) {
+        try {
+            const args = JSON.parse(input);
+            return (args.prompt || args.description || '').substring(0, 100);
+        } catch { return input.substring(0, 100); }
+    }
+    return '';
+}
+
+// ---------------------------------------------------------------------------
+// Trace rendering
+// ---------------------------------------------------------------------------
+
 function renderTrace(trace) {
     const spans = trace.spans || [];
     if (spans.length === 0) return '<p class="muted">No spans in trace</p>';
 
-    // Find the root span and compute time range
-    const times = spans
-        .filter(s => s.startTime)
-        .map(s => new Date(s.startTime).getTime());
+    // Compute time range from all spans
+    const times = spans.map(s => spanStartMs(s)).filter(t => t != null);
+    const endTimes = spans.map(s => spanEndMs(s)).filter(t => t != null);
     const minTime = Math.min(...times);
-    const maxTime = Math.max(...times);
+    const maxTime = Math.max(...times, ...endTimes);
     const totalDuration = maxTime - minTime || 1;
 
     // Build parent-child map
     const childMap = {};
     spans.forEach(s => {
-        const pid = s.parentId || 'root';
+        const pid = spanParentId(s) || 'root';
         if (!childMap[pid]) childMap[pid] = [];
         childMap[pid].push(s);
     });
 
-    // Find root spans (no parent or parent is the trace root)
-    const rootId = spans.find(s => s.name === trace.name)?.id;
-    const rootChildren = childMap[rootId] || childMap['root'] || spans;
+    // Find root spans
+    const rootSpanId = spans.find(s => s.name === trace.name)
+        ? spanId(spans.find(s => s.name === trace.name))
+        : null;
+    const rootChildren = childMap[rootSpanId] || childMap['root'] || spans;
 
     // Flatten tree in DFS order with depth
     const flatSpans = [];
     function walk(spanList, depth) {
         for (const span of spanList) {
-            flatSpans.push({ ...span, depth });
-            if (childMap[span.id]) {
-                walk(childMap[span.id], depth + 1);
-            }
+            flatSpans.push({ span, depth });
+            const children = childMap[spanId(span)];
+            if (children) walk(children, depth + 1);
         }
     }
     walk(rootChildren, 0);
@@ -296,43 +398,29 @@ function renderTrace(trace) {
     </div>`;
 
     html += '<div class="trace-spans">';
-    for (const [idx, span] of flatSpans.entries()) {
-        const startMs = span.startTime ? new Date(span.startTime).getTime() - minTime : 0;
-        const endMs = span.endTime ? new Date(span.endTime).getTime() - minTime : startMs;
+    for (const [idx, { span, depth }] of flatSpans.entries()) {
+        const attrs = attrMap(span);
+        const displayName = spanDisplayName(span, attrs);
+        const input = spanInput(span, attrs);
+        const output = spanOutput(span, attrs);
+        const latency = spanLatency(span);
+
+        const startMs = (spanStartMs(span) || minTime) - minTime;
+        const endMs = (spanEndMs(span) || (spanStartMs(span) || minTime)) - minTime;
         const leftPct = (startMs / totalDuration * 100).toFixed(2);
-        const widthPct = Math.max(0.5, ((endMs - startMs) / totalDuration * 100)).toFixed(2);
+        const widthPct = Math.max(0.5, (endMs - startMs) / totalDuration * 100).toFixed(2);
 
-        const spanClass = getSpanClass(span.name);
-        const indent = span.depth * 16;
-        const latencyLabel = span.latency != null ? `${span.latency.toFixed(2)}s` : '';
-        const hasContent = span.input || span.output;
-        const spanId = `span-${idx}`;
+        const spanClass = getSpanClass(displayName);
+        const indent = depth * 16;
+        const latencyLabel = latency != null ? `${latency.toFixed(2)}s` : '';
+        const hasContent = input || output;
+        const detailId = `span-${idx}`;
+        const preview = spanPreview(displayName, input, output);
 
-        // Build preview text
-        let preview = '';
-        if (span.name === 'assistant-message' && span.output) {
-            preview = span.output.substring(0, 100);
-        } else if (span.name.startsWith('tool:') && span.input) {
-            try {
-                const args = JSON.parse(span.input);
-                if (args.command) preview = args.command.substring(0, 100);
-                else if (args.path) preview = args.path;
-                else if (args.pattern) preview = args.pattern;
-                else preview = span.input.substring(0, 100);
-            } catch { preview = span.input.substring(0, 100); }
-        } else if (span.name === 'user-message' && span.input) {
-            preview = span.input.substring(0, 100);
-        } else if (span.name.startsWith('subagent:') && span.input) {
-            try {
-                const args = JSON.parse(span.input);
-                preview = (args.prompt || args.description || '').substring(0, 100);
-            } catch { preview = span.input.substring(0, 100); }
-        }
-
-        html += `<div class="trace-span ${hasContent ? 'clickable' : ''}" ${hasContent ? `onclick="toggleSpanDetail('${spanId}')"` : ''}>
+        html += `<div class="trace-span ${hasContent ? 'clickable' : ''}" ${hasContent ? `onclick="toggleSpanDetail('${detailId}')"` : ''}>
             <div class="trace-span-label" style="padding-left:${indent}px">
                 <span class="trace-span-icon ${spanClass}"></span>
-                <span class="trace-span-name">${escapeHtml(span.name)}</span>
+                <span class="trace-span-name">${escapeHtml(displayName)}</span>
                 ${preview ? `<span class="trace-span-preview">${escapeHtml(preview)}</span>` : ''}
                 <span class="trace-span-duration">${latencyLabel}</span>
             </div>
@@ -343,17 +431,17 @@ function renderTrace(trace) {
 
         // Expandable detail panel
         if (hasContent) {
-            html += `<div id="${spanId}" class="trace-span-detail" style="display:none">`;
-            if (span.input) {
+            html += `<div id="${detailId}" class="trace-span-detail" style="display:none">`;
+            if (input) {
                 html += `<div class="trace-detail-section">
                     <div class="trace-detail-label">Input</div>
-                    <pre class="trace-detail-content">${escapeHtml(span.input)}</pre>
+                    <pre class="trace-detail-content">${escapeHtml(input)}</pre>
                 </div>`;
             }
-            if (span.output) {
+            if (output) {
                 html += `<div class="trace-detail-section">
                     <div class="trace-detail-label">Output</div>
-                    <pre class="trace-detail-content">${escapeHtml(span.output)}</pre>
+                    <pre class="trace-detail-content">${escapeHtml(output)}</pre>
                 </div>`;
             }
             html += '</div>';
