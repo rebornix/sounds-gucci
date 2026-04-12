@@ -1,0 +1,17 @@
+{
+  "name": "sounds-gucci",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "analyze": "tsx scripts/run-analysis.ts"
+  },
+  "dependencies": {
+    "@github/copilot-sdk": "^0.2.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}
