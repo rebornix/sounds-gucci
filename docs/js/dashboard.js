@@ -2,9 +2,20 @@
 
 let analysisData = [];
 let currentExperiment = 'all';
-let currentTag = 'all';
+let currentPeriod = 'all';
 let scoreChart = null;
 let categoryChart = null;
+
+const PERIOD_TAGS = {
+    feb: ['sessions', 'error-telemetry'],
+    march: ['round-2']
+};
+
+function matchesPeriod(entry, period) {
+    if (period === 'all') return true;
+    const periodTags = PERIOD_TAGS[period] || [];
+    return (entry.tags || []).some(t => periodTags.includes(t));
+}
 
 async function loadData() {
     try {
@@ -16,12 +27,12 @@ async function loadData() {
         if (params.get('experiment')) {
             currentExperiment = params.get('experiment');
         }
-        if (params.get('tag')) {
-            currentTag = params.get('tag');
+        if (params.get('period')) {
+            currentPeriod = params.get('period');
         }
         
+        populatePeriodFilter();
         populateExperimentFilter();
-        populateTagFilter();
         renderDashboard();
     } catch (err) {
         console.error('Failed to load data:', err);
@@ -30,9 +41,29 @@ async function loadData() {
     }
 }
 
+function populatePeriodFilter() {
+    const select = document.getElementById('period-filter');
+    
+    if (currentPeriod !== 'all') {
+        select.value = currentPeriod;
+    }
+    
+    select.addEventListener('change', () => {
+        currentPeriod = select.value;
+        // Reset experiment when period changes since available experiments differ
+        currentExperiment = 'all';
+        populateExperimentFilter();
+        renderDashboard();
+    });
+}
+
 function populateExperimentFilter() {
     const select = document.getElementById('experiment-filter');
-    const experiments = [...new Set(analysisData.map(d => d.experimentId))].sort();
+    // Keep only the "All" option, remove the rest
+    select.innerHTML = '<option value="all">All Experiments</option>';
+    
+    const periodData = analysisData.filter(d => matchesPeriod(d, currentPeriod));
+    const experiments = [...new Set(periodData.map(d => d.experimentId))].sort();
     
     experiments.forEach(exp => {
         const opt = document.createElement('option');
@@ -42,32 +73,11 @@ function populateExperimentFilter() {
         select.appendChild(opt);
     });
     
-    // Default to 'all' if none specified
-    if (currentExperiment === 'all') {
-        select.value = 'all';
+    // Reset to 'all' if current experiment is not in the new list
+    if (currentExperiment !== 'all' && !experiments.includes(currentExperiment)) {
+        currentExperiment = 'all';
     }
-}
-
-function populateTagFilter() {
-    const select = document.getElementById('tag-filter');
-    const tags = [...new Set(analysisData.flatMap(d => d.tags || []))].sort();
-    
-    tags.forEach(tag => {
-        const opt = document.createElement('option');
-        opt.value = tag;
-        opt.textContent = tag;
-        if (tag === currentTag) opt.selected = true;
-        select.appendChild(opt);
-    });
-    
-    if (currentTag === 'all') {
-        select.value = 'all';
-    }
-    
-    select.addEventListener('change', () => {
-        currentTag = select.value;
-        renderDashboard();
-    });
+    select.value = currentExperiment;
 }
 
 function renderSingleStats(withScores) {
@@ -100,10 +110,7 @@ function renderComparisonStats(withScores) {
 }
 
 function getFilteredData() {
-    let data = analysisData;
-    if (currentTag !== 'all') {
-        data = data.filter(d => (d.tags || []).includes(currentTag));
-    }
+    let data = analysisData.filter(d => matchesPeriod(d, currentPeriod));
     if (currentExperiment !== 'all') {
         data = data.filter(d => d.experimentId === currentExperiment);
     }
@@ -148,10 +155,10 @@ function renderDashboard() {
     } else {
         url.searchParams.delete('experiment');
     }
-    if (currentTag !== 'all') {
-        url.searchParams.set('tag', currentTag);
+    if (currentPeriod !== 'all') {
+        url.searchParams.set('period', currentPeriod);
     } else {
-        url.searchParams.delete('tag');
+        url.searchParams.delete('period');
     }
     history.replaceState(null, '', url);
 }
