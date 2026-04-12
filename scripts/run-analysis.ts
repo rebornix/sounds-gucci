@@ -96,7 +96,7 @@ function discoverPRs(phase: string, slug: string): string[] {
 
       const expDir = findExperimentDir(pr, slug);
 
-      if (phase === "analyze" || phase === "both") {
+      if (phase === "analyze") {
         if (!expDir) return true;
         return !existsSync(join(prDir, expDir, "proposed-fix.md"));
       }
@@ -107,7 +107,11 @@ function discoverPRs(phase: string, slug: string): string[] {
           !existsSync(join(prDir, expDir, "validation.md"))
         );
       }
-      return true;
+      // phase === "both": include if needs analysis OR validation
+      if (!expDir) return true;
+      const hasProposed = existsSync(join(prDir, expDir, "proposed-fix.md"));
+      if (!hasProposed) return true;
+      return !existsSync(join(prDir, expDir, "validation.md"));
     })
     .sort((a, b) => Number(a) - Number(b));
 }
@@ -159,11 +163,12 @@ async function runAgent(
 
   // Each PR gets its own CopilotClient (= its own CLI process) for isolation.
   const client = new CopilotClient({ telemetry });
+  let session: Awaited<ReturnType<typeof client.createSession>> | undefined;
 
   try {
     const agentPrompt = readAgentPrompt(agentName);
 
-    const session = await client.createSession({
+    session = await client.createSession({
       model,
       onPermissionRequest: approveAll,
       streaming: verbose,
@@ -194,7 +199,6 @@ async function runAgent(
       : `Validate the fix proposal in data/analysis/${pr}`;
 
     await session.sendAndWait({ prompt }, timeout);
-    await session.disconnect();
 
     const ms = Date.now() - start;
     console.log(`  ✅ PR #${pr} done (${(ms / 1000).toFixed(1)}s)`);
@@ -204,6 +208,7 @@ async function runAgent(
     console.error(`  ❌ PR #${pr} failed (${(ms / 1000).toFixed(1)}s): ${err.message}`);
     return { pr, agent: agentName, success: false, error: err.message, durationMs: ms };
   } finally {
+    await session?.disconnect().catch(() => {});
     await client.stop().catch(() => {});
   }
 }
@@ -307,6 +312,11 @@ Options:
   const concurrency = parseInt(values.concurrency || "3", 10);
   const verbose = values.verbose ?? false;
   const dryRun = values["dry-run"] ?? false;
+
+  if (values["otel-endpoint"] && values["otel-file"]) {
+    console.error("Error: Cannot specify both --otel-endpoint and --otel-file");
+    process.exit(1);
+  }
 
   const otelConfig: OtelConfig | undefined =
     values["otel-endpoint"] || values["otel-file"]
