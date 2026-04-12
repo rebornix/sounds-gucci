@@ -319,6 +319,12 @@ def build_bundle_for_trace(trace_id: str, trace_data: dict[str, Any], analysis_i
 
 
 def normalize_trace(analysis_id: str, experiment_id: str, bundles: list[dict[str, Any]]) -> dict[str, Any]:
+    """Build a trace envelope around OTEL-native spans.
+
+    Spans are kept in their original Tempo format (spanId, parentSpanId,
+    startTimeUnixNano, attributes[]).  Only synthetic root and trace-group
+    spans are injected to tie multi-trace bundles together.
+    """
     synthetic_root_id = f"analysis:{analysis_id}"
     span_entries: list[dict[str, Any]] = []
     session_ids: set[str] = set()
@@ -337,88 +343,75 @@ def normalize_trace(analysis_id: str, experiment_id: str, bundles: list[dict[str
         if bundle_end is not None:
             end_times.append(bundle_end or bundle_start)
 
+        first_start = next((span.get("startTimeUnixNano") for span in group_spans if span.get("startTimeUnixNano")), None)
+        last_end = next((span.get("endTimeUnixNano") for span in reversed(group_spans) if span.get("endTimeUnixNano")), None)
+
+        # Synthetic group span to anchor this bundle under the root
         span_entries.append(
             {
-                "id": group_id,
-                "parentId": synthetic_root_id,
+                "spanId": group_id,
+                "parentSpanId": synthetic_root_id,
                 "name": f"tempo:{bundle['kind']}:{bundle['traceId'][:12]}",
-                "type": "SPAN",
-                "startTime": iso_from_nanos(next((span.get("startTimeUnixNano") for span in group_spans if span.get("startTimeUnixNano")), None)),
-                "endTime": iso_from_nanos(next((span.get("endTimeUnixNano") for span in reversed(group_spans) if span.get("endTimeUnixNano")), None)),
-                "latency": (bundle_end - bundle_start) if bundle_start is not None and bundle_end is not None else None,
-                "input": None,
-                "output": None,
-                "metadata": {
-                    "traceId": bundle["traceId"],
-                    "sourceKind": bundle["kind"],
-                },
+                "kind": "SPAN",
+                "startTimeUnixNano": first_start,
+                "endTimeUnixNano": last_end,
+                "attributes": [
+                    {"key": "synthetic", "value": {"stringValue": "true"}},
+                    {"key": "source.traceId", "value": {"stringValue": bundle["traceId"]}},
+                    {"key": "source.kind", "value": {"stringValue": bundle["kind"]}},
+                ],
             }
         )
 
+        # Collect session IDs for the envelope
         bundle_ids = {span["spanId"] for span in group_spans}
         for span in group_spans:
             attrs = bundle["attrsById"][span["spanId"]]
             session_id = attrs.get("copilot_chat.session_id") or attrs.get("copilot_chat.parent_chat_session_id")
             if session_id:
                 session_ids.add(session_id)
-            tool_args = parse_tool_arguments(attrs)
-            input_payload = attrs.get("gen_ai.tool.call.arguments") or attrs.get("gen_ai.input.messages")
-            output_payload = attrs.get("gen_ai.tool.call.result") or attrs.get("gen_ai.output.messages")
+
+            # Re-parent top-level spans to the group span
             parent_span_id = span.get("parentSpanId")
-            normalized_parent = f"{bundle['traceId']}:{parent_span_id}" if parent_span_id in bundle_ids else group_id
-            normalized_id = f"{bundle['traceId']}:{span['spanId']}"
+            patched_parent = parent_span_id if parent_span_id in bundle_ids else group_id
+
             start_seconds = seconds_from_nanos(span.get("startTimeUnixNano"))
             end_seconds = seconds_from_nanos(span.get("endTimeUnixNano"))
-            latency = None
-            if start_seconds is not None and end_seconds is not None:
-                latency = end_seconds - start_seconds
+            if start_seconds is not None:
                 start_times.append(start_seconds)
+            if end_seconds is not None:
                 end_times.append(end_seconds)
-            span_entries.append(
-                {
-                    "id": normalized_id,
-                    "parentId": normalized_parent,
-                    "name": normalize_span_name(span, attrs),
-                    "type": span.get("kind", "SPAN"),
-                    "startTime": iso_from_nanos(span.get("startTimeUnixNano")),
-                    "endTime": iso_from_nanos(span.get("endTimeUnixNano")),
-                    "latency": latency,
-                    "input": trim_text(input_payload),
-                    "output": trim_text(output_payload),
-                    "metadata": {
-                        "traceId": bundle["traceId"],
-                        "sourceKind": bundle["kind"],
-                        "originalName": span.get("name"),
-                        "agentName": attrs.get("gen_ai.agent.name"),
-                        "toolName": attrs.get("gen_ai.tool.name"),
-                        "operation": attrs.get("gen_ai.operation.name"),
-                        "agentDescription": tool_args.get("description") if tool_args else None,
-                    },
-                }
-            )
+
+            # Keep the original span, only patch parentSpanId for orphans
+            entry = dict(span)
+            entry["parentSpanId"] = patched_parent
+            span_entries.append(entry)
 
     overall_start = min(start_times) if start_times else None
     overall_end = max(end_times) if end_times else overall_start
     root_latency = None
     if overall_start is not None and overall_end is not None:
         root_latency = overall_end - overall_start
+
+    root_start_nanos = str(int(overall_start * 1_000_000_000)) if overall_start is not None else None
+    root_end_nanos = str(int(overall_end * 1_000_000_000)) if overall_end is not None else None
+
+    # Synthetic root span
     span_entries.insert(
         0,
         {
-            "id": synthetic_root_id,
-            "parentId": None,
+            "spanId": synthetic_root_id,
+            "parentSpanId": None,
             "name": f"analysis:{analysis_id}",
-            "type": "SPAN",
-            "startTime": iso_from_nanos(int(overall_start * 1_000_000_000) if overall_start is not None else None),
-            "endTime": iso_from_nanos(int(overall_end * 1_000_000_000) if overall_end is not None else None),
-            "latency": root_latency,
-            "input": None,
-            "output": None,
-            "metadata": {
-                "analysisId": analysis_id,
-                "experimentId": experiment_id,
-                "sourceTraceIds": [bundle["traceId"] for bundle in bundles],
-            },
+            "kind": "SPAN",
+            "startTimeUnixNano": root_start_nanos,
+            "endTimeUnixNano": root_end_nanos,
+            "attributes": [
+                {"key": "synthetic", "value": {"stringValue": "true"}},
+                {"key": "analysis.id", "value": {"stringValue": analysis_id}},
+                {"key": "analysis.experimentId", "value": {"stringValue": experiment_id}},
+                {"key": "source.traceIds", "value": {"stringValue": ",".join(bundle["traceId"] for bundle in bundles)}},
+            ],
         },
     )
 

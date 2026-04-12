@@ -342,10 +342,18 @@ class TestNormalizeTrace(unittest.TestCase):
         self.assertEqual(result["sessionId"], "sess-1")
         # Root span + group span + 1 data span = 3 spans
         self.assertEqual(len(result["spans"]), 3)
-        # Root span
+        # Root span uses OTEL-native field names
         root = result["spans"][0]
-        self.assertIsNone(root["parentId"])
+        self.assertIsNone(root["parentSpanId"])
         self.assertEqual(root["name"], "analysis:12345")
+        self.assertIn("spanId", root)
+        self.assertIn("startTimeUnixNano", root)
+        self.assertIn("attributes", root)
+        # Data span preserves original OTEL attributes
+        data_span = result["spans"][2]
+        self.assertEqual(data_span["spanId"], "s1")
+        self.assertIn("attributes", data_span)
+        self.assertIn("startTimeUnixNano", data_span)
 
 
 class TestBuildTraceMetadata(unittest.TestCase):
